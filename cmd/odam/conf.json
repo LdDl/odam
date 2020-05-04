@@ -19,9 +19,9 @@
         "enable": true
     },
     "mjpeg_settings":{
-        "imshow_enable": true,
-        "enable": false,
-        "port": 35679
+        "imshow_enable": false,
+        "enable": true,
+        "port": 35678
     },
     "grpc_settings": {
         "enable": true,

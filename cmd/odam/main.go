@@ -191,13 +191,18 @@ func main() {
 			// show current frame without blocking, so do nothing here
 		}
 
-		if settings.MjpegSettings.ImshowEnable {
+		if settings.MjpegSettings.ImshowEnable || settings.MjpegSettings.Enable {
 			for i := range settings.TrackerSettings.LinesSettings {
 				settings.TrackerSettings.LinesSettings[i].VLine.Draw(&img.ImgScaled)
 			}
 			for i, b := range (*allblobies).Objects {
-				(*b).DrawTrack(&img.ImgScaled, fmt.Sprintf("%v", i))
+				_ = i
+				// (*b).DrawTrack(&img.ImgScaled, fmt.Sprintf("%v", i))
+				(*b).DrawTrack(&img.ImgScaled, "")
 			}
+		}
+		if settings.MjpegSettings.ImshowEnable {
+
 			window.IMShow(img.ImgScaled)
 			if window.WaitKey(1) == 27 {
 				break
