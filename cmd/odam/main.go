@@ -2,9 +2,11 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"flag"
 	"fmt"
 	"image"
+	"image/jpeg"
 	"log"
 	"math"
 	"net/http"
@@ -15,6 +17,7 @@ import (
 	"github.com/LdDl/odam"
 	"github.com/hybridgroup/mjpeg"
 	"gocv.io/x/gocv"
+	"google.golang.org/grpc"
 )
 
 var (
@@ -39,6 +42,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	// MJPEG server
 	if settings.MjpegSettings.Enable {
 		stream = mjpeg.NewStream()
 		go func() {
@@ -48,6 +52,20 @@ func main() {
 		}()
 	}
 
+	// gRPC sender
+	var grpcConn *grpc.ClientConn
+	if settings.GrpcSettings.Enable {
+		url := fmt.Sprintf("%s:%d", settings.GrpcSettings.ServerIP, settings.GrpcSettings.ServerPort)
+		grpcConn, err = grpc.Dial(url, grpc.WithInsecure(), grpc.WithBlock())
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		defer grpcConn.Close()
+	}
+	grpcClient := odam.NewSTYoloClient(grpcConn)
+
+	// Neural network
 	neuralNet := darknet.YOLONetwork{
 		GPUDeviceIndex:           0,
 		NetworkConfigurationFile: settings.NeuralNetworkSettings.DarknetCFG,
@@ -59,8 +77,10 @@ func main() {
 	}
 	defer neuralNet.Close()
 
+	// Tracker
 	allblobies = blob.NewBlobiesDefaults()
 
+	// Video capture
 	videoCapturer, err := gocv.OpenVideoCapture(settings.VideoSettings.Source)
 	if err != nil {
 		log.Fatalln(err)
@@ -71,24 +91,25 @@ func main() {
 		window.ResizeWindow(settings.VideoSettings.ReducedWidth, settings.VideoSettings.ReducedHeight)
 		defer window.Close()
 	}
+
+	// Initial channels
 	imagesChannel = make(chan *odam.FrameData, 1)
 	detectedChannel = make(chan []odam.DetectedObject)
-
 	img := odam.NewFrameData()
 	defer img.Close()
 	// Read first frame
 	if ok := videoCapturer.Read(&img.ImgSource); !ok {
 		log.Fatalf("Error cannot read video %v\n", settings.VideoSettings.Source)
 	}
-
 	err = img.Preprocess(settings.VideoSettings.ReducedWidth, settings.VideoSettings.ReducedHeight)
 	if err != nil {
 		log.Fatalln("First preprocess step:", err)
 	}
 
+	// First step of processing
 	processFrame(img)
-
 	go performDetection(&neuralNet, settings.NeuralNetworkSettings.TargetClasses)
+
 	// Read frames in a loop
 	for {
 		if ok := videoCapturer.Read(&img.ImgSource); !ok {
@@ -117,6 +138,8 @@ func main() {
 				allblobies.MatchToExisting(detectedObject)
 				for _, vline := range settings.TrackerSettings.LinesSettings {
 					for i, b := range allblobies.Objects {
+						_ = i
+
 						shift := 20
 						// shift = b.Center.Y + b.CurrentRect.Dy()/2
 						if b.IsCrossedTheLineWithShift(vline.VLine.RightPT.Y, vline.VLine.LeftPT.X, vline.VLine.RightPT.X, vline.VLine.Direction, shift) {
@@ -129,10 +152,37 @@ func main() {
 								int(maxy)+10,
 							)
 							odam.FixRectForOpenCV(&cropRect, settings.VideoSettings.Width, settings.VideoSettings.Height)
+
 							cropImage := img.ImgSource.Region(cropRect)
+							copyCrop := cropImage.Clone()
+
+							cropImageSTD, err := copyCrop.ToImage()
+							if err != nil {
+								fmt.Println("can't convert cropped gocv.Mat to image.Image:", err)
+								cropImage.Close()
+								copyCrop.Close()
+								continue
+							}
+							cropImage.Close()
+							copyCrop.Close()
+
+							buf := new(bytes.Buffer)
+							err = jpeg.Encode(buf, cropImageSTD, nil)
+							sendS3 := buf.Bytes()
+							sendData := odam.CamInfo{
+								CamId:     settings.VideoSettings.CameraID,
+								Timestamp: time.Now().Unix(),
+								Image:     sendS3,
+								Detection: &odam.Detection{
+									XLeft:  0,
+									YTop:   0,
+									Width:  int32(cropRect.Dx()),
+									Height: int32(cropRect.Dy()),
+								},
+							}
+							go sendDataToServer(grpcClient, &sendData)
 							// result := gocv.IMWrite("dets/"+i.String()+".jpeg", cropImage)
 							// fmt.Println("saved?", result, i)
-							// cropImage.Close()
 						}
 					}
 				}
@@ -170,7 +220,7 @@ func main() {
 	if settings.PPROFSettings.Enable {
 		var b bytes.Buffer
 		// go run -tags matprofile main.go
-		gocv.MatProfile.WriteTo(&b, 1)
+		// gocv.MatProfile.WriteTo(&b, 1)
 		fmt.Print(b.String())
 	}
 }
@@ -238,4 +288,26 @@ func stringInSlice(str *string, sl []string) bool {
 		}
 	}
 	return false
+}
+
+func sendDataToServer(client odam.STYoloClient, data *odam.CamInfo) {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	r, err := client.SendDetection(
+		ctx,
+		data,
+	)
+	if err != nil {
+		log.Println("grpc send error:", err)
+	}
+
+	if len(r.GetError()) != 0 {
+		log.Println("grpc accepts error:", r.GetError())
+	}
+
+	if len(r.GetWarning()) != 0 {
+		log.Println("grpc accepts warning:", r.GetWarning())
+	}
+
+	log.Println("grpc answer:", r.GetMessage())
 }

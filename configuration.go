@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"image"
+	"image/color"
 	"io/ioutil"
 	"math"
 	"os"
@@ -54,25 +55,26 @@ func NewSettings(fname string) (*AppSettings, error) {
 		fmt.Println("Field 'reduced_height' in 'video_settings' > 'height'. Using default reduced_height = height")
 	}
 
-	appsettings.VideoSettings.scalex = float64(appsettings.VideoSettings.Width) / float64(appsettings.VideoSettings.ReducedWidth)
-	appsettings.VideoSettings.scaley = float64(appsettings.VideoSettings.Height) / float64(appsettings.VideoSettings.ReducedHeight)
+	appsettings.VideoSettings.ScaleX = float64(appsettings.VideoSettings.Width) / float64(appsettings.VideoSettings.ReducedWidth)
+	appsettings.VideoSettings.ScaleY = float64(appsettings.VideoSettings.Height) / float64(appsettings.VideoSettings.ReducedHeight)
 
 	if len(appsettings.TrackerSettings.LinesSettings) == 0 {
 		fmt.Println("No 'lines_settings'? Please check it")
 	}
 	for i := range appsettings.TrackerSettings.LinesSettings {
 		lsettings := &appsettings.TrackerSettings.LinesSettings[i]
-		x1 := math.Round(float64(lsettings.Begin[0]) / appsettings.VideoSettings.scalex)
-		y1 := math.Round(float64(lsettings.Begin[1]) / appsettings.VideoSettings.scaley)
-		x2 := math.Round(float64(lsettings.End[0]) / appsettings.VideoSettings.scalex)
-		y2 := math.Round(float64(lsettings.End[1]) / appsettings.VideoSettings.scaley)
+		x1 := math.Round(float64(lsettings.Begin[0]) / appsettings.VideoSettings.ScaleX)
+		y1 := math.Round(float64(lsettings.Begin[1]) / appsettings.VideoSettings.ScaleY)
+		x2 := math.Round(float64(lsettings.End[0]) / appsettings.VideoSettings.ScaleX)
+		y2 := math.Round(float64(lsettings.End[1]) / appsettings.VideoSettings.ScaleY)
 		vline := VirtualLine{
 			LeftPT:    image.Point{X: int(x1), Y: int(y1)},
 			RightPT:   image.Point{X: int(x2), Y: int(y2)},
-			Direction: 1,
+			Direction: true,
+			Color:     color.RGBA{lsettings.RGBA[0], lsettings.RGBA[1], lsettings.RGBA[2], lsettings.RGBA[3]},
 		}
 		if lsettings.Direction == "from_detector" {
-			vline.Direction = 0
+			vline.Direction = false
 		}
 		lsettings.VLine = &vline
 	}
@@ -116,11 +118,12 @@ type MjpegSettings struct {
 
 // NeuralNetworkSettings Neural network
 type NeuralNetworkSettings struct {
-	DarknetCFG     string  `json:"darknet_cfg"`
-	DarknetWeights string  `json:"darknet_weights"`
-	DarknetClasses string  `json:"darknet_classes"`
-	ConfThreshold  float64 `json:"conf_threshold"`
-	NmsThreshold   float64 `json:"nms_threshold"`
+	DarknetCFG     string `json:"darknet_cfg"`
+	DarknetWeights string `json:"darknet_weights"`
+	// DarknetClasses string   `json:"darknet_classes"`
+	ConfThreshold float64  `json:"conf_threshold"`
+	NmsThreshold  float64  `json:"nms_threshold"`
+	TargetClasses []string `json:"target_classes"`
 }
 
 // TrackerSettings Object tracker settings
@@ -130,12 +133,12 @@ type TrackerSettings struct {
 
 // LinesSetting Virtual lines
 type LinesSetting struct {
-	LineID        int    `json:"line_id"`
-	Begin         [2]int `json:"begin"`
-	End           [2]int `json:"end"`
-	Direction     string `json:"direction"`
-	DetectClasses []int  `json:"detect_classes"`
-
+	LineID        int      `json:"line_id"`
+	Begin         [2]int   `json:"begin"`
+	End           [2]int   `json:"end"`
+	Direction     string   `json:"direction"`
+	DetectClasses []string `json:"detect_classes"`
+	RGBA          [4]uint8 `json:"rgba"`
 	// Exported, but not from JSON
 	VLine *VirtualLine `json:"-"`
 }
@@ -147,8 +150,9 @@ type VideoSettings struct {
 	Height        int    `json:"height"`
 	ReducedWidth  int    `json:"reduced_width"`
 	ReducedHeight int    `json:"reduced_height"`
+	CameraID      string `json:"camera_id"`
 
-	// not exported
-	scalex float64
-	scaley float64
+	// Exported, but not from JSON
+	ScaleX float64 `json:"-"`
+	ScaleY float64 `json:"-"`
 }

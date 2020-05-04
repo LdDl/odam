@@ -1,0 +1,28 @@
+syntax = "proto3";
+package plates_recognition_grpc;
+
+message CamInfo{
+    string cam_id = 1;
+    int64 timestamp = 2;
+    bytes image = 3;// bytes of full image in PNG - format
+    Detection detection = 4;
+}
+
+message Detection{
+    int32 x_left = 1;
+    int32 y_top = 2;
+    int32 height = 3;
+    int32 width = 4;
+}
+
+message Response {
+  string message = 1;
+  string warning = 2;
+  string error = 3;
+}
+
+// STYolo - service for second and third yolo stages 
+// in car number search cascade
+service STYolo{
+    rpc SendDetection(CamInfo) returns (Response){};
+}

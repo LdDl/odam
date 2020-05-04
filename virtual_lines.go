@@ -11,10 +11,11 @@ import (
 type VirtualLine struct {
 	LeftPT    image.Point
 	RightPT   image.Point
-	Direction int8
+	Color     color.RGBA
+	Direction bool
 }
 
 // Draw Draw virtual line on image
 func (vline *VirtualLine) Draw(img *gocv.Mat) {
-	gocv.Line(img, vline.LeftPT, vline.RightPT, color.RGBA{0, 255, 0, 0}, 3)
+	gocv.Line(img, vline.LeftPT, vline.RightPT, vline.Color, 3)
 }

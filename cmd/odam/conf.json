@@ -4,7 +4,8 @@
         "width": 1920,
         "height": 1080,
         "reduced_width": 640,
-        "reduced_height": 360
+        "reduced_height": 360,
+        "camera_id": "f2abe45e-aad8-40a2-a3b7-0c610c0f3dda"
     },
     "neural_network_settings": {
         "darknet_cfg": "yolov3.cfg",
