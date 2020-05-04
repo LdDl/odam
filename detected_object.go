@@ -11,7 +11,7 @@ type DetectedObject struct {
 	Classname  string
 	ClassID    int
 	ID         int64
-	Confidence float64
+	Confidence float32
 }
 
 type DetectedObjects []*DetectedObject

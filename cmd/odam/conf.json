@@ -7,8 +7,8 @@
         "reduced_height": 360
     },
     "neural_network_settings": {
-        "darknet_cfg": "coco_5common_inference.cfg",
-        "darknet_weights": "coco_5common.weights",
+        "darknet_cfg": "yolov3.cfg",
+        "darknet_weights": "yolov3.weights",
         "darknet_classes": "coco_5common.names",
         "conf_threshold": 0.2,
         "nms_threshold": 0.4
@@ -18,8 +18,8 @@
     },
     "mjpeg_settings":{
         "imshow_enable": true,
-        "enable": true,
-        "port": 35678
+        "enable": false,
+        "port": 35679
     },
     "grpc_settings": {
         "enable": true,

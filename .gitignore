@@ -1,1 +1,2 @@
 cmd/gocv_yolo
+*.weights

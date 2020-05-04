@@ -1,6 +1,10 @@
 package odam
 
 import (
+	"bytes"
+	"image"
+	"image/jpeg"
+
 	"gocv.io/x/gocv"
 )
 
@@ -8,6 +12,8 @@ import (
 type FrameData struct {
 	ImgSource gocv.Mat //  Source image
 	ImgScaled gocv.Mat // Scaled image
+	ImgSTD    image.Image
+	// ImgBytes  []byte   // Slice of bytes
 }
 
 // NewFrameData Simplify creation of FrameData
@@ -23,4 +29,28 @@ func NewFrameData() *FrameData {
 func (fd *FrameData) Close() {
 	fd.ImgSource.Close()
 	fd.ImgScaled.Close()
+}
+
+func (fd *FrameData) Preprocess(width, height int) error {
+	gocv.Resize(fd.ImgSource, &fd.ImgScaled, image.Point{X: width, Y: height}, 0, 0, gocv.InterpolationDefault)
+	stdImage, err := fd.ImgScaled.ToImage()
+	if err != nil {
+		return err
+	}
+	fd.ImgSTD = stdImage
+	return nil
+}
+
+func matToBytes(im *gocv.Mat) (ans []byte, err error) {
+	stdImage, err := im.ToImage()
+	if err != nil {
+		return ans, err
+	}
+	buf := new(bytes.Buffer)
+	err = jpeg.Encode(buf, stdImage, nil)
+	if err != nil {
+		return ans, err
+	}
+	ans = buf.Bytes()
+	return ans, nil
 }

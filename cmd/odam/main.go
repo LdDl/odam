@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"time"
 
+	darknet "github.com/LdDl/go-darknet"
+	"github.com/LdDl/go-lpr/utils"
 	"github.com/LdDl/gocv-blob/blob"
 	"github.com/LdDl/odam"
 	"github.com/hybridgroup/mjpeg"
@@ -26,6 +28,7 @@ var (
 	detectedChannel chan []odam.DetectedObject
 	detected        []odam.DetectedObject
 	allblobies      *blob.Blobies
+	neuralNet       darknet.YOLONetwork
 )
 
 func main() {
@@ -46,6 +49,17 @@ func main() {
 		}()
 	}
 
+	neuralNet = darknet.YOLONetwork{
+		GPUDeviceIndex:           0,
+		NetworkConfigurationFile: settings.NeuralNetworkSettings.DarknetCFG,
+		WeightsFile:              settings.NeuralNetworkSettings.DarknetWeights,
+		Threshold:                float32(settings.NeuralNetworkSettings.ConfThreshold),
+	}
+	if err := neuralNet.Init(); err != nil {
+		log.Fatalln(err)
+	}
+	defer neuralNet.Close()
+
 	allblobies = blob.NewBlobiesDefaults()
 
 	videoCapturer, err := gocv.OpenVideoCapture(settings.VideoSettings.Source)
@@ -59,13 +73,20 @@ func main() {
 		defer window.Close()
 	}
 	imagesChannel = make(chan *odam.FrameData, 1)
+	detectedChannel = make(chan []odam.DetectedObject)
+
 	img := odam.NewFrameData()
 	// Read first frame
 	if ok := videoCapturer.Read(&img.ImgSource); !ok {
 		log.Fatalf("Error cannot read video %v\n", settings.VideoSettings.Source)
 	}
-	gocv.Resize(img.ImgSource, &img.ImgScaled, image.Point{X: settings.VideoSettings.ReducedWidth, Y: settings.VideoSettings.ReducedHeight}, 0, 0, gocv.InterpolationDefault)
+	err = img.Preprocess(settings.VideoSettings.ReducedWidth, settings.VideoSettings.ReducedHeight)
+	if err != nil {
+		log.Fatalln("First preprocess step:", err)
+	}
 
+	processFrame(img)
+	go performDetection()
 	// Read frames in a loop
 	for {
 		if ok := videoCapturer.Read(&img.ImgSource); !ok {
@@ -77,11 +98,30 @@ func main() {
 			time.Sleep(400 * time.Millisecond)
 			continue
 		}
-		gocv.Resize(img.ImgSource, &img.ImgScaled, image.Point{X: settings.VideoSettings.ReducedWidth, Y: settings.VideoSettings.ReducedHeight}, 0, 0, gocv.InterpolationDefault)
-
+		err := img.Preprocess(settings.VideoSettings.ReducedWidth, settings.VideoSettings.ReducedHeight)
+		if err != nil {
+			fmt.Println("Can't preprocess. Sleep for 400ms:", err)
+			time.Sleep(400 * time.Millisecond)
+			continue
+		}
 		select {
 		case detected = <-detectedChannel:
 			processFrame(img)
+			if len(detected) != 0 {
+				detectedObject := make([]image.Rectangle, len(detected))
+				for i := range detected {
+					detectedObject[i] = detected[i].Rect
+				}
+				allblobies.MatchToExisting(detectedObject)
+
+				// for i := range detected {
+				// 	if settings.MjpegSettings.ImshowEnable {
+				// 		gocv.Rectangle(&img.ImgScaled, detected[i].Rect, color.RGBA{255, 255, 0, 0}, 2)
+				// 	}
+				// }
+				// allblobies.MatchToExisting(detectedObject)
+			}
+
 		default:
 			// show current frame without blocking, so do nothing here
 		}
@@ -90,6 +130,10 @@ func main() {
 			for i := range settings.TrackerSettings.LinesSettings {
 				settings.TrackerSettings.LinesSettings[i].VLine.Draw(&img.ImgScaled)
 			}
+			for i, b := range (*allblobies).Objects {
+				(*b).DrawTrack(&img.ImgScaled, fmt.Sprintf("%v", i))
+			}
+
 			window.IMShow(img.ImgScaled)
 			if window.WaitKey(1) == 27 {
 				break
@@ -104,7 +148,6 @@ func main() {
 
 	// Release memory
 	img.Close()
-	window.Close()
 
 	// pprof
 	if settings.PPROFSettings.Enable {
@@ -119,13 +162,52 @@ func processFrame(fd *odam.FrameData) {
 	frame := odam.NewFrameData()
 	fd.ImgSource.CopyTo(&frame.ImgSource)
 	fd.ImgScaled.CopyTo(&frame.ImgScaled)
+	frame.ImgSTD = fd.ImgSTD
 	imagesChannel <- frame
 }
 
 func performDetection() {
+	fmt.Println("Start performDetection thread")
 	for {
-		frame := <-imagesChannel
 
-		frame.Close()
+		frame := <-imagesChannel
+		defer frame.Close()
+
+		darknetImage, err := darknet.Image2Float32(frame.ImgSTD)
+		if err != nil {
+			log.Println("ImageFromMemory error")
+			// Error: no handling
+			time.Sleep(100 * time.Millisecond)
+			continue
+		}
+		defer darknetImage.Close()
+
+		dr, err := neuralNet.Detect(darknetImage)
+		if err != nil {
+			fmt.Println(err)
+			time.Sleep(100 * time.Millisecond)
+		}
+
+		detectedRects := make([]odam.DetectedObject, 0, len(dr.Detections))
+		for _, d := range dr.Detections {
+			for i := range d.ClassIDs {
+				if d.ClassNames[i] != "car" && d.ClassNames[i] != "motorbike" && d.ClassNames[i] != "bus" && d.ClassNames[i] != "train" && d.ClassNames[i] != "truck" {
+					continue
+				}
+				bBox := d.BoundingBox
+				// minX, minY := float64(bBox.StartPoint.X)/0.33, float64(bBox.StartPoint.Y)/scaleHeight
+				// maxX, maxY := float64(bBox.EndPoint.X)/0.33, float64(bBox.EndPoint.Y)/scaleHeight
+				minX, minY := float64(bBox.StartPoint.X), float64(bBox.StartPoint.Y)
+				maxX, maxY := float64(bBox.EndPoint.X), float64(bBox.EndPoint.Y)
+				rect := odam.DetectedObject{
+					Rect:       image.Rect(utils.Round(minX), utils.Round(minY), utils.Round(maxX), utils.Round(maxY)),
+					Classname:  d.ClassNames[i],
+					Confidence: d.Probabilities[i],
+				}
+				detectedRects = append(detectedRects, rect)
+			}
+		}
+
+		detectedChannel <- detectedRects
 	}
 }
