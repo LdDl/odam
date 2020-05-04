@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"math"
 	"net/http"
 	"time"
 
 	darknet "github.com/LdDl/go-darknet"
-	"github.com/LdDl/go-lpr/utils"
 	"github.com/LdDl/gocv-blob/blob"
 	"github.com/LdDl/odam"
 	"github.com/hybridgroup/mjpeg"
@@ -28,7 +28,6 @@ var (
 	detectedChannel chan []odam.DetectedObject
 	detected        []odam.DetectedObject
 	allblobies      *blob.Blobies
-	neuralNet       darknet.YOLONetwork
 )
 
 func main() {
@@ -49,7 +48,7 @@ func main() {
 		}()
 	}
 
-	neuralNet = darknet.YOLONetwork{
+	neuralNet := darknet.YOLONetwork{
 		GPUDeviceIndex:           0,
 		NetworkConfigurationFile: settings.NeuralNetworkSettings.DarknetCFG,
 		WeightsFile:              settings.NeuralNetworkSettings.DarknetWeights,
@@ -76,17 +75,20 @@ func main() {
 	detectedChannel = make(chan []odam.DetectedObject)
 
 	img := odam.NewFrameData()
+	defer img.Close()
 	// Read first frame
 	if ok := videoCapturer.Read(&img.ImgSource); !ok {
 		log.Fatalf("Error cannot read video %v\n", settings.VideoSettings.Source)
 	}
+
 	err = img.Preprocess(settings.VideoSettings.ReducedWidth, settings.VideoSettings.ReducedHeight)
 	if err != nil {
 		log.Fatalln("First preprocess step:", err)
 	}
 
 	processFrame(img)
-	go performDetection()
+
+	go performDetection(&neuralNet, settings.NeuralNetworkSettings.TargetClasses)
 	// Read frames in a loop
 	for {
 		if ok := videoCapturer.Read(&img.ImgSource); !ok {
@@ -113,15 +115,28 @@ func main() {
 					detectedObject[i] = detected[i].Rect
 				}
 				allblobies.MatchToExisting(detectedObject)
-
-				// for i := range detected {
-				// 	if settings.MjpegSettings.ImshowEnable {
-				// 		gocv.Rectangle(&img.ImgScaled, detected[i].Rect, color.RGBA{255, 255, 0, 0}, 2)
-				// 	}
-				// }
-				// allblobies.MatchToExisting(detectedObject)
+				for _, vline := range settings.TrackerSettings.LinesSettings {
+					for i, b := range allblobies.Objects {
+						shift := 20
+						// shift = b.Center.Y + b.CurrentRect.Dy()/2
+						if b.IsCrossedTheLineWithShift(vline.VLine.RightPT.Y, vline.VLine.LeftPT.X, vline.VLine.RightPT.X, vline.VLine.Direction, shift) {
+							minx, miny := math.Floor(float64(b.CurrentRect.Min.X)*settings.VideoSettings.ScaleX), math.Floor(float64(b.CurrentRect.Min.Y)*settings.VideoSettings.ScaleY)
+							maxx, maxy := math.Floor(float64(b.CurrentRect.Max.X)*settings.VideoSettings.ScaleX), math.Floor(float64(b.CurrentRect.Max.Y)*settings.VideoSettings.ScaleY)
+							cropRect := image.Rect(
+								int(minx)+5,  // add a bit width to crop bigger region
+								int(miny)+10, // add a bit height to crop bigger region
+								int(maxx)+5,
+								int(maxy)+10,
+							)
+							odam.FixRectForOpenCV(&cropRect, settings.VideoSettings.Width, settings.VideoSettings.Height)
+							cropImage := img.ImgSource.Region(cropRect)
+							// result := gocv.IMWrite("dets/"+i.String()+".jpeg", cropImage)
+							// fmt.Println("saved?", result, i)
+							// cropImage.Close()
+						}
+					}
+				}
 			}
-
 		default:
 			// show current frame without blocking, so do nothing here
 		}
@@ -133,7 +148,6 @@ func main() {
 			for i, b := range (*allblobies).Objects {
 				(*b).DrawTrack(&img.ImgScaled, fmt.Sprintf("%v", i))
 			}
-
 			window.IMShow(img.ImgScaled)
 			if window.WaitKey(1) == 27 {
 				break
@@ -146,14 +160,17 @@ func main() {
 
 	}
 
-	// Release memory
+	fmt.Println("Shutting down...")
+	time.Sleep(2 * time.Second) // @todo temporary fix: need to wait a bit time for last call of neuralNet.Detect(...)
+
+	// hard release memory
 	img.Close()
 
 	// pprof
 	if settings.PPROFSettings.Enable {
 		var b bytes.Buffer
 		// go run -tags matprofile main.go
-		// gocv.MatProfile.WriteTo(&b, 1)
+		gocv.MatProfile.WriteTo(&b, 1)
 		fmt.Print(b.String())
 	}
 }
@@ -166,48 +183,59 @@ func processFrame(fd *odam.FrameData) {
 	imagesChannel <- frame
 }
 
-func performDetection() {
+func performDetection(neuralNet *darknet.YOLONetwork, targetClasses []string) {
 	fmt.Println("Start performDetection thread")
 	for {
 
 		frame := <-imagesChannel
-		defer frame.Close()
 
 		darknetImage, err := darknet.Image2Float32(frame.ImgSTD)
 		if err != nil {
-			log.Println("ImageFromMemory error")
+			log.Println("Image2Float32 error:", err)
+			frame.Close()
 			// Error: no handling
 			time.Sleep(100 * time.Millisecond)
 			continue
 		}
-		defer darknetImage.Close()
 
 		dr, err := neuralNet.Detect(darknetImage)
 		if err != nil {
-			fmt.Println(err)
+			frame.Close()
+			darknetImage.Close()
+			fmt.Println("Detect error:", err)
 			time.Sleep(100 * time.Millisecond)
+			continue
 		}
+
+		darknetImage.Close() // free the memory
 
 		detectedRects := make([]odam.DetectedObject, 0, len(dr.Detections))
 		for _, d := range dr.Detections {
 			for i := range d.ClassIDs {
-				if d.ClassNames[i] != "car" && d.ClassNames[i] != "motorbike" && d.ClassNames[i] != "bus" && d.ClassNames[i] != "train" && d.ClassNames[i] != "truck" {
-					continue
+				if stringInSlice(&d.ClassNames[i], targetClasses) {
+					bBox := d.BoundingBox
+					minX, minY := float64(bBox.StartPoint.X), float64(bBox.StartPoint.Y)
+					maxX, maxY := float64(bBox.EndPoint.X), float64(bBox.EndPoint.Y)
+					rect := odam.DetectedObject{
+						Rect:       image.Rect(odam.Round(minX), odam.Round(minY), odam.Round(maxX), odam.Round(maxY)),
+						Classname:  d.ClassNames[i],
+						Confidence: d.Probabilities[i],
+					}
+					detectedRects = append(detectedRects, rect)
 				}
-				bBox := d.BoundingBox
-				// minX, minY := float64(bBox.StartPoint.X)/0.33, float64(bBox.StartPoint.Y)/scaleHeight
-				// maxX, maxY := float64(bBox.EndPoint.X)/0.33, float64(bBox.EndPoint.Y)/scaleHeight
-				minX, minY := float64(bBox.StartPoint.X), float64(bBox.StartPoint.Y)
-				maxX, maxY := float64(bBox.EndPoint.X), float64(bBox.EndPoint.Y)
-				rect := odam.DetectedObject{
-					Rect:       image.Rect(utils.Round(minX), utils.Round(minY), utils.Round(maxX), utils.Round(maxY)),
-					Classname:  d.ClassNames[i],
-					Confidence: d.Probabilities[i],
-				}
-				detectedRects = append(detectedRects, rect)
 			}
 		}
 
+		frame.Close() // free the memory
 		detectedChannel <- detectedRects
 	}
+}
+
+func stringInSlice(str *string, sl []string) bool {
+	for i := range sl {
+		if sl[i] == *str {
+			return true
+		}
+	}
+	return false
 }

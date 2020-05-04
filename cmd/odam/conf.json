@@ -9,9 +9,10 @@
     "neural_network_settings": {
         "darknet_cfg": "yolov3.cfg",
         "darknet_weights": "yolov3.weights",
-        "darknet_classes": "coco_5common.names",
+        "darknet_classes": "coco.names",
         "conf_threshold": 0.2,
-        "nms_threshold": 0.4
+        "nms_threshold": 0.4,
+        "target_classes": ["car", "motorbike", "bus", "train", "truck"]
     },
     "cuda_settings":{
         "enable": true
@@ -24,7 +25,7 @@
     "grpc_settings": {
         "enable": true,
         "server_ip": "localhost",
-        "server_port": 5001
+        "server_port": 50051
     },
     "tracker_settings": {
         "lines_settings":[
@@ -33,7 +34,8 @@
                 "begin": [150, 800],
                 "end": [1600, 800],
                 "direction": "to_detector",
-                "detect_classes": [0, 1, 2, 3 ,4]
+                "detect_classes": ["car", "motorbike", "bus", "train", "truck"],
+                "rgba": [255, 0, 0, 0]
             }
         ]
     },
