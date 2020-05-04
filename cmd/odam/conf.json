@@ -1,0 +1,43 @@
+{
+    "video_settings": {
+        "source": "rtsp://212.12.20.198:554/h264",
+        "width": 1920,
+        "height": 1080,
+        "reduced_width": 640,
+        "reduced_height": 360
+    },
+    "neural_network_settings": {
+        "darknet_cfg": "coco_5common_inference.cfg",
+        "darknet_weights": "coco_5common.weights",
+        "darknet_classes": "coco_5common.names",
+        "conf_threshold": 0.2,
+        "nms_threshold": 0.4
+    },
+    "cuda_settings":{
+        "enable": true
+    },
+    "mjpeg_settings":{
+        "imshow_enable": true,
+        "enable": true,
+        "port": 35678
+    },
+    "grpc_settings": {
+        "enable": true,
+        "server_ip": "localhost",
+        "server_port": 5001
+    },
+    "tracker_settings": {
+        "lines_settings":[
+            {
+                "line_id": 1,
+                "begin": [150, 800],
+                "end": [1600, 800],
+                "direction": "to_detector",
+                "detect_classes": [0, 1, 2, 3 ,4]
+            }
+        ]
+    },
+    "pprof_settings": {
+        "enable": true
+    }
+}
