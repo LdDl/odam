@@ -1,3 +1,4 @@
 cmd/gocv_yolo
-*.weights
+cmd/odam/*.weights
+cmd/odam/*.cfg
 cmd/odam/odam

@@ -9,8 +9,11 @@ import (
 	"image/jpeg"
 	"log"
 	"math"
-	"net/http"
+	"runtime"
+	"runtime/debug"
 	"time"
+
+	"net/http"
 
 	darknet "github.com/LdDl/go-darknet"
 	"github.com/LdDl/gocv-blob/blob"
@@ -33,6 +36,10 @@ var (
 	allblobies      *blob.Blobies
 )
 
+func handler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello world!")
+}
+
 func main() {
 
 	// Settings
@@ -52,6 +59,20 @@ func main() {
 		}()
 	}
 
+	debug.SetGCPercent(10)
+	var m runtime.MemStats
+	go func() {
+		for {
+			time.Sleep(1 * time.Minute)
+			fmt.Println("call free OS")
+			runtime.ReadMemStats(&m)
+			fmt.Printf("\tBefore HeapSys: %d, HeapAlloc: %d, HeapIdle: %d, HeapReleased: %d\n", m.HeapSys, m.HeapAlloc, m.HeapIdle, m.HeapReleased)
+			debug.FreeOSMemory()
+			runtime.ReadMemStats(&m)
+			fmt.Printf("\tAfter HeapSys: %d, HeapAlloc: %d, HeapIdle: %d, HeapReleased: %d\n", m.HeapSys, m.HeapAlloc, m.HeapIdle, m.HeapReleased)
+			time.Sleep(15 * time.Minute)
+		}
+	}()
 	// gRPC sender
 	var grpcConn *grpc.ClientConn
 	if settings.GrpcSettings.Enable {
@@ -63,8 +84,6 @@ func main() {
 		}
 		defer grpcConn.Close()
 	}
-	grpcClient := odam.NewSTYoloClient(grpcConn)
-
 	// Neural network
 	neuralNet := darknet.YOLONetwork{
 		GPUDeviceIndex:           0,
@@ -96,7 +115,7 @@ func main() {
 	imagesChannel = make(chan *odam.FrameData, 1)
 	detectedChannel = make(chan []odam.DetectedObject)
 	img := odam.NewFrameData()
-	defer img.Close()
+
 	// Read first frame
 	if ok := videoCapturer.Read(&img.ImgSource); !ok {
 		log.Fatalf("Error cannot read video %v\n", settings.VideoSettings.Source)
@@ -180,7 +199,10 @@ func main() {
 									Height: int32(cropRect.Dy()),
 								},
 							}
-							go sendDataToServer(grpcClient, &sendData)
+
+							if settings.GrpcSettings.Enable {
+								go sendDataToServer(grpcConn, &sendData)
+							}
 							// result := gocv.IMWrite("dets/"+i.String()+".jpeg", cropImage)
 							// fmt.Println("saved?", result, i)
 						}
@@ -209,8 +231,12 @@ func main() {
 			}
 		}
 		if settings.MjpegSettings.Enable {
-			buf, _ := gocv.IMEncode(".jpg", img.ImgScaled)
-			stream.UpdateJPEG(buf)
+			buf, err := gocv.IMEncode(".jpg", img.ImgScaled)
+			if err != nil {
+				log.Println("Error while decoding to JPG (mjpeg)", err)
+			} else {
+				stream.UpdateJPEG(buf)
+			}
 		}
 
 	}
@@ -222,7 +248,7 @@ func main() {
 	img.Close()
 
 	// pprof
-	if settings.PPROFSettings.Enable {
+	if settings.MatPPROFSettings.Enable {
 		var b bytes.Buffer
 		// go run -tags matprofile main.go
 		// gocv.MatProfile.WriteTo(&b, 1)
@@ -263,6 +289,7 @@ func performDetection(neuralNet *darknet.YOLONetwork, targetClasses []string) {
 		}
 
 		darknetImage.Close() // free the memory
+		darknetImage = nil
 
 		detectedRects := make([]odam.DetectedObject, 0, len(dr.Detections))
 		for _, d := range dr.Detections {
@@ -295,7 +322,9 @@ func stringInSlice(str *string, sl []string) bool {
 	return false
 }
 
-func sendDataToServer(client odam.STYoloClient, data *odam.CamInfo) {
+func sendDataToServer(grpcConn *grpc.ClientConn, data *odam.CamInfo) {
+	client := odam.NewSTYoloClient(grpcConn)
+
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 	r, err := client.SendDetection(
@@ -304,15 +333,19 @@ func sendDataToServer(client odam.STYoloClient, data *odam.CamInfo) {
 	)
 	if err != nil {
 		log.Println("grpc send error:", err)
+		return
 	}
 
 	if len(r.GetError()) != 0 {
 		log.Println("grpc accepts error:", r.GetError())
+		return
 	}
 
 	if len(r.GetWarning()) != 0 {
 		log.Println("grpc accepts warning:", r.GetWarning())
+		return
 	}
 
 	log.Println("grpc answer:", r.GetMessage())
+	return
 }

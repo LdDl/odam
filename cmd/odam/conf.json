@@ -8,8 +8,8 @@
         "camera_id": "f2abe45e-aad8-40a2-a3b7-0c610c0f3dda"
     },
     "neural_network_settings": {
-        "darknet_cfg": "yolov3.cfg",
-        "darknet_weights": "yolov3.weights",
+        "darknet_cfg": "yolov4.cfg",
+        "darknet_weights": "yolov4.weights",
         "darknet_classes": "coco.names",
         "conf_threshold": 0.2,
         "nms_threshold": 0.4,
@@ -40,7 +40,7 @@
             }
         ]
     },
-    "pprof_settings": {
+    "matpprof_settings": {
         "enable": true
     }
 }
