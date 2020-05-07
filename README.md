@@ -1,5 +1,6 @@
 # ODaM - Object Detection and Monitoring
 ODaM is project aimed to do monitoring such as: pedestrian detection and counting, vehicle detection and counting, speed estimation of objects, sending detected objects to gRPC server for detailed analysis.
+
 It's written on Go with a lot of [CGO](https://golang.org/cmd/cgo/).
 
 # Work in progress
