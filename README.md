@@ -35,8 +35,8 @@ It's built on top of [go-darknet](https://github.com/LdDl/go-darknet#go-darknet-
     ```
 2. Go bindings for Darknet - [link](https://github.com/LdDl/go-darknet#installation)
 3. GoCV - [link](https://github.com/hybridgroup/gocv#how-to-install).
-3. Blob tracking library - [link](https://github.com/LdDl/gocv-blob#installation)
-4. gRPC - [link](https://github.com/grpc/grpc-go#installation)
+4. Blob tracking library - [link](https://github.com/LdDl/gocv-blob#installation)
+5. gRPC - [link](https://github.com/grpc/grpc-go#installation)
 
 ## Usage
 ### notice: targeted for Linux users (no Windows/OSX instructions currenlty)
