@@ -29,6 +29,8 @@ New ideas, thoughts about needed features will be store in this file.
     * detect vehicles
     * crop vehicle near detection line and prepare gRPC structure if needed
 
+* added drawing options for tracker (conf.json)
+
 ### W.I.P
 * Extend configuration of conf.json file.
 
