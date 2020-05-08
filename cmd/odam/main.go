@@ -98,6 +98,7 @@ func main() {
 
 	// Tracker
 	allblobies = blob.NewBlobiesDefaults()
+	allblobies.DrawingOptions = settings.TrackerSettings.DrawOptions
 
 	// Video capture
 	videoCapturer, err := gocv.OpenVideoCapture(settings.VideoSettings.Source)

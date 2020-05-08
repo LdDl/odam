@@ -38,7 +38,24 @@
                 "detect_classes": ["car", "motorbike", "bus", "train", "truck"],
                 "rgba": [255, 0, 0, 0]
             }
-        ]
+        ],
+        "draw_track_settings": {
+            "bbox_settings": {
+                "rgba": [255, 255, 0, 0],
+                "thickness": 2
+            },
+            "centroid_settings": {
+                "rgba": [255, 0, 0, 0],
+                "radius": 4,
+                "thickness": 2
+            },
+            "text_settings": {
+                "rgba": [0, 255, 0, 0],
+                "scale": 1.2,
+                "thickness": 2,
+                "font": "hershey_plain"
+            }
+        }
     },
     "matpprof_settings": {
         "enable": true
