@@ -4,6 +4,7 @@ ODaM is project aimed to do monitoring such as: pedestrian detection and countin
 It's written on Go with a lot of [CGO](https://golang.org/cmd/cgo/).
 
 # Work in progress
+# DO NOT USE IT IN PRODUCTION
 
 ## Table of Contents
 - [About](#about)
@@ -21,7 +22,20 @@ It's built on top of [go-darknet](https://github.com/LdDl/go-darknet#go-darknet-
 
 ## Installation
 ### notice: targeted for Linux users (no Windows/OSX instructions currenlty)
-@todo
+**Highly recommended to enable CUDA (GPU) in every possible installation step.**
+
+1. Darknet - follow this [link](https://github.com/AlexeyAB/darknet#how-to-compile-on-linux-using-make). Do not forget to build library:
+    ```Makefile
+    LIBSO=1
+    ```
+    And then move it to /usr folder:
+    ```shell
+    [sudo] cp libdarknet.so /usr/[local]/lib/libdarknet.so && sudo cp include/darknet.h /usr/[local]/include/darknet.h
+    ```
+2. Go bindings for Darknet - [link](https://github.com/LdDl/go-darknet#installation)
+3. GoCV - [link](https://github.com/hybridgroup/gocv#how-to-install).
+3. Blob tracking library - [link](https://github.com/LdDl/gocv-blob#installation)
+4. gRPC - [link](https://github.com/grpc/grpc-go#installation)
 
 ## Usage
 ### notice: targeted for Linux users (no Windows/OSX instructions currenlty)
