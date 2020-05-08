@@ -23,7 +23,7 @@ It's built on top of [go-darknet](https://github.com/LdDl/go-darknet#go-darknet-
 
 ## Installation
 ### notice: targeted for Linux users (no Windows/OSX instructions currenlty)
-**Highly recommended to enable CUDA (GPU) in every possible installation step.**
+**Highly recommended to enable CUDA (GPU) in every installation step if it possible.**
 
 1. Darknet - follow this [link](https://github.com/AlexeyAB/darknet#how-to-compile-on-linux-using-make). Do not forget to build library:
     ```Makefile
