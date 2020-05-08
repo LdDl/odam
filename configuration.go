@@ -8,6 +8,10 @@ import (
 	"io/ioutil"
 	"math"
 	"os"
+	"strings"
+
+	"github.com/LdDl/gocv-blob/blob"
+	"gocv.io/x/gocv"
 )
 
 // NewSettings Create new AppSettings from content of configuration file
@@ -78,6 +82,73 @@ func NewSettings(fname string) (*AppSettings, error) {
 		}
 		lsettings.VLine = &vline
 	}
+
+	// Prepare drawing options
+	bboxOpts := blob.DrawBBoxOptions{
+		Color: color.RGBA{
+			appsettings.TrackerSettings.DrawTrackSettings.BBoxSettings.RGBA[0],
+			appsettings.TrackerSettings.DrawTrackSettings.BBoxSettings.RGBA[1],
+			appsettings.TrackerSettings.DrawTrackSettings.BBoxSettings.RGBA[2],
+			appsettings.TrackerSettings.DrawTrackSettings.BBoxSettings.RGBA[3],
+		},
+		Thickness: appsettings.TrackerSettings.DrawTrackSettings.BBoxSettings.Thickness,
+	}
+	cenOpts := blob.DrawCentroidOptions{
+		Color: color.RGBA{
+			appsettings.TrackerSettings.DrawTrackSettings.CentroidSettings.RGBA[0],
+			appsettings.TrackerSettings.DrawTrackSettings.CentroidSettings.RGBA[1],
+			appsettings.TrackerSettings.DrawTrackSettings.CentroidSettings.RGBA[2],
+			appsettings.TrackerSettings.DrawTrackSettings.CentroidSettings.RGBA[3],
+		},
+		Radius:    appsettings.TrackerSettings.DrawTrackSettings.CentroidSettings.Radius,
+		Thickness: appsettings.TrackerSettings.DrawTrackSettings.CentroidSettings.Thickness,
+	}
+	textOpts := blob.DrawTextOptions{
+		Color: color.RGBA{
+			appsettings.TrackerSettings.DrawTrackSettings.TextSettings.RGBA[0],
+			appsettings.TrackerSettings.DrawTrackSettings.TextSettings.RGBA[1],
+			appsettings.TrackerSettings.DrawTrackSettings.TextSettings.RGBA[2],
+			appsettings.TrackerSettings.DrawTrackSettings.TextSettings.RGBA[3],
+		},
+		Scale:     appsettings.TrackerSettings.DrawTrackSettings.TextSettings.Scale,
+		Thickness: appsettings.TrackerSettings.DrawTrackSettings.TextSettings.Thickness,
+	}
+	switch strings.ToLower(appsettings.TrackerSettings.DrawTrackSettings.TextSettings.Font) {
+	case "hershey_simplex":
+		textOpts.Font = gocv.FontHersheySimplex
+		break
+	case "hershey_plain":
+		textOpts.Font = gocv.FontHersheyPlain
+		break
+	case "hershey_duplex":
+		textOpts.Font = gocv.FontHersheyDuplex
+		break
+	case "hershey_complex":
+		textOpts.Font = gocv.FontHersheyComplex
+		break
+	case "hershey_triplex":
+		textOpts.Font = gocv.FontHersheyTriplex
+		break
+	case "hershey_complex_small":
+		textOpts.Font = gocv.FontHersheyComplexSmall
+		break
+	case "hershey_script_simplex":
+		textOpts.Font = gocv.FontHersheyScriptSimplex
+		break
+	case "hershey_script_complex":
+		textOpts.Font = gocv.FontHersheyScriptComplex
+		break
+	case "italic":
+		textOpts.Font = gocv.FontItalic
+		break
+	default:
+		textOpts.Font = gocv.FontHersheyPlain
+		break
+	}
+
+	drOpts := blob.NewDrawOptions(bboxOpts, cenOpts, textOpts)
+	appsettings.TrackerSettings.DrawOptions = drOpts
+
 	return &appsettings, nil
 }
 
@@ -89,7 +160,7 @@ type AppSettings struct {
 	MjpegSettings         MjpegSettings         `json:"mjpeg_settings"`
 	GrpcSettings          GrpcSettings          `json:"grpc_settings"`
 	TrackerSettings       TrackerSettings       `json:"tracker_settings"`
-	MatPPROFSettings         MatPPROFSettings         `json:"matpprof_settings"`
+	MatPPROFSettings      MatPPROFSettings      `json:"matpprof_settings"`
 }
 
 // CudaSettings CUDA settings
@@ -126,9 +197,27 @@ type NeuralNetworkSettings struct {
 	TargetClasses []string `json:"target_classes"`
 }
 
+// VideoSettings Settings for video
+type VideoSettings struct {
+	Source        string `json:"source"`
+	Width         int    `json:"width"`
+	Height        int    `json:"height"`
+	ReducedWidth  int    `json:"reduced_width"`
+	ReducedHeight int    `json:"reduced_height"`
+	CameraID      string `json:"camera_id"`
+
+	// Exported, but not from JSON
+	ScaleX float64 `json:"-"`
+	ScaleY float64 `json:"-"`
+}
+
 // TrackerSettings Object tracker settings
 type TrackerSettings struct {
-	LinesSettings []LinesSetting `json:"lines_settings"`
+	LinesSettings     []LinesSetting    `json:"lines_settings"`
+	DrawTrackSettings DrawTrackSettings `json:"draw_track_settings"`
+
+	// Exported, but not from JSON
+	DrawOptions *blob.DrawOptions `json:"-"`
 }
 
 // LinesSetting Virtual lines
@@ -143,16 +232,33 @@ type LinesSetting struct {
 	VLine *VirtualLine `json:"-"`
 }
 
-// VideoSettings Settings for video
-type VideoSettings struct {
-	Source        string `json:"source"`
-	Width         int    `json:"width"`
-	Height        int    `json:"height"`
-	ReducedWidth  int    `json:"reduced_width"`
-	ReducedHeight int    `json:"reduced_height"`
-	CameraID      string `json:"camera_id"`
+// DrawTrackSettings Drawing settings for MJPEG/imshow
+type DrawTrackSettings struct {
+	// Drawing options for detection rectangle
+	BBoxSettings BBoxSettings `json:"bbox_settings"`
+	// Drawing options for center of detection rectangle
+	CentroidSettings CentroidSettings `json:"centroid_settings"`
+	// Drawing options for text in top left corner of detection rectangle
+	TextSettings TextSettings `json:"text_settings"`
+}
 
-	// Exported, but not from JSON
-	ScaleX float64 `json:"-"`
-	ScaleY float64 `json:"-"`
+// BBoxSettings Options for detection rectangle
+type BBoxSettings struct {
+	RGBA      [4]uint8 `json:"rgba"`
+	Thickness int      `json:"thickness"`
+}
+
+// CentroidSettings Options for center of detection rectangle
+type CentroidSettings struct {
+	RGBA      [4]uint8 `json:"rgba"`
+	Radius    int      `json:"radius"`
+	Thickness int      `json:"thickness"`
+}
+
+// TextSettings Options for text in top left corner of detection rectangle
+type TextSettings struct {
+	RGBA      [4]uint8 `json:"rgba"`
+	Scale     float64  `json:"scale"`
+	Thickness int      `json:"thickness"`
+	Font      string   `json:"font"` // Possible values are: hershey_simplex, hershey_plain, hershey_duplex, hershey_complex, hershey_triplex, hershey_complex_small, hershey_script_simplex, hershey_script_cddomplex, italic
 }

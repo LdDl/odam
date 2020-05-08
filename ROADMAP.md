@@ -58,3 +58,4 @@ New ideas, thoughts about needed features will be store in this file.
 * Memory profiling
 * [ODaM](cmd/odam) itself
 * Roadmap itself
+* conf.json features
