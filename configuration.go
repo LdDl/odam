@@ -89,7 +89,7 @@ type AppSettings struct {
 	MjpegSettings         MjpegSettings         `json:"mjpeg_settings"`
 	GrpcSettings          GrpcSettings          `json:"grpc_settings"`
 	TrackerSettings       TrackerSettings       `json:"tracker_settings"`
-	PPROFSettings         PPROFSettings         `json:"matpprof_settings"`
+	MatPPROFSettings         MatPPROFSettings         `json:"matpprof_settings"`
 }
 
 // CudaSettings CUDA settings
@@ -97,8 +97,8 @@ type CudaSettings struct {
 	Enable bool `json:"enable"`
 }
 
-// PPROFSettings pprof settings
-type PPROFSettings struct {
+// MatPPROFSettings pprof settings of gocv.Mat
+type MatPPROFSettings struct {
 	Enable bool `json:"enable"`
 }
 
