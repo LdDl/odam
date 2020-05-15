@@ -9,8 +9,6 @@ import (
 	"image/jpeg"
 	"log"
 	"math"
-	"runtime"
-	"runtime/debug"
 	"time"
 
 	"net/http"
@@ -59,20 +57,20 @@ func main() {
 		}()
 	}
 
-	debug.SetGCPercent(10)
-	var m runtime.MemStats
-	go func() {
-		for {
-			time.Sleep(1 * time.Minute)
-			fmt.Println("call free OS")
-			runtime.ReadMemStats(&m)
-			fmt.Printf("\tBefore HeapSys: %d, HeapAlloc: %d, HeapIdle: %d, HeapReleased: %d\n", m.HeapSys, m.HeapAlloc, m.HeapIdle, m.HeapReleased)
-			debug.FreeOSMemory()
-			runtime.ReadMemStats(&m)
-			fmt.Printf("\tAfter HeapSys: %d, HeapAlloc: %d, HeapIdle: %d, HeapReleased: %d\n", m.HeapSys, m.HeapAlloc, m.HeapIdle, m.HeapReleased)
-			time.Sleep(15 * time.Minute)
-		}
-	}()
+	// debug.SetGCPercent(10)
+	// var m runtime.MemStats
+	// go func() {
+	// 	for {
+	// 		time.Sleep(1 * time.Minute)
+	// 		fmt.Println("call free OS")
+	// 		runtime.ReadMemStats(&m)
+	// 		fmt.Printf("\tBefore HeapSys: %d, HeapAlloc: %d, HeapIdle: %d, HeapReleased: %d\n", m.HeapSys, m.HeapAlloc, m.HeapIdle, m.HeapReleased)
+	// 		debug.FreeOSMemory()
+	// 		runtime.ReadMemStats(&m)
+	// 		fmt.Printf("\tAfter HeapSys: %d, HeapAlloc: %d, HeapIdle: %d, HeapReleased: %d\n", m.HeapSys, m.HeapAlloc, m.HeapIdle, m.HeapReleased)
+	// 		time.Sleep(15 * time.Minute)
+	// 	}
+	// }()
 	// gRPC sender
 	var grpcConn *grpc.ClientConn
 	if settings.GrpcSettings.Enable {
