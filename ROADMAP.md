@@ -30,6 +30,7 @@ New ideas, thoughts about needed features will be store in this file.
     * crop vehicle near detection line and prepare gRPC structure if needed
 
 * added drawing options for tracker (conf.json)
+* Check memory leaking
 
 ### W.I.P
 * Extend configuration of conf.json file.
@@ -44,7 +45,6 @@ New ideas, thoughts about needed features will be store in this file.
 * Contributing guidelines
 * gRPC
     * extend gRPC-client to send more attributes
-* Check memory leaking
 * Additional field 'targeted objects' in [odam.VirtualLine](virtual_lines.go#11) struct. After it's done odam.VirtualLine will be able to detect only pedestrians or only motorbikes for example.
 * vehicle detection
     * speed estimation
