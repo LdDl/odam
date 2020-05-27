@@ -14,6 +14,7 @@ It's written on Go with a lot of [CGO](https://golang.org/cmd/cgo/).
 - [ToDo](#todo)
 - [Dependencies](#dependencies)
 - [License](#license)
+- [Devs](#developers)
 
 ## About
 ODaM is tool for doing monitoring via Darknet's neural network called Yolo V4 (paper: https://arxiv.org/abs/2004.10934).
@@ -163,3 +164,11 @@ Please see [ROADMAP.md](ROADMAP.md)
 
 ## License
 You can check it [here](LICENSE.md)
+
+## Developers
+
+cpllbstr https://github.com/cpllbstr
+
+LdDl https://github.com/LdDl
+
+Pavel7824 https://github.com/Pavel7824
