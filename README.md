@@ -73,7 +73,7 @@ Usage of ./odam:
         names = coco.names # <<========= here is the link to 'coco.names' file
         ```
 * Prepare configuration file for application. Example of file: [conf.json](cmd/odam/conf.json). Description of fields:
-```json
+```Makefile
 {
     "video_settings": { # Video input settings
         "source": "rtsp://127.0.0.1:554/h264", # Link to RTSP stream
