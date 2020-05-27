@@ -32,7 +32,7 @@ It's built on top of [go-darknet](https://github.com/LdDl/go-darknet#go-darknet-
     ```
     And then move it to /usr folder:
     ```shell
-    [sudo] cp libdarknet.so /usr/[local]/lib/libdarknet.so && sudo cp include/darknet.h /usr/[local]/include/darknet.h
+    [sudo] cp libdarknet.so /usr/[local]/lib/libdarknet.so && [sudo] cp include/darknet.h /usr/[local]/include/darknet.h
     ```
 2. Go bindings for Darknet - [link](https://github.com/LdDl/go-darknet#installation)
 3. GoCV - [link](https://github.com/hybridgroup/gocv#how-to-install).
