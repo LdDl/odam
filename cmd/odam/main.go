@@ -175,7 +175,7 @@ func main() {
 							sendS3 := buf.Bytes()
 							sendData := odam.CamInfo{
 								CamId:     settings.VideoSettings.CameraID,
-								Timestamp: time.Now().Unix(),
+								Timestamp: time.Now().UTC().Unix(),
 								Image:     sendS3,
 								Detection: &odam.Detection{
 									XLeft:  0,
