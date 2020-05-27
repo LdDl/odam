@@ -4,6 +4,8 @@ ODaM is project aimed to do monitoring such as: pedestrian detection and countin
 
 It's written on Go with a lot of [CGO](https://golang.org/cmd/cgo/).
 
+## Work in progress
+
 ## Table of Contents
 - [About](#about)
 - [Installation](#installation)
