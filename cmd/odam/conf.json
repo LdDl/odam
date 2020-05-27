@@ -1,6 +1,6 @@
 {
     "video_settings": {
-        "source": "rtsp://212.12.20.198:554/h264",
+        "source": "rtsp://127.0.0.1:554/h264",
         "width": 1920,
         "height": 1080,
         "reduced_width": 640,
