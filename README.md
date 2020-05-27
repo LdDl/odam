@@ -10,6 +10,7 @@ It's written on Go with a lot of [CGO](https://golang.org/cmd/cgo/).
 - [About](#about)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Screenshots](#screenshots)
 - [Support](#support)
 - [ToDo](#todo)
 - [Dependencies](#dependencies)
@@ -146,6 +147,15 @@ Usage of ./odam:
     ```
     odam --settings=conf.json
     ```
+
+## Screenshots
+* gocv.Imshow() output:
+
+    <img src="screenshots/imshow_screen_1.png" width="720">
+
+* MJPEG streaming output:
+
+    <img src="screenshots/mjpeg_screen_1.png" width="720">
 
 ## Support
 If you have troubles or questions please [open an issue](https://github.com/LdDl/odam/issues/new).
