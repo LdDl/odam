@@ -39,7 +39,7 @@ It's built on top of [go-darknet](https://github.com/LdDl/go-darknet#go-darknet-
 4. Blob tracking library - [link](https://github.com/LdDl/gocv-blob#installation)
 5. gRPC - [link](https://github.com/grpc/grpc-go#installation)
 
-After steps above completed then:
+After steps above done:
 ```
 go get github.com/LdDl/odam
 go install github.com/LdDl/odam
