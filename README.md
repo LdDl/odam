@@ -12,7 +12,7 @@ It's written on Go with a lot of [CGO](https://golang.org/cmd/cgo/).
 - [Usage](#usage)
 - [Screenshots](#screenshots)
 - [Support](#support)
-- [ToDo](#todo)
+- [Roadmap](#roadmap)
 - [Dependencies](#dependencies)
 - [License](#license)
 - [Devs](#developers)
@@ -197,7 +197,7 @@ Usage of ./odam:
 If you have troubles or questions please [open an issue](https://github.com/LdDl/odam/issues/new).
 Feel free to make PR's (we do not have contributing guidelines currently, but we will someday)
 
-## ToDo
+## Roadmap
 Please see [ROADMAP.md](ROADMAP.md)
 
 ## Dependencies
