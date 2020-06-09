@@ -64,7 +64,7 @@ It's built on top of [go-darknet](https://github.com/LdDl/go-darknet#go-darknet-
     sed 's/CUDNN=0/CUDNN=1/' ./Makefile
     # Prepare *.so
     sed 's/LIBSO=0/LIBSO=1/' ./Makefile
-    make -j4
+    make
     # Copy *.so to /usr/lib + /usr/include (or /usr/local/lib + /usr/local/include)
     sudo cp libdarknet.so /usr/lib/libdarknet.so && sudo cp include/darknet.h /usr/include/darknet.h
     # sudo cp libdarknet.so /usr/local/lib/libdarknet.so && sudo cp include/darknet.h /usr/local/include/darknet.h
