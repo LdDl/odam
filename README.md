@@ -46,7 +46,7 @@ It's built on top of [go-darknet](https://github.com/LdDl/go-darknet#go-darknet-
     sudo dpkg -i libcudnn7-dev_7.6.5.32-1+cuda10.2_amd64.deb
     sudo dpkg -i libcudnn7-doc_7.6.5.32-1+cuda10.2_amd64.deb
     ```
-    Don not forget to check if cuDNN installed properly:
+    Do not forget to check if cuDNN installed properly:
     ```bash
     cp -r /usr/src/cudnn_samples_v7/ $HOME
     cd  $HOME/cudnn_samples_v7/mnistCUDNN
