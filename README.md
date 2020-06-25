@@ -5,6 +5,7 @@ ODaM is project aimed to do monitoring such as: pedestrian detection and countin
 It's written on Go with a lot of [CGO](https://golang.org/cmd/cgo/).
 
 ## Work in progress
+Notice that gRPC integration uses 'license_plate_recognition' protobuff (see gRPC server here https://github.com/LdDl/license_plate_recognition)
 
 ## Table of Contents
 - [About](#about)
