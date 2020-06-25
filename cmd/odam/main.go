@@ -156,7 +156,6 @@ func main() {
 								int(maxy)+10,
 							)
 							odam.FixRectForOpenCV(&cropRect, settings.VideoSettings.Width, settings.VideoSettings.Height)
-
 							cropImage := img.ImgSource.Region(cropRect)
 							copyCrop := cropImage.Clone()
 
