@@ -12,7 +12,7 @@ It's written on Go with a lot of [CGO](https://golang.org/cmd/cgo/).
 - [Usage](#usage)
 - [Screenshots](#screenshots)
 - [Support](#support)
-- [ToDo](#todo)
+- [Roadmap](#roadmap)
 - [Dependencies](#dependencies)
 - [License](#license)
 - [Devs](#developers)
@@ -24,20 +24,56 @@ It's built on top of [go-darknet](https://github.com/LdDl/go-darknet#go-darknet-
 
 ## Installation
 ### notice: targeted for Linux users (no Windows/OSX instructions currenlty)
-**Highly recommended to enable CUDA (GPU) in every installation step if it possible.**
+**Need to enable CUDA (GPU) in every installation step where it's possible.**
 
-1. Darknet - follow this [link](https://github.com/AlexeyAB/darknet#how-to-compile-on-linux-using-make). Do not forget to build library:
-    ```Makefile
-    LIBSO=1
+1. Install CUDA (we recommend version 10.2)
+    ```bash
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-ubuntu1804.pin
+    sudo mv cuda-ubuntu1804.pin /etc/apt/preferences.d/cuda-repository-pin-600
+    wget http://developer.download.nvidia.com/compute/cuda/10.2/Prod/local_installers/cuda-repo-ubuntu1804-10-2-local-10.2.89-440.33.01_1.0-1_amd64.deb
+    sudo dpkg -i cuda-repo-ubuntu1804-10-2-local-10.2.89-440.33.01_1.0-1_amd64.deb
+    sudo apt-key add /var/cuda-repo-10-2-local-10.2.89-440.33.01/7fa2af80.pub
+    sudo apt-get update
+    sudo apt-get -y install cuda
+    echo 'export PATH=/usr/local/cuda/bin:$PATH' >> ~/.bashrc
+    echo 'export LD_LIBRARY_PATH=/usr/local/cuda/lib64:LD_LIBRARY_PATH'  >> ~/.bashrc
+    source ~/.bashrc
     ```
-    And then move it to /usr folder:
-    ```shell
-    [sudo] cp libdarknet.so /usr/[local]/lib/libdarknet.so && [sudo] cp include/darknet.h /usr/[local]/include/darknet.h
+2. Install cuDNN (we recommend version v7.6.5 (November 18th, 2019), for CUDA 10.2)
+    Go to [NVIDIA's site](https://developer.nvidia.com/rdp/cudnn-download) and download *.deb package. After downloading *.deb package install it:
+    ```bash
+    sudo dpkg -i libcudnn7_7.6.5.32-1+cuda10.2_amd64.deb
+    sudo dpkg -i libcudnn7-dev_7.6.5.32-1+cuda10.2_amd64.deb
+    sudo dpkg -i libcudnn7-doc_7.6.5.32-1+cuda10.2_amd64.deb
     ```
-2. Go bindings for Darknet - [link](https://github.com/LdDl/go-darknet#installation)
-3. GoCV - [link](https://github.com/hybridgroup/gocv#how-to-install).
-4. Blob tracking library - [link](https://github.com/LdDl/gocv-blob#installation)
-5. gRPC - [link](https://github.com/grpc/grpc-go#installation)
+    Do not forget to check if cuDNN installed properly:
+    ```bash
+    cp -r /usr/src/cudnn_samples_v7/ $HOME
+    cd  $HOME/cudnn_samples_v7/mnistCUDNN
+    make clean && make
+    ./mnistCUDNN
+    cd -
+    ```
+3. Install [AlexeyAb's fork of Darknet](https://github.com/AlexeyAB/darknet)
+    ```bash
+    git clone https://github.com/AlexeyAB/darknet
+    cd ./darknet
+    # Enable GPU acceleration
+    sed 's/GPU=0/GPU=1/' ./Makefile
+    # Enable cuDNN
+    sed 's/CUDNN=0/CUDNN=1/' ./Makefile
+    # Prepare *.so
+    sed 's/LIBSO=0/LIBSO=1/' ./Makefile
+    make
+    # Copy *.so to /usr/lib + /usr/include (or /usr/local/lib + /usr/local/include)
+    sudo cp libdarknet.so /usr/lib/libdarknet.so && sudo cp include/darknet.h /usr/include/darknet.h
+    # sudo cp libdarknet.so /usr/local/lib/libdarknet.so && sudo cp include/darknet.h /usr/local/include/darknet.h
+    ```
+4. Go bindings for Darknet - [instructions link](https://github.com/LdDl/go-darknet#installation)
+5. GoCV - [instructions link](https://github.com/hybridgroup/gocv#how-to-install).
+6. Blob tracking library - [instructions link](https://github.com/LdDl/gocv-blob#installation)
+7. gRPC - [instructions link](https://github.com/grpc/grpc-go#installation)
+
 
 After steps above done:
 ```
@@ -161,7 +197,7 @@ Usage of ./odam:
 If you have troubles or questions please [open an issue](https://github.com/LdDl/odam/issues/new).
 Feel free to make PR's (we do not have contributing guidelines currently, but we will someday)
 
-## ToDo
+## Roadmap
 Please see [ROADMAP.md](ROADMAP.md)
 
 ## Dependencies
