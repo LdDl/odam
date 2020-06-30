@@ -74,7 +74,8 @@ It's built on top of [go-darknet](https://github.com/LdDl/go-darknet#go-darknet-
 5. GoCV - [instructions link](https://github.com/hybridgroup/gocv#how-to-install).
 6. Blob tracking library - [instructions link](https://github.com/LdDl/gocv-blob#installation)
 7. gRPC - [instructions link](https://github.com/grpc/grpc-go#installation)
-
+   You need to implement your gRPC server as following proto-file: https://github.com/LdDl/odam/blob/master/yolo_grpc.proto.
+   In case of my needs I need to detect vehicles and do OCR on server-side: you can take a look on https://github.com/LdDl/license_plate_recognition for gRPC server example
 
 After steps above done:
 ```
