@@ -1,5 +1,5 @@
 syntax = "proto3";
-package plates_recognition_grpc;
+package license_plate_recognition;
 
 message CamInfo{
     string cam_id = 1;
