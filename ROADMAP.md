@@ -31,6 +31,7 @@ New ideas, thoughts about needed features will be store in this file.
 
 * added drawing options for tracker (conf.json)
 * Check memory leaking
+* github tags: godoc, go-report, tagnum, sourcegraph
 
 ### W.I.P
 * Extend configuration of conf.json file.
@@ -53,7 +54,7 @@ New ideas, thoughts about needed features will be store in this file.
     * count pedestrians
     * speed estimation
 * integration with go modules
-* github tags: godoc, travis, go-report, tagnum, sourcegraph
+* github tags: travis
 
 ### Continuous activity
 * README
