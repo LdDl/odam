@@ -6,6 +6,7 @@ message CamInfo{
     int64 timestamp = 2;
     bytes image = 3;// bytes of full image in PNG - format
     Detection detection = 4;
+    VirtualLineInfo virtual_line = 5;
 }
 
 message Detection{
@@ -13,6 +14,14 @@ message Detection{
     int32 y_top = 2;
     int32 height = 3;
     int32 width = 4;
+}
+
+message VirtualLineInfo{
+    int32 id = 1;
+    int32 left_x = 2;
+    int32 left_y = 3;
+    int32 right_x = 4;
+    int32 right_y = 5;
 }
 
 message Response {
