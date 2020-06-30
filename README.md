@@ -1,4 +1,5 @@
 # ODaM - Object Detection and Monitoring
+[![GoDoc](https://godoc.org/github.com/LdDl/odam?status.svg)](https://godoc.org/github.com/LdDl/odam) [![Sourcegraph](https://sourcegraph.com/github.com/LdDl/odam/-/badge.svg)](https://sourcegraph.com/github.com/LdDl/odam?badge) [![Go Report Card](https://goreportcard.com/badge/github.com/LdDl/odam)](https://goreportcard.com/report/github.com/LdDl/odam) [![GitHub tag](https://img.shields.io/github/tag/LdDl/odam.svg)](https://github.com/LdDl/odam/releases)
 # v0.1.0
 ODaM is project aimed to do monitoring such as: pedestrian detection and counting, vehicle detection and counting, speed estimation of objects, sending detected objects to gRPC server for detailed analysis.
 
@@ -75,6 +76,9 @@ It's built on top of [go-darknet](https://github.com/LdDl/go-darknet#go-darknet-
 6. Blob tracking library - [instructions link](https://github.com/LdDl/gocv-blob#installation)
 7. gRPC - [instructions link](https://github.com/grpc/grpc-go#installation)
 
+   You need to implement your gRPC server as following proto-file: https://github.com/LdDl/odam/blob/master/yolo_grpc.proto.
+   
+   In case of my needs I need to detect vehicles and do OCR on server-side: you can take a look on https://github.com/LdDl/license_plate_recognition for gRPC server example
 
 After steps above done:
 ```
