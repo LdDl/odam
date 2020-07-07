@@ -74,11 +74,11 @@ It's built on top of [go-darknet](https://github.com/LdDl/go-darknet#go-darknet-
 4. Go bindings for Darknet - [instructions link](https://github.com/LdDl/go-darknet#installation)
 5. GoCV - [instructions link](https://github.com/hybridgroup/gocv#how-to-install).
 6. Blob tracking library - [instructions link](https://github.com/LdDl/gocv-blob#installation)
-7. gRPC - [instructions link](https://github.com/grpc/grpc-go#installation)
+7. If you want to use gRPC client-server model: gRPC - [instructions link](https://github.com/grpc/grpc-go#installation)
 
    You need to implement your gRPC server as following proto-file: https://github.com/LdDl/odam/blob/master/yolo_grpc.proto.
    
-   In case of my needs I need to detect vehicles and do OCR on server-side: you can take a look on https://github.com/LdDl/license_plate_recognition for gRPC server example
+   In case of my needs I need to detect license plates on vehicles and do OCR on server-side: you can take a look on https://github.com/LdDl/license_plate_recognition for gRPC server example
 
 After steps above done:
 ```
