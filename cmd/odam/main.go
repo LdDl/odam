@@ -184,10 +184,10 @@ func main() {
 								},
 								VirtualLine: &odam.VirtualLineInfo{
 									Id:     vline.LineID,
-									LeftX:  int32(vline.VLine.LeftPT.X),
-									LeftY:  int32(vline.VLine.LeftPT.Y),
-									RightX: int32(vline.VLine.RightPT.X),
-									RightY: int32(vline.VLine.RightPT.Y),
+									LeftX:  int32(vline.VLine.SourceLeftPT.X),
+									LeftY:  int32(vline.VLine.SourceLeftPT.Y),
+									RightX: int32(vline.VLine.SourceRightPT.X),
+									RightY: int32(vline.VLine.SourceRightPT.Y),
 								},
 							}
 
