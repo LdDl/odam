@@ -72,10 +72,12 @@ func NewSettings(fname string) (*AppSettings, error) {
 		x2 := math.Round(float64(lsettings.End[0]) / appsettings.VideoSettings.ScaleX)
 		y2 := math.Round(float64(lsettings.End[1]) / appsettings.VideoSettings.ScaleY)
 		vline := VirtualLine{
-			LeftPT:    image.Point{X: int(x1), Y: int(y1)},
-			RightPT:   image.Point{X: int(x2), Y: int(y2)},
-			Direction: true,
-			Color:     color.RGBA{lsettings.RGBA[0], lsettings.RGBA[1], lsettings.RGBA[2], lsettings.RGBA[3]},
+			LeftPT:        image.Point{X: int(x1), Y: int(y1)},
+			RightPT:       image.Point{X: int(x2), Y: int(y2)},
+			SourceLeftPT:  image.Point{X: lsettings.Begin[0], Y: lsettings.Begin[1]},
+			SourceRightPT: image.Point{X: lsettings.End[0], Y: lsettings.End[1]},
+			Direction:     true,
+			Color:         color.RGBA{lsettings.RGBA[0], lsettings.RGBA[1], lsettings.RGBA[2], lsettings.RGBA[3]},
 		}
 		if lsettings.Direction == "from_detector" {
 			vline.Direction = false

@@ -13,6 +13,9 @@ type VirtualLine struct {
 	RightPT   image.Point
 	Color     color.RGBA
 	Direction bool
+
+	SourceLeftPT  image.Point
+	SourceRightPT image.Point
 }
 
 // Draw Draw virtual line on image
