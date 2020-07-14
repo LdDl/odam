@@ -222,7 +222,7 @@ type TrackerSettings struct {
 
 // LinesSetting Virtual lines
 type LinesSetting struct {
-	LineID        int      `json:"line_id"`
+	LineID        int64    `json:"line_id"`
 	Begin         [2]int   `json:"begin"`
 	End           [2]int   `json:"end"`
 	Direction     string   `json:"direction"`

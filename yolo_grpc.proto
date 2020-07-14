@@ -17,7 +17,7 @@ message Detection{
 }
 
 message VirtualLineInfo{
-    int32 id = 1;
+    int64 id = 1;
     int32 left_x = 2;
     int32 left_y = 3;
     int32 right_x = 4;
