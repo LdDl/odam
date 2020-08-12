@@ -11,4 +11,5 @@ require (
 	gocv.io/x/gocv v0.23.0
 	golang.org/x/image v0.0.0-20200618115811-c13761719519 // indirect
 	google.golang.org/grpc v1.30.0
+	google.golang.org/protobuf v1.23.0
 )

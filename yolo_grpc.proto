@@ -1,7 +1,7 @@
 syntax = "proto3";
 package odam;
 
-option go_package = ".;proto";
+option go_package = ".;odam";
 
 message ObjectInformation{
     string cam_id = 1;
