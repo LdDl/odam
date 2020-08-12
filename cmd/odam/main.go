@@ -172,7 +172,7 @@ func main() {
 							buf := new(bytes.Buffer)
 							err = jpeg.Encode(buf, cropImageSTD, nil)
 							sendS3 := buf.Bytes()
-							sendData := odam.CamInfo{
+							sendData := odam.ObjectInformation{
 								CamId:     settings.VideoSettings.CameraID,
 								Timestamp: time.Now().UTC().Unix(),
 								Image:     sendS3,
@@ -313,8 +313,8 @@ func stringInSlice(str *string, sl []string) bool {
 	return false
 }
 
-func sendDataToServer(grpcConn *grpc.ClientConn, data *odam.CamInfo) {
-	client := odam.NewSTYoloClient(grpcConn)
+func sendDataToServer(grpcConn *grpc.ClientConn, data *odam.ObjectInformation) {
+	client := odam.NewServiceYOLOClient(grpcConn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
