@@ -135,15 +135,14 @@ func main() {
 		case detected = <-detectedChannel:
 			processFrame(img)
 			if len(detected) != 0 {
-				detectedObject := make([]image.Rectangle, len(detected))
+				detectedObject := make([]*blob.Blobie, len(detected))
 				for i := range detected {
-					detectedObject[i] = detected[i].Rect
+					detectedObject[i] = blob.NewBlobie(detected[i].Rect, 10, detected[i].ClassID, detected[i].ClassName)
+					detectedObject[i].SetDraw(allblobies.DrawingOptions)
 				}
 				allblobies.MatchToExisting(detectedObject)
 				for _, vline := range settings.TrackerSettings.LinesSettings {
-					for i, b := range allblobies.Objects {
-						_ = i
-
+					for _, b := range allblobies.Objects {
 						shift := 20
 						// shift = b.Center.Y + b.CurrentRect.Dy()/2
 						if b.IsCrossedTheLineWithShift(vline.VLine.RightPT.Y, vline.VLine.LeftPT.X, vline.VLine.RightPT.X, vline.VLine.Direction, shift) {
@@ -181,6 +180,10 @@ func main() {
 									YTop:   0,
 									Width:  int32(cropRect.Dx()),
 									Height: int32(cropRect.Dy()),
+								},
+								Class: &odam.ClassInfo{
+									ClassId:   int32(b.GetClassID()),
+									ClassName: b.GetClassName(),
 								},
 								VirtualLine: &odam.VirtualLineInfo{
 									Id:     vline.LineID,
@@ -291,7 +294,8 @@ func performDetection(neuralNet *darknet.YOLONetwork, targetClasses []string) {
 					maxX, maxY := float64(bBox.EndPoint.X), float64(bBox.EndPoint.Y)
 					rect := odam.DetectedObject{
 						Rect:       image.Rect(odam.Round(minX), odam.Round(minY), odam.Round(maxX), odam.Round(maxY)),
-						Classname:  d.ClassNames[i],
+						ClassName:  d.ClassNames[i],
+						ClassID:    d.ClassIDs[i],
 						Confidence: d.Probabilities[i],
 					}
 					detectedRects = append(detectedRects, rect)

@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/LdDl/go-darknet v1.2.0
-	github.com/LdDl/gocv-blob v1.0.1
+	github.com/LdDl/gocv-blob v1.1.2
 	github.com/golang/protobuf v1.4.2
 	github.com/hybridgroup/mjpeg v0.0.0-20140228234708-4680f319790e
 	github.com/satori/go.uuid v1.2.0 // indirect

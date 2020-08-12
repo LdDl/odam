@@ -7,7 +7,8 @@ import (
 // DetectedObject Store detected object info
 type DetectedObject struct {
 	Rect       image.Rectangle
-	Classname  string
+	ClassID    int
+	ClassName  string
 	Confidence float32
 }
 
