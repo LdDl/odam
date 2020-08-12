@@ -3,7 +3,7 @@ package odam;
 
 option go_package = ".;proto";
 
-message CamInfo{
+message ObjectInformation{
     string cam_id = 1;
     int64 timestamp = 2;
     bytes image = 3;// bytes of full image in PNG - format
@@ -38,8 +38,8 @@ message Response {
   string error = 3;
 }
 
-// STYolo - service for second and third yolo stages 
+// ServiceYOLO - service for second and third yolo stages 
 // in car number search cascade
-service STYolo{
-    rpc SendDetection(CamInfo) returns (Response){};
+service ServiceYOLO{
+    rpc SendDetection(ObjectInformation) returns (Response){};
 }
