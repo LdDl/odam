@@ -1,12 +1,15 @@
 syntax = "proto3";
 package odam;
 
+option go_package = ".;proto";
+
 message CamInfo{
     string cam_id = 1;
     int64 timestamp = 2;
     bytes image = 3;// bytes of full image in PNG - format
     Detection detection = 4;
-    VirtualLineInfo virtual_line = 5;
+    ClassInfo class = 5;
+    VirtualLineInfo virtual_line = 6;
 }
 
 message Detection{
@@ -14,6 +17,11 @@ message Detection{
     int32 y_top = 2;
     int32 height = 3;
     int32 width = 4;
+}
+
+message ClassInfo{
+    int32 class_id = 1;
+    string class_name = 2;
 }
 
 message VirtualLineInfo{
