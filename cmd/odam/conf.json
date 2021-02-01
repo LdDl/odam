@@ -24,7 +24,7 @@
         "port": 35678
     },
     "grpc_settings": {
-        "enable": true,
+        "enable": false,
         "server_ip": "localhost",
         "server_port": 50051
     },
@@ -51,10 +51,11 @@
             },
             "text_settings": {
                 "rgba": [0, 255, 0, 0],
-                "scale": 1.2,
-                "thickness": 2,
-                "font": "hershey_plain"
-            }
+                "scale": 0.5,
+                "thickness": 1,
+                "font": "hershey_simplex"
+            },
+            "display_object_id": true
         }
     },
     "matpprof_settings": {

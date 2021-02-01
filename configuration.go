@@ -242,6 +242,8 @@ type DrawTrackSettings struct {
 	CentroidSettings CentroidSettings `json:"centroid_settings"`
 	// Drawing options for text in top left corner of detection rectangle
 	TextSettings TextSettings `json:"text_settings"`
+	// Do you want to display ID of object (uuid)
+	DisplayObjectID bool `json:"display_object_id"`
 }
 
 // BBoxSettings Options for detection rectangle

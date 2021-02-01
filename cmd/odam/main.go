@@ -29,8 +29,8 @@ var (
 	window          *gocv.Window
 	stream          *mjpeg.Stream
 	imagesChannel   chan *odam.FrameData
-	detectedChannel chan []odam.DetectedObject
-	detected        []odam.DetectedObject
+	detectedChannel chan []*odam.DetectedObject
+	detected        []*odam.DetectedObject
 	allblobies      *blob.Blobies
 )
 
@@ -91,14 +91,14 @@ func main() {
 	}
 	if settings.MjpegSettings.ImshowEnable {
 		fmt.Println("Press 'ESC' to stop imshow()")
-		window = gocv.NewWindow("ODAM v0.1.0")
+		window = gocv.NewWindow("ODAM v0.5.0")
 		window.ResizeWindow(settings.VideoSettings.ReducedWidth, settings.VideoSettings.ReducedHeight)
 		defer window.Close()
 	}
 
 	// Initial channels
 	imagesChannel = make(chan *odam.FrameData, 1)
-	detectedChannel = make(chan []odam.DetectedObject)
+	detectedChannel = make(chan []*odam.DetectedObject)
 	img := odam.NewFrameData()
 
 	// Read first frame
@@ -135,16 +135,15 @@ func main() {
 		case detected = <-detectedChannel:
 			processFrame(img)
 			if len(detected) != 0 {
-				detectedObject := make([]*blob.Blobie, len(detected))
+				detectedObjects := make([]*blob.Blobie, len(detected))
 				for i := range detected {
-					detectedObject[i] = blob.NewBlobie(detected[i].Rect, 10, detected[i].ClassID, detected[i].ClassName)
-					detectedObject[i].SetDraw(allblobies.DrawingOptions)
+					detectedObjects[i] = blob.NewBlobie(detected[i].Rect, 10, detected[i].ClassID, detected[i].ClassName)
+					detectedObjects[i].SetDraw(allblobies.DrawingOptions)
 				}
-				allblobies.MatchToExisting(detectedObject)
+				allblobies.MatchToExisting(detectedObjects)
 				for _, vline := range settings.TrackerSettings.LinesSettings {
 					for _, b := range allblobies.Objects {
 						shift := 20
-						// shift = b.Center.Y + b.CurrentRect.Dy()/2
 						if b.IsCrossedTheLineWithShift(vline.VLine.RightPT.Y, vline.VLine.LeftPT.X, vline.VLine.RightPT.X, vline.VLine.Direction, shift) {
 							minx, miny := math.Floor(float64(b.CurrentRect.Min.X)*settings.VideoSettings.ScaleX), math.Floor(float64(b.CurrentRect.Min.Y)*settings.VideoSettings.ScaleY)
 							maxx, maxy := math.Floor(float64(b.CurrentRect.Max.X)*settings.VideoSettings.ScaleX), math.Floor(float64(b.CurrentRect.Max.Y)*settings.VideoSettings.ScaleY)
@@ -212,13 +211,14 @@ func main() {
 				settings.TrackerSettings.LinesSettings[i].VLine.Draw(&img.ImgScaled)
 			}
 			for i, b := range (*allblobies).Objects {
-				_ = i
-				// (*b).DrawTrack(&img.ImgScaled, fmt.Sprintf("%v", i))
-				(*b).DrawTrack(&img.ImgScaled, "")
+				if settings.TrackerSettings.DrawTrackSettings.DisplayObjectID {
+					(*b).DrawTrack(&img.ImgScaled, fmt.Sprintf("%v", i))
+				} else {
+					(*b).DrawTrack(&img.ImgScaled, "")
+				}
 			}
 		}
 		if settings.MjpegSettings.ImshowEnable {
-
 			window.IMShow(img.ImgScaled)
 			if window.WaitKey(1) == 27 {
 				break
@@ -240,6 +240,7 @@ func main() {
 
 	// hard release memory
 	img.Close()
+	neuralNet.Close()
 
 	// pprof
 	if settings.MatPPROFSettings.Enable {
@@ -285,7 +286,7 @@ func performDetection(neuralNet *darknet.YOLONetwork, targetClasses []string) {
 		darknetImage.Close() // free the memory
 		darknetImage = nil
 
-		detectedRects := make([]odam.DetectedObject, 0, len(dr.Detections))
+		detectedRects := make([]*odam.DetectedObject, 0, len(dr.Detections))
 		for _, d := range dr.Detections {
 			for i := range d.ClassIDs {
 				if stringInSlice(&d.ClassNames[i], targetClasses) {
@@ -298,7 +299,7 @@ func performDetection(neuralNet *darknet.YOLONetwork, targetClasses []string) {
 						ClassID:    d.ClassIDs[i],
 						Confidence: d.Probabilities[i],
 					}
-					detectedRects = append(detectedRects, rect)
+					detectedRects = append(detectedRects, &rect)
 				}
 			}
 		}
