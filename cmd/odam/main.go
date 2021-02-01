@@ -144,7 +144,9 @@ func main() {
 				for _, vline := range settings.TrackerSettings.LinesSettings {
 					for _, b := range allblobies.Objects {
 						shift := 20
-						if b.IsCrossedTheLineWithShift(vline.VLine.RightPT.Y, vline.VLine.LeftPT.X, vline.VLine.RightPT.X, vline.VLine.Direction, shift) {
+						className := b.GetClassName()
+						if stringInSlice(&className, vline.DetectClasses) && // Detect if object should be detected by virtual line (filter by classname)
+							b.IsCrossedTheLineWithShift(vline.VLine.RightPT.Y, vline.VLine.LeftPT.X, vline.VLine.RightPT.X, vline.VLine.Direction, shift) { // If object crossed the virtual line
 							minx, miny := math.Floor(float64(b.CurrentRect.Min.X)*settings.VideoSettings.ScaleX), math.Floor(float64(b.CurrentRect.Min.Y)*settings.VideoSettings.ScaleY)
 							maxx, maxy := math.Floor(float64(b.CurrentRect.Max.X)*settings.VideoSettings.ScaleX), math.Floor(float64(b.CurrentRect.Max.Y)*settings.VideoSettings.ScaleY)
 							cropRect := image.Rect(
@@ -156,7 +158,7 @@ func main() {
 							odam.FixRectForOpenCV(&cropRect, settings.VideoSettings.Width, settings.VideoSettings.Height)
 							cropImage := img.ImgSource.Region(cropRect)
 							copyCrop := cropImage.Clone()
-
+							fmt.Println("ke")
 							cropImageSTD, err := copyCrop.ToImage()
 							if err != nil {
 								fmt.Println("can't convert cropped gocv.Mat to image.Image:", err)
@@ -182,7 +184,7 @@ func main() {
 								},
 								Class: &odam.ClassInfo{
 									ClassId:   int32(b.GetClassID()),
-									ClassName: b.GetClassName(),
+									ClassName: className,
 								},
 								VirtualLine: &odam.VirtualLineInfo{
 									Id:     vline.LineID,
