@@ -179,7 +179,8 @@ Usage of ./odam:
                 "scale": 1.2, # Size of text
                 "thickness": 2, # Thickness as is
                 "font": "hershey_plain"
-            }
+            },
+            "display_object_id": true # If you want to display object identifier
         }
     },
     "matpprof_settings": { # pprof for GoCV. Useful for debugging
