@@ -158,7 +158,6 @@ func main() {
 							odam.FixRectForOpenCV(&cropRect, settings.VideoSettings.Width, settings.VideoSettings.Height)
 							cropImage := img.ImgSource.Region(cropRect)
 							copyCrop := cropImage.Clone()
-							fmt.Println("ke")
 							cropImageSTD, err := copyCrop.ToImage()
 							if err != nil {
 								fmt.Println("can't convert cropped gocv.Mat to image.Image:", err)
