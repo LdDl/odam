@@ -3,15 +3,23 @@ package odam;
 
 option go_package = ".;odam";
 
+// Reference info about detection, camera, timestamp and etc.
 message ObjectInformation{
+    // Camera identifier
     string cam_id = 1;
+    // Timestamp in Unix UTC
     int64 timestamp = 2;
-    bytes image = 3;// bytes of full image in PNG - format
+    // Bytes representation of image (PNG)
+    bytes image = 3;
+    // Reference information about detection rectangle
     Detection detection = 4;
+    // Reference information about object class
     ClassInfo class = 5;
+    // Reference information about virtual line (detection line)
     VirtualLineInfo virtual_line = 6;
 }
 
+// Reference information about detection rectangle
 message Detection{
     int32 x_left = 1;
     int32 y_top = 2;
@@ -19,11 +27,13 @@ message Detection{
     int32 width = 4;
 }
 
+// Reference information about object class
 message ClassInfo{
     int32 class_id = 1;
     string class_name = 2;
 }
 
+// Reference information about virtual line (detection line)
 message VirtualLineInfo{
     int64 id = 1;
     int32 left_x = 2;
@@ -32,7 +42,8 @@ message VirtualLineInfo{
     int32 right_y = 5;
 }
 
-message Response {
+// Response from server-side application
+message Response{
   string message = 1;
   string warning = 2;
   string error = 3;
