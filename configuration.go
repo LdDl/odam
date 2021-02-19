@@ -82,6 +82,18 @@ func NewSettings(fname string) (*AppSettings, error) {
 		if lsettings.Direction == "from_detector" {
 			vline.Direction = false
 		}
+		switch lsettings.CropMode {
+		case "crop":
+			vline.CropObject = true
+			break
+		case "no_crop":
+			vline.CropObject = false
+			break
+		default:
+			fmt.Printf("[WARNING] Field 'crop_mode' for line (id = '%d') can't be '%s'\n", lsettings.LineID, lsettings.CropMode)
+			vline.CropObject = true
+			break
+		}
 		lsettings.VLine = &vline
 	}
 
@@ -230,6 +242,7 @@ type LinesSetting struct {
 	Direction     string   `json:"direction"`
 	DetectClasses []string `json:"detect_classes"`
 	RGBA          [4]uint8 `json:"rgba"`
+	CropMode      string   `json:"crop_mode"`
 	// Exported, but not from JSON
 	VLine *VirtualLine `json:"-"`
 }
