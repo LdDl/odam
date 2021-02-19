@@ -73,6 +73,8 @@ It's built on top of [go-darknet](https://github.com/LdDl/go-darknet#go-darknet-
     sudo cp libdarknet.so /usr/lib/libdarknet.so && sudo cp include/darknet.h /usr/include/darknet.h
     # sudo cp libdarknet.so /usr/local/lib/libdarknet.so && sudo cp include/darknet.h /usr/local/include/darknet.h
     ```
+    Alternatively you can use Makefile from go-darknet repository: https://github.com/LdDl/go-darknet/blob/master/Makefile
+    
 4. Go bindings for Darknet - [instructions link](https://github.com/LdDl/go-darknet#installation)
 5. GoCV - [instructions link](https://github.com/hybridgroup/gocv#how-to-install).
 6. Blob tracking library - [instructions link](https://github.com/LdDl/gocv-blob#installation)
