@@ -166,6 +166,7 @@ Usage of ./odam:
             }
         ],
         "draw_track_settings": { # Tracker drawing settings (for WOW effect in imshow() or MJPEG streaming)
+            "max_points_in_track": 150, # Restriction for maximum points in single track
             "bbox_settings": { # Setting for bounding boxes (detected objects)
                 "rgba": [255, 255, 0, 0], # Color of bounding box border
                 "thickness": 2 # Thickness as is

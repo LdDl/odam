@@ -249,6 +249,8 @@ type LinesSetting struct {
 
 // DrawTrackSettings Drawing settings for MJPEG/imshow
 type DrawTrackSettings struct {
+	// Restriction for maximum points in single track
+	MaxPointsInTrack int `json:"max_points_in_track"`
 	// Drawing options for detection rectangle
 	BBoxSettings BBoxSettings `json:"bbox_settings"`
 	// Drawing options for center of detection rectangle

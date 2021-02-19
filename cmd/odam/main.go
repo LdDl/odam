@@ -137,7 +137,7 @@ func main() {
 			if len(detected) != 0 {
 				detectedObjects := make([]*blob.Blobie, len(detected))
 				for i := range detected {
-					detectedObjects[i] = blob.NewBlobie(detected[i].Rect, 10, detected[i].ClassID, detected[i].ClassName)
+					detectedObjects[i] = blob.NewBlobie(detected[i].Rect, settings.TrackerSettings.DrawTrackSettings.MaxPointsInTrack, detected[i].ClassID, detected[i].ClassName)
 					detectedObjects[i].SetDraw(allblobies.DrawingOptions)
 				}
 				allblobies.MatchToExisting(detectedObjects)
