@@ -41,6 +41,7 @@
             }
         ],
         "draw_track_settings": {
+            "max_points_in_track": 150,
             "bbox_settings": {
                 "rgba": [255, 255, 0, 0],
                 "thickness": 2

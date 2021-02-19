@@ -162,10 +162,11 @@ Usage of ./odam:
                 "direction": "to_detector", # Direction of line (possible values: 'to_detector' and 'from_detector')
                 "detect_classes": ["car", "motorbike", "bus", "train", "truck"], # What classes must be cropped (as detected objects) that were captured by detection line.
                 "rgba": [255, 0, 0, 0], # Color of detection line
-                "crop_mode": "crop" # When 'grpc_settings' field 'enable' is set to TRUE this option will be used for sending either cropped detected object (bbox==crop) or full image with bbox info to gRPC server-side application
+                "crop_mode": "crop" # When 'grpc_settings' field 'enable' is set to TRUE this option will be used for sending either cropped detected object (bbox==crop) or full image with bbox info to gRPC server-side application. Default is 'crop'
             }
         ],
         "draw_track_settings": { # Tracker drawing settings (for WOW effect in imshow() or MJPEG streaming)
+            "max_points_in_track": 150, # Restriction for maximum points in single track (>=1). Default value 10 (in case of value less than 1)
             "bbox_settings": { # Setting for bounding boxes (detected objects)
                 "rgba": [255, 255, 0, 0], # Color of bounding box border
                 "thickness": 2 # Thickness as is
