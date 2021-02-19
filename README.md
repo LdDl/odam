@@ -60,6 +60,8 @@ It's built on top of [go-darknet](https://github.com/LdDl/go-darknet#go-darknet-
     ```bash
     git clone https://github.com/AlexeyAB/darknet
     cd ./darknet
+    # Checkout to last battle-tested commit
+    git checkout f056fc3b6a11528fa0522a468eca1e909b7004b7
     # Enable GPU acceleration
     sed 's/GPU=0/GPU=1/' ./Makefile
     # Enable cuDNN
