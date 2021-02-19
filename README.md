@@ -1,6 +1,6 @@
 # ODaM - Object Detection and Monitoring
 [![GoDoc](https://godoc.org/github.com/LdDl/odam?status.svg)](https://godoc.org/github.com/LdDl/odam) [![Sourcegraph](https://sourcegraph.com/github.com/LdDl/odam/-/badge.svg)](https://sourcegraph.com/github.com/LdDl/odam?badge) [![Go Report Card](https://goreportcard.com/badge/github.com/LdDl/odam)](https://goreportcard.com/report/github.com/LdDl/odam) [![GitHub tag](https://img.shields.io/github/tag/LdDl/odam.svg)](https://github.com/LdDl/odam/releases)
-# v0.5.1
+# v0.5.4
 ODaM is project aimed to do monitoring such as: pedestrian detection and counting, vehicle detection and counting, speed estimation of objects, sending detected objects to gRPC server for detailed analysis.
 
 It's written on Go with a lot of [CGO](https://golang.org/cmd/cgo/).
@@ -161,7 +161,8 @@ Usage of ./odam:
                 "end": [1600, 800], # [X2,Y2], end point of line (usually, right side)
                 "direction": "to_detector", # Direction of line (possible values: 'to_detector' and 'from_detector')
                 "detect_classes": ["car", "motorbike", "bus", "train", "truck"], # What classes must be cropped (as detected objects) that were captured by detection line.
-                "rgba": [255, 0, 0, 0] # Color of detection line
+                "rgba": [255, 0, 0, 0], # Color of detection line
+                "crop_mode": "crop" # When 'grpc_settings' field 'enable' is set to TRUE this option will be used for sending either cropped detected object (bbox==crop) or full image with bbox info to gRPC server-side application
             }
         ],
         "draw_track_settings": { # Tracker drawing settings (for WOW effect in imshow() or MJPEG streaming)

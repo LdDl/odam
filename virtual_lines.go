@@ -9,13 +9,13 @@ import (
 
 // VirtualLine Detection line attributes
 type VirtualLine struct {
-	LeftPT    image.Point
-	RightPT   image.Point
-	Color     color.RGBA
-	Direction bool
-
-	SourceLeftPT  image.Point
-	SourceRightPT image.Point
+	LeftPT        image.Point `json:"-"`
+	RightPT       image.Point `json:"-"`
+	Color         color.RGBA  `json:"-"`
+	Direction     bool        `json:"-"`
+	CropObject    bool        `json:"-"`
+	SourceLeftPT  image.Point `json:"-"`
+	SourceRightPT image.Point `json:"-"`
 }
 
 // Draw Draw virtual line on image

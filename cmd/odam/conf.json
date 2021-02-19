@@ -36,7 +36,8 @@
                 "end": [1600, 800],
                 "direction": "to_detector",
                 "detect_classes": ["car", "motorbike", "bus", "train", "truck"],
-                "rgba": [255, 0, 0, 0]
+                "rgba": [255, 0, 0, 0],
+                "crop_mode": "crop"
             }
         ],
         "draw_track_settings": {
