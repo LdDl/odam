@@ -90,7 +90,7 @@ func NewSettings(fname string) (*AppSettings, error) {
 			vline.CropObject = false
 			break
 		default:
-			fmt.Printf("[WARNING] Field 'crop_mode' for line (id = '%d') can't be '%s'\n", lsettings.LineID, lsettings.CropMode)
+			fmt.Printf("[WARNING] Field 'crop_mode' for line (id = '%d') can't be '%s'. Setting default value = 'crop'\n", lsettings.LineID, lsettings.CropMode)
 			vline.CropObject = true
 			break
 		}
@@ -98,6 +98,10 @@ func NewSettings(fname string) (*AppSettings, error) {
 	}
 
 	// Prepare drawing options
+	if appsettings.TrackerSettings.DrawTrackSettings.MaxPointsInTrack < 1 {
+		fmt.Printf("[WARNING] Field 'max_points_in_track' shoudle be >= 1, but got '%d'. Setting default value = 10\n", appsettings.TrackerSettings.DrawTrackSettings.MaxPointsInTrack)
+		appsettings.TrackerSettings.DrawTrackSettings.MaxPointsInTrack = 10
+	}
 	bboxOpts := blob.DrawBBoxOptions{
 		Color: color.RGBA{
 			appsettings.TrackerSettings.DrawTrackSettings.BBoxSettings.RGBA[0],
