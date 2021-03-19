@@ -40,6 +40,21 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
+	// DEVELOPER CONFIGURATION TEST
+	src := []gocv.Point2f{
+		gocv.Point2f{640, 360},
+		gocv.Point2f{640, 0},
+		gocv.Point2f{0, 0},
+		gocv.Point2f{0, 360},
+	}
+	dst := []gocv.Point2f{
+		gocv.Point2f{37.6201042, 54.2081145},
+		gocv.Point2f{37.6200611, 54.2080183},
+		gocv.Point2f{37.6201553, 54.2080049},
+		gocv.Point2f{37.6201984, 54.2081033},
+	}
+	gisConverter := odam.GetPerspectiveTransformer(src, dst)
+
 	// Settings
 	flag.Parse()
 	settings, err := odam.NewSettings(*settingsFile)
@@ -141,6 +156,17 @@ func main() {
 					detectedObjects[i].SetDraw(allblobies.DrawingOptions)
 				}
 				allblobies.MatchToExisting(detectedObjects)
+				for id, blob := range allblobies.Objects {
+					trackLen := len(blob.Track)
+					if trackLen >= 2 {
+						fp := odam.STDPointToGoCVPoint2F(blob.Track[0])
+						lp := odam.STDPointToGoCVPoint2F(blob.Track[trackLen-1])
+						fmt.Println(fp, lp, blob.TrackTime[trackLen-1].Sub(blob.TrackTime[0]).Hours(), trackLen)
+						//if blob.TrackTime[trackLen-1].Sub(blob.TrackTime[0]).Seconds() > 0.01 {
+						fmt.Println(id, odam.EstimateSpeed(fp, lp, blob.TrackTime[0], blob.TrackTime[trackLen-1], gisConverter))
+						//}
+					}
+				}
 				for _, vline := range settings.TrackerSettings.LinesSettings {
 					for _, b := range allblobies.Objects {
 						shift := 20
