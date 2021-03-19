@@ -10,7 +10,7 @@ import (
 	"log"
 	"math"
 	"time"
-
+"image/color"
 	"net/http"
 
 	darknet "github.com/LdDl/go-darknet"
@@ -161,10 +161,12 @@ func main() {
 					if trackLen >= 2 {
 						fp := odam.STDPointToGoCVPoint2F(blob.Track[0])
 						lp := odam.STDPointToGoCVPoint2F(blob.Track[trackLen-1])
-						fmt.Println(fp, lp, blob.TrackTime[trackLen-1].Sub(blob.TrackTime[0]).Hours(), trackLen)
+						// fmt.Println(fp, lp, blob.TrackTime[trackLen-1].Sub(blob.TrackTime[0]).Hours(), trackLen)
 						//if blob.TrackTime[trackLen-1].Sub(blob.TrackTime[0]).Seconds() > 0.01 {
 						spd := odam.EstimateSpeed(fp, lp, blob.TrackTime[0], blob.TrackTime[trackLen-1], gisConverter)
-						fmt.Println(id, spd)
+						// fmt.Println(id, spd)
+						_ = id
+						gocv.PutText(&img.ImgScaled, fmt.Sprintf("Speed: %0.3f", spd), blob.Center, gocv.FontHersheySimplex, 1.0, color.RGBA{255, 255, 0, 1.0}, 1.0)
 						//}
 					}
 				}
@@ -260,9 +262,11 @@ func main() {
 			}
 			for i, b := range (*allblobies).Objects {
 				if settings.TrackerSettings.DrawTrackSettings.DisplayObjectID {
-					(*b).DrawTrack(&img.ImgScaled, fmt.Sprintf("%v", i))
+					_ = i
+					_ = b
+					// (*b).DrawTrack(&img.ImgScaled, fmt.Sprintf("%v", i))
 				} else {
-					(*b).DrawTrack(&img.ImgScaled, "")
+					// (*b).DrawTrack(&img.ImgScaled, "")
 				}
 			}
 		}

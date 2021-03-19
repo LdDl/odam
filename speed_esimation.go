@@ -1,7 +1,6 @@
 package odam
 
 import (
-	"fmt"
 	"image"
 	"math"
 	"time"
@@ -22,7 +21,6 @@ func GetPerspectiveTransformer(srcPoints, dstPoints []gocv.Point2f) func(gocv.Po
 		pmat.SetDoubleAt(2, 0, 1.0)
 		answ := transformMat.MultiplyMatrix(pmat)
 		scale := answ.GetDoubleAt(2, 0)
-		fmt.Println(answ.GetDoubleAt(2, 0), answ.GetFloatAt(2, 0))
 		return gocv.Point2f{X: float32(answ.GetDoubleAt(0, 0) / scale), Y: float32(answ.GetDoubleAt(1, 0) / scale)}
 	}
 }
