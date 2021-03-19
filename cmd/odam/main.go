@@ -163,7 +163,8 @@ func main() {
 						lp := odam.STDPointToGoCVPoint2F(blob.Track[trackLen-1])
 						fmt.Println(fp, lp, blob.TrackTime[trackLen-1].Sub(blob.TrackTime[0]).Hours(), trackLen)
 						//if blob.TrackTime[trackLen-1].Sub(blob.TrackTime[0]).Seconds() > 0.01 {
-						fmt.Println(id, odam.EstimateSpeed(fp, lp, blob.TrackTime[0], blob.TrackTime[trackLen-1], gisConverter))
+						spd := odam.EstimateSpeed(fp, lp, blob.TrackTime[0], blob.TrackTime[trackLen-1], gisConverter)
+						fmt.Println(id, spd)
 						//}
 					}
 				}
