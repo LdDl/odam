@@ -14,7 +14,7 @@ import (
 	"net/http"
 
 	darknet "github.com/LdDl/go-darknet"
-	"github.com/LdDl/gocv-blob/blob"
+	blob "github.com/LdDl/gocv-blob/v2/blob"
 	"github.com/LdDl/odam"
 	"github.com/hybridgroup/mjpeg"
 	"gocv.io/x/gocv"
@@ -135,9 +135,9 @@ func main() {
 		case detected = <-detectedChannel:
 			processFrame(img)
 			if len(detected) != 0 {
-				detectedObjects := make([]*blob.Blobie, len(detected))
+				detectedObjects := make([]blob.Blobie, len(detected))
 				for i := range detected {
-					detectedObjects[i] = blob.NewBlobie(detected[i].Rect, settings.TrackerSettings.DrawTrackSettings.MaxPointsInTrack, detected[i].ClassID, detected[i].ClassName)
+					detectedObjects[i] = blob.NewSimpleBlobie(detected[i].Rect, settings.TrackerSettings.DrawTrackSettings.MaxPointsInTrack, detected[i].ClassID, detected[i].ClassName)
 					detectedObjects[i].SetDraw(allblobies.DrawingOptions)
 				}
 				allblobies.MatchToExisting(detectedObjects)
@@ -149,8 +149,9 @@ func main() {
 							b.IsCrossedTheLineWithShift(vline.VLine.RightPT.Y, vline.VLine.LeftPT.X, vline.VLine.RightPT.X, vline.VLine.Direction, shift) { // If object crossed the virtual line
 							// If gRPC streaming data is disabled why do we need to process all stuff? So add another condition
 							if settings.GrpcSettings.Enable {
-								minx, miny := math.Floor(float64(b.CurrentRect.Min.X)*settings.VideoSettings.ScaleX), math.Floor(float64(b.CurrentRect.Min.Y)*settings.VideoSettings.ScaleY)
-								maxx, maxy := math.Floor(float64(b.CurrentRect.Max.X)*settings.VideoSettings.ScaleX), math.Floor(float64(b.CurrentRect.Max.Y)*settings.VideoSettings.ScaleY)
+								blobRect := b.GetCurrentRect()
+								q, miny := math.Floor(float64(blobRect.Min.X)*settings.VideoSettings.ScaleX), math.Floor(float64(blobRect.Min.Y)*settings.VideoSettings.ScaleY)
+								maxx, maxy := math.Floor(float64(blobRect.Max.X)*settings.VideoSettings.ScaleX), math.Floor(float64(blobRect.Max.Y)*settings.VideoSettings.ScaleY)
 								cropRect := image.Rect(
 									int(minx)+5,  // add a bit width to crop bigger region
 									int(miny)+10, // add a bit height to crop bigger region
@@ -233,9 +234,9 @@ func main() {
 			}
 			for i, b := range (*allblobies).Objects {
 				if settings.TrackerSettings.DrawTrackSettings.DisplayObjectID {
-					(*b).DrawTrack(&img.ImgScaled, fmt.Sprintf("%v", i))
+					b.DrawTrack(&img.ImgScaled, fmt.Sprintf("%v", i))
 				} else {
-					(*b).DrawTrack(&img.ImgScaled, "")
+					b.DrawTrack(&img.ImgScaled, "")
 				}
 			}
 		}
