@@ -35,6 +35,9 @@ New ideas, thoughts about needed features will be store in this file.
 
 ### W.I.P
 * Extend configuration of conf.json file.
+* Integrate Kalman tracker
+* vehicle detection
+    * speed estimation
 
 ### Planned
 * Stable core (need many tests as possible)
@@ -47,8 +50,6 @@ New ideas, thoughts about needed features will be store in this file.
 * gRPC
     * extend gRPC-client to send more attributes
 * Additional field 'targeted objects' in [odam.VirtualLine](virtual_lines.go#11) struct. After it's done odam.VirtualLine will be able to detect only pedestrians or only motorbikes for example.
-* vehicle detection
-    * speed estimation
 * pedestrian detection
     * detect pedestrians
     * count pedestrians
