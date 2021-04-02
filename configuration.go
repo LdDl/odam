@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/LdDl/gocv-blob/blob"
+	blob "github.com/LdDl/gocv-blob/v2/blob"
 	"gocv.io/x/gocv"
 )
 
