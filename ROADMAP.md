@@ -32,10 +32,11 @@ New ideas, thoughts about needed features will be store in this file.
 * added drawing options for tracker (conf.json)
 * Check memory leaking
 * github tags: godoc, go-report, tagnum, sourcegraph
+* integration with go modules
+* Integrate Kalman tracker
 
 ### W.I.P
 * Extend configuration of conf.json file.
-* Integrate Kalman tracker
 * vehicle detection
     * speed estimation
 
@@ -54,7 +55,6 @@ New ideas, thoughts about needed features will be store in this file.
     * detect pedestrians
     * count pedestrians
     * speed estimation
-* integration with go modules
 * github tags: travis
 
 ### Continuous activity

@@ -29,6 +29,7 @@
         "server_port": 50051
     },
     "tracker_settings": {
+        "tracker_type": "simple",
         "lines_settings":[
             {
                 "line_id": 1,

@@ -62,6 +62,25 @@ func NewSettings(fname string) (*AppSettings, error) {
 	appsettings.VideoSettings.ScaleX = float64(appsettings.VideoSettings.Width) / float64(appsettings.VideoSettings.ReducedWidth)
 	appsettings.VideoSettings.ScaleY = float64(appsettings.VideoSettings.Height) / float64(appsettings.VideoSettings.ReducedHeight)
 
+	switch strings.ToLower(appsettings.TrackerSettings.TrackerType) {
+	case "simple":
+		appsettings.TrackerSettings.TrackerType = strings.ToLower(appsettings.TrackerSettings.TrackerType)
+		appsettings.TrackerSettings.trackerType = TRACKER_SIMPLE
+		break
+	case "kalman":
+		appsettings.TrackerSettings.TrackerType = strings.ToLower(appsettings.TrackerSettings.TrackerType)
+		appsettings.TrackerSettings.trackerType = TRACKER_KALMAN
+		break
+	case "":
+		fmt.Println("[WARNING]: Field 'tracker_type' is empty. Settings default value 'simple'")
+		appsettings.TrackerSettings.TrackerType = "simple"
+		appsettings.TrackerSettings.trackerType = TRACKER_SIMPLE
+	default:
+		fmt.Printf("[WARNING]: Value '%s' 'tracker_type' is not supported. Settings default value 'simple'\n", appsettings.TrackerSettings.TrackerType)
+		appsettings.TrackerSettings.TrackerType = "simple"
+		appsettings.TrackerSettings.trackerType = TRACKER_SIMPLE
+		break
+	}
 	if len(appsettings.TrackerSettings.LinesSettings) == 0 {
 		fmt.Println("No 'lines_settings'? Please check it")
 	}
@@ -231,11 +250,18 @@ type VideoSettings struct {
 
 // TrackerSettings Object tracker settings
 type TrackerSettings struct {
+	TrackerType       string `json:"tracker_type"`
+	trackerType       TRACKER_TYPE
 	LinesSettings     []LinesSetting    `json:"lines_settings"`
 	DrawTrackSettings DrawTrackSettings `json:"draw_track_settings"`
 
 	// Exported, but not from JSON
 	DrawOptions *blob.DrawOptions `json:"-"`
+}
+
+// GetTrackerType Returns enum for tracker type option
+func (trs *TrackerSettings) GetTrackerType() TRACKER_TYPE {
+	return trs.trackerType
 }
 
 // LinesSetting Virtual lines
@@ -285,3 +311,10 @@ type TextSettings struct {
 	Thickness int      `json:"thickness"`
 	Font      string   `json:"font"` // Possible values are: hershey_simplex, hershey_plain, hershey_duplex, hershey_complex, hershey_triplex, hershey_complex_small, hershey_script_simplex, hershey_script_cddomplex, italic
 }
+
+type TRACKER_TYPE int
+
+const (
+	TRACKER_SIMPLE = TRACKER_TYPE(1)
+	TRACKER_KALMAN = TRACKER_TYPE(2)
+)

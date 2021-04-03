@@ -83,6 +83,8 @@ func main() {
 	// Tracker
 	allblobies = blob.NewBlobiesDefaults()
 	allblobies.DrawingOptions = settings.TrackerSettings.DrawOptions
+	trackerType := settings.TrackerSettings.GetTrackerType()
+	fmt.Printf("Using tracker: '%s'\n", settings.TrackerSettings.TrackerType)
 
 	// Video capture
 	videoCapturer, err := gocv.OpenVideoCapture(settings.VideoSettings.Source)
@@ -137,7 +139,11 @@ func main() {
 			if len(detected) != 0 {
 				detectedObjects := make([]blob.Blobie, len(detected))
 				for i := range detected {
-					detectedObjects[i] = blob.NewSimpleBlobie(detected[i].Rect, settings.TrackerSettings.DrawTrackSettings.MaxPointsInTrack, detected[i].ClassID, detected[i].ClassName)
+					if trackerType == odam.TRACKER_SIMPLE {
+						detectedObjects[i] = blob.NewSimpleBlobie(detected[i].Rect, settings.TrackerSettings.DrawTrackSettings.MaxPointsInTrack, detected[i].ClassID, detected[i].ClassName)
+					} else if trackerType == odam.TRACKER_KALMAN {
+						detectedObjects[i] = blob.NewKalmanBlobie(detected[i].Rect, settings.TrackerSettings.DrawTrackSettings.MaxPointsInTrack, 1.0, detected[i].ClassID, detected[i].ClassName)
+					}
 					detectedObjects[i].SetDraw(allblobies.DrawingOptions)
 				}
 				allblobies.MatchToExisting(detectedObjects)
