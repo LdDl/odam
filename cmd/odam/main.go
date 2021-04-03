@@ -150,7 +150,7 @@ func main() {
 							// If gRPC streaming data is disabled why do we need to process all stuff? So add another condition
 							if settings.GrpcSettings.Enable {
 								blobRect := b.GetCurrentRect()
-								q, miny := math.Floor(float64(blobRect.Min.X)*settings.VideoSettings.ScaleX), math.Floor(float64(blobRect.Min.Y)*settings.VideoSettings.ScaleY)
+								minx, miny := math.Floor(float64(blobRect.Min.X)*settings.VideoSettings.ScaleX), math.Floor(float64(blobRect.Min.Y)*settings.VideoSettings.ScaleY)
 								maxx, maxy := math.Floor(float64(blobRect.Max.X)*settings.VideoSettings.ScaleX), math.Floor(float64(blobRect.Max.Y)*settings.VideoSettings.ScaleY)
 								cropRect := image.Rect(
 									int(minx)+5,  // add a bit width to crop bigger region
