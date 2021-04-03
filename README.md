@@ -1,6 +1,6 @@
 # ODaM - Object Detection and Monitoring
 [![GoDoc](https://godoc.org/github.com/LdDl/odam?status.svg)](https://godoc.org/github.com/LdDl/odam) [![Sourcegraph](https://sourcegraph.com/github.com/LdDl/odam/-/badge.svg)](https://sourcegraph.com/github.com/LdDl/odam?badge) [![Go Report Card](https://goreportcard.com/badge/github.com/LdDl/odam)](https://goreportcard.com/report/github.com/LdDl/odam) [![GitHub tag](https://img.shields.io/github/tag/LdDl/odam.svg)](https://github.com/LdDl/odam/releases)
-# v0.6.5
+# v0.7.0
 ODaM is project aimed to do monitoring such as: pedestrian detection and counting, vehicle detection and counting, speed estimation of objects, sending detected objects to gRPC server for detailed analysis.
 
 It's written on Go with a lot of [CGO](https://golang.org/cmd/cgo/).
@@ -158,6 +158,7 @@ Usage of ./odam:
         "server_port": 50051 # gRPC server's listening port
     },
     "tracker_settings": { # Tracked settings
+        "tracker_type": "simple/kalman" # Use one of supported trackers. Simple tracker should fit realy simple scenes, while Kalman should be used with complicated scenes.
         "lines_settings":[
             {
                 "line_id": 1, # Unique ID for line id (useful for 'client-server' model)
