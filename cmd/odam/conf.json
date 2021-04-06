@@ -29,7 +29,7 @@
         "server_port": 50051
     },
     "tracker_settings": {
-        "tracker_type": "simple",
+        "tracker_type": "kalman",
         "lines_settings":[
             {
                 "line_id": 1,

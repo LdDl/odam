@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"image"
 	"image/jpeg"
+	"image/color"
 	"log"
 	"math"
 	"time"
@@ -39,6 +40,22 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+
+	// DEVELOPER CONFIGURATION TEST
+	src := []gocv.Point2f{
+		gocv.Point2f{640, 360},
+		gocv.Point2f{640, 0},
+		gocv.Point2f{0, 0},
+		gocv.Point2f{0, 360},
+	}
+	dst := []gocv.Point2f{
+		gocv.Point2f{37.61891380882616, 54.20564268115055},
+		gocv.Point2f{37.61875545294513, 54.20546281228973},
+		gocv.Point2f{37.61903085447736, 54.20543126804313},
+		gocv.Point2f{37.61906183714973, 54.20562590237201},
+	}
+	gisConverter := odam.GetPerspectiveTransformer(src, dst)
+
 
 	// Settings
 	flag.Parse()
@@ -133,20 +150,54 @@ func main() {
 			time.Sleep(400 * time.Millisecond)
 			continue
 		}
+		
 		select {
 		case detected = <-detectedChannel:
 			processFrame(img)
 			if len(detected) != 0 {
+				currentTime := time.Now()
 				detectedObjects := make([]blob.Blobie, len(detected))
 				for i := range detected {
+					commonOptions := blob.BlobOptions{
+						ClassID: detected[i].ClassID,
+						ClassName: detected[i].ClassName,
+						MaxPointsInTrack: settings.TrackerSettings.DrawTrackSettings.MaxPointsInTrack,
+						Time: currentTime,
+						TimeDeltaSeconds: 1.0,
+					}
 					if trackerType == odam.TRACKER_SIMPLE {
-						detectedObjects[i] = blob.NewSimpleBlobie(detected[i].Rect, settings.TrackerSettings.DrawTrackSettings.MaxPointsInTrack, detected[i].ClassID, detected[i].ClassName)
+						detectedObjects[i] = blob.NewSimpleBlobie(detected[i].Rect, &commonOptions)
 					} else if trackerType == odam.TRACKER_KALMAN {
-						detectedObjects[i] = blob.NewKalmanBlobie(detected[i].Rect, settings.TrackerSettings.DrawTrackSettings.MaxPointsInTrack, 1.0, detected[i].ClassID, detected[i].ClassName)
+						detectedObjects[i] = blob.NewKalmanBlobie(detected[i].Rect, &commonOptions)
 					}
 					detectedObjects[i].SetDraw(allblobies.DrawingOptions)
 				}
 				allblobies.MatchToExisting(detectedObjects)
+				for id, blob := range allblobies.Objects {
+					blobTrack := blob.GetTrack()
+					trackLen := len(blobTrack)
+					if trackLen >= 2 {
+						blobTimestamps := blob.GetTimestamps()
+						currentRect := blob.GetCurrentRect()
+						currentCenter := blob.GetCenter()
+						fp := odam.STDPointToGoCVPoint2F(blobTrack[0])
+						lp := odam.STDPointToGoCVPoint2F(blobTrack[trackLen-1])
+						// fmt.Println(fp, lp, blobTimestamps[trackLen-1].Sub(blobTimestamps[0]).Hours(), trackLen)
+						//if blobTimestamps[trackLen-1].Sub(blobTimestamps[0]).Seconds() > 0.01 {
+						spd := odam.EstimateSpeed(fp, lp, blobTimestamps[0], blobTimestamps[trackLen-1], gisConverter)
+						// fmt.Println(id, spd)
+						_ = id
+						gocv.PutText(&img.ImgScaled, fmt.Sprintf("Speed: %0.3f", spd), currentCenter, gocv.FontHersheySimplex, 1.0, color.RGBA{255, 255, 0, 1.0}, 1.0)
+						fmt.Println(blob.GetID(), currentRect, spd, blobTimestamps[trackLen-1].Sub(blobTimestamps[0]).Seconds())
+						// for kk := range blob.Track {
+						// // 	gisPtd := gisConverterReverse(odam.STDPointToGoCVPoint2F(blob.Track[kk]))
+						// // 	gisPt := fmt.Sprintf(`{"type": "Feature", "properties": {}, "geometry":{"type": "Point", "coordinates": [%f, %f]}},`,gisPtd.X, gisPtd.Y )
+						// // 	fmt.Println("\t", blob.Track[kk], "and", gisPt)
+						// // }
+						// }
+					}
+				}
+
 				for _, vline := range settings.TrackerSettings.LinesSettings {
 					for _, b := range allblobies.Objects {
 						shift := 20
@@ -260,7 +311,7 @@ func main() {
 				stream.UpdateJPEG(buf)
 			}
 		}
-
+		gocv.WaitKey(25)
 	}
 
 	fmt.Println("Shutting down...")
