@@ -188,6 +188,18 @@ Usage of ./odam:
                 "font": "hershey_plain"
             },
             "display_object_id": true # If you want to display object identifier
+        },
+        "speed_estimation_settings": { # Setting for speed estimation bas on GIS convertion between different spatial systems
+            "enabled": false, # Enable this feature or not
+            "mapper": [ # Map pixel coordinate to EPSG4326 coordinates
+                # You should provide coordinates in correct order.
+                # E.g. right bottom -> left bottom -> left top -> right top
+                # Coordinates should match reduced_width and reduces_height attributes.
+                {"image_coordinates": [640, 360], "epsg4326": [37.61891380882616, 54.20564268115055]},
+                {"image_coordinates": [640, 0], "epsg4326": [37.61875545294513, 54.20546281228973]},
+                {"image_coordinates": [0, 0], "epsg4326": [37.61903085447736, 54.20543126804313]},
+                {"image_coordinates": [0, 360], "epsg4326": [37.61906183714973, 54.20562590237201]}
+            ]
         }
     },
     "matpprof_settings": { # pprof for GoCV. Useful for debugging

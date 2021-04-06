@@ -16,9 +16,18 @@ type VirtualLine struct {
 	CropObject    bool        `json:"-"`
 	SourceLeftPT  image.Point `json:"-"`
 	SourceRightPT image.Point `json:"-"`
+
+	LineType VIRTUAL_LINE_TYPE `json:"-"`
 }
 
 // Draw Draw virtual line on image
 func (vline *VirtualLine) Draw(img *gocv.Mat) {
 	gocv.Line(img, vline.LeftPT, vline.RightPT, vline.Color, 3)
 }
+
+type VIRTUAL_LINE_TYPE int
+
+const (
+	HORIZONTAL_LINE = VIRTUAL_LINE_TYPE(1)
+	OBLIQUE_LINE = VIRTUAL_LINE_TYPE(2)
+)

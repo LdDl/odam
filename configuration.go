@@ -98,6 +98,11 @@ func NewSettings(fname string) (*AppSettings, error) {
 			Direction:     true,
 			Color:         color.RGBA{lsettings.RGBA[0], lsettings.RGBA[1], lsettings.RGBA[2], lsettings.RGBA[3]},
 		}
+		if int(y1) == int(y2) {
+			vline.LineType = HORIZONTAL_LINE
+		} else {
+			vline.LineType = OBLIQUE_LINE
+		}
 		if lsettings.Direction == "from_detector" {
 			vline.Direction = false
 		}
@@ -254,6 +259,7 @@ type TrackerSettings struct {
 	trackerType       TRACKER_TYPE
 	LinesSettings     []LinesSetting    `json:"lines_settings"`
 	DrawTrackSettings DrawTrackSettings `json:"draw_track_settings"`
+	SpeedEstimationSettings SpeedEstimationSettings `json:"speed_estimation_settings"`
 
 	// Exported, but not from JSON
 	DrawOptions *blob.DrawOptions `json:"-"`
@@ -310,6 +316,20 @@ type TextSettings struct {
 	Scale     float64  `json:"scale"`
 	Thickness int      `json:"thickness"`
 	Font      string   `json:"font"` // Possible values are: hershey_simplex, hershey_plain, hershey_duplex, hershey_complex, hershey_triplex, hershey_complex_small, hershey_script_simplex, hershey_script_cddomplex, italic
+}
+
+// SpeedEstimationSettings Settings speed estimation
+type SpeedEstimationSettings struct {
+	// Is this feature enabled?
+	Enabled bool `json:"enabled"`
+	// Map image coordinates to GIS coordinates. EPSG 4326 is handled only currently
+	Mapper []GISMapper `json:"mapper"`
+}
+
+// GISMapper Map image coordinates to GIS coordinates
+type GISMapper struct {
+	ImageCoordinates [2]float32 `json:"image_coordinates"`
+	EPSG4326 [2]float32 `json:"epsg4326"`
 }
 
 type TRACKER_TYPE int

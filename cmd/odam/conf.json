@@ -1,6 +1,6 @@
 {
     "video_settings": {
-        "source": "./video_example/video.mp4",
+        "source": "/home/dimitrii/sample.mp4",
         "width": 1920,
         "height": 1080,
         "reduced_width": 640,
@@ -59,6 +59,15 @@
                 "font": "hershey_simplex"
             },
             "display_object_id": true
+        },
+        "speed_estimation_settings": {
+            "enabled": true,
+            "mapper": [
+                {"image_coordinates": [640, 360], "epsg4326": [37.61891380882616, 54.20564268115055]},
+                {"image_coordinates": [640, 0], "epsg4326": [37.61875545294513, 54.20546281228973]},
+                {"image_coordinates": [0, 0], "epsg4326": [37.61903085447736, 54.20543126804313]},
+                {"image_coordinates": [0, 360], "epsg4326": [37.61906183714973, 54.20562590237201]}
+            ]
         }
     },
     "matpprof_settings": {
