@@ -6,8 +6,8 @@ import (
 	"flag"
 	"fmt"
 	"image"
-	"image/jpeg"
 	"image/color"
+	"image/jpeg"
 	"log"
 	"math"
 	"time"
@@ -148,7 +148,7 @@ func main() {
 			time.Sleep(400 * time.Millisecond)
 			continue
 		}
-		
+
 		select {
 		case detected = <-detectedChannel:
 			processFrame(img)
@@ -157,10 +157,10 @@ func main() {
 				detectedObjects := make([]blob.Blobie, len(detected))
 				for i := range detected {
 					commonOptions := blob.BlobOptions{
-						ClassID: detected[i].ClassID,
-						ClassName: detected[i].ClassName,
+						ClassID:          detected[i].ClassID,
+						ClassName:        detected[i].ClassName,
 						MaxPointsInTrack: settings.TrackerSettings.DrawTrackSettings.MaxPointsInTrack,
-						Time: currentTime,
+						Time:             currentTime,
 						TimeDeltaSeconds: 1.0,
 					}
 					if trackerType == odam.TRACKER_SIMPLE {
@@ -201,7 +201,7 @@ func main() {
 					for _, b := range allblobies.Objects {
 						shift := 20
 						className := b.GetClassName()
-						if stringInSlice(&className, vline.DetectClasses) {// Detect if object should be detected by virtual line (filter by classname)
+						if stringInSlice(&className, vline.DetectClasses) { // Detect if object should be detected by virtual line (filter by classname)
 							crossedLine := false
 							if vline.VLine.LineType == odam.HORIZONTAL_LINE {
 								crossedLine = b.IsCrossedTheLineWithShift(vline.VLine.RightPT.Y, vline.VLine.LeftPT.X, vline.VLine.RightPT.X, vline.VLine.Direction, shift)
@@ -210,80 +210,79 @@ func main() {
 							}
 							// If object crossed the virtual line
 							if crossedLine {
-								fmt.Println("yes")
-							// If gRPC streaming data is disabled why do we need to process all stuff? So add another condition
-							if settings.GrpcSettings.Enable {
-								blobRect := b.GetCurrentRect()
-								minx, miny := math.Floor(float64(blobRect.Min.X)*settings.VideoSettings.ScaleX), math.Floor(float64(blobRect.Min.Y)*settings.VideoSettings.ScaleY)
-								maxx, maxy := math.Floor(float64(blobRect.Max.X)*settings.VideoSettings.ScaleX), math.Floor(float64(blobRect.Max.Y)*settings.VideoSettings.ScaleY)
-								cropRect := image.Rect(
-									int(minx)+5,  // add a bit width to crop bigger region
-									int(miny)+10, // add a bit height to crop bigger region
-									int(maxx)+5,
-									int(maxy)+10,
-								)
-								odam.FixRectForOpenCV(&cropRect, settings.VideoSettings.Width, settings.VideoSettings.Height)
+								// If gRPC streaming data is disabled why do we need to process all stuff? So add another condition
+								if settings.GrpcSettings.Enable {
+									blobRect := b.GetCurrentRect()
+									minx, miny := math.Floor(float64(blobRect.Min.X)*settings.VideoSettings.ScaleX), math.Floor(float64(blobRect.Min.Y)*settings.VideoSettings.ScaleY)
+									maxx, maxy := math.Floor(float64(blobRect.Max.X)*settings.VideoSettings.ScaleX), math.Floor(float64(blobRect.Max.Y)*settings.VideoSettings.ScaleY)
+									cropRect := image.Rect(
+										int(minx)+5,  // add a bit width to crop bigger region
+										int(miny)+10, // add a bit height to crop bigger region
+										int(maxx)+5,
+										int(maxy)+10,
+									)
+									odam.FixRectForOpenCV(&cropRect, settings.VideoSettings.Width, settings.VideoSettings.Height)
 
-								buf := new(bytes.Buffer)
-								xtop, ytop := int32(cropRect.Min.X), int32(cropRect.Min.Y)
-								if vline.VLine.CropObject {
-									cropImage := img.ImgSource.Region(cropRect)
-									copyCrop := cropImage.Clone()
-									cropImageSTD, err := copyCrop.ToImage()
-									if err != nil {
-										fmt.Println("[WARNING] Can't convert cropped gocv.Mat to image.Image:", err)
+									buf := new(bytes.Buffer)
+									xtop, ytop := int32(cropRect.Min.X), int32(cropRect.Min.Y)
+									if vline.VLine.CropObject {
+										cropImage := img.ImgSource.Region(cropRect)
+										copyCrop := cropImage.Clone()
+										cropImageSTD, err := copyCrop.ToImage()
+										if err != nil {
+											fmt.Println("[WARNING] Can't convert cropped gocv.Mat to image.Image:", err)
+											cropImage.Close()
+											copyCrop.Close()
+											continue
+										}
 										cropImage.Close()
 										copyCrop.Close()
-										continue
+										err = jpeg.Encode(buf, cropImageSTD, nil)
+										if err != nil {
+											fmt.Println("[WARNING] Can't call jpeg.Encode() on cropped gocv.Mat to image.Image:", err)
+										}
+										xtop, ytop = 0, 0
+									} else {
+										copyImage := img.ImgSource.Clone()
+										copyImageSTD, err := copyImage.ToImage()
+										if err != nil {
+											fmt.Println("[WARNING] Can't convert source gocv.Mat to image.Image:", err)
+											copyImage.Close()
+											continue
+										}
+										err = jpeg.Encode(buf, copyImageSTD, nil)
+										if err != nil {
+											fmt.Println("[WARNING] Can't call jpeg.Encode() on source gocv.Mat to image.Image:", err)
+										}
 									}
-									cropImage.Close()
-									copyCrop.Close()
-									err = jpeg.Encode(buf, cropImageSTD, nil)
-									if err != nil {
-										fmt.Println("[WARNING] Can't call jpeg.Encode() on cropped gocv.Mat to image.Image:", err)
-									}
-									xtop, ytop = 0, 0
-								} else {
-									copyImage := img.ImgSource.Clone()
-									copyImageSTD, err := copyImage.ToImage()
-									if err != nil {
-										fmt.Println("[WARNING] Can't convert source gocv.Mat to image.Image:", err)
-										copyImage.Close()
-										continue
-									}
-									err = jpeg.Encode(buf, copyImageSTD, nil)
-									if err != nil {
-										fmt.Println("[WARNING] Can't call jpeg.Encode() on source gocv.Mat to image.Image:", err)
-									}
-								}
-								bytesBuffer := buf.Bytes()
+									bytesBuffer := buf.Bytes()
 
-								sendData := odam.ObjectInformation{
-									CamId:     settings.VideoSettings.CameraID,
-									Timestamp: time.Now().UTC().Unix(),
-									Image:     bytesBuffer,
-									Detection: &odam.Detection{
-										XLeft:  xtop,
-										YTop:   ytop,
-										Width:  int32(cropRect.Dx()),
-										Height: int32(cropRect.Dy()),
-									},
-									Class: &odam.ClassInfo{
-										ClassId:   int32(b.GetClassID()),
-										ClassName: className,
-									},
-									VirtualLine: &odam.VirtualLineInfo{
-										Id:     vline.LineID,
-										LeftX:  int32(vline.VLine.SourceLeftPT.X),
-										LeftY:  int32(vline.VLine.SourceLeftPT.Y),
-										RightX: int32(vline.VLine.SourceRightPT.X),
-										RightY: int32(vline.VLine.SourceRightPT.Y),
-									},
+									sendData := odam.ObjectInformation{
+										CamId:     settings.VideoSettings.CameraID,
+										Timestamp: time.Now().UTC().Unix(),
+										Image:     bytesBuffer,
+										Detection: &odam.Detection{
+											XLeft:  xtop,
+											YTop:   ytop,
+											Width:  int32(cropRect.Dx()),
+											Height: int32(cropRect.Dy()),
+										},
+										Class: &odam.ClassInfo{
+											ClassId:   int32(b.GetClassID()),
+											ClassName: className,
+										},
+										VirtualLine: &odam.VirtualLineInfo{
+											Id:     vline.LineID,
+											LeftX:  int32(vline.VLine.SourceLeftPT.X),
+											LeftY:  int32(vline.VLine.SourceLeftPT.Y),
+											RightX: int32(vline.VLine.SourceRightPT.X),
+											RightY: int32(vline.VLine.SourceRightPT.Y),
+										},
+									}
+									go sendDataToServer(grpcConn, &sendData)
 								}
-								go sendDataToServer(grpcConn, &sendData)
-							}
-							// result := gocv.IMWrite("dets/"+i.String()+".jpeg", cropImage)
-							// fmt.Println("saved?", result, i)
+								// result := gocv.IMWrite("dets/"+i.String()+".jpeg", cropImage)
+								// fmt.Println("saved?", result, i)
 							}
 						}
 					}
