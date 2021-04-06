@@ -201,8 +201,16 @@ func main() {
 					for _, b := range allblobies.Objects {
 						shift := 20
 						className := b.GetClassName()
-						if stringInSlice(&className, vline.DetectClasses) && // Detect if object should be detected by virtual line (filter by classname)
-							b.IsCrossedTheLineWithShift(vline.VLine.RightPT.Y, vline.VLine.LeftPT.X, vline.VLine.RightPT.X, vline.VLine.Direction, shift) { // If object crossed the virtual line
+						if stringInSlice(&className, vline.DetectClasses) {// Detect if object should be detected by virtual line (filter by classname)
+							crossedLine := false
+							if vline.VLine.LineType == odam.HORIZONTAL_LINE {
+								crossedLine = b.IsCrossedTheLineWithShift(vline.VLine.RightPT.Y, vline.VLine.LeftPT.X, vline.VLine.RightPT.X, vline.VLine.Direction, shift)
+							} else if vline.VLine.LineType == odam.OBLIQUE_LINE {
+								crossedLine = b.IsCrossedTheObliqueLineWithShift(vline.VLine.RightPT.X, vline.VLine.RightPT.Y, vline.VLine.LeftPT.X, vline.VLine.LeftPT.Y, vline.VLine.Direction, shift)
+							}
+							// If object crossed the virtual line
+							if crossedLine {
+								fmt.Println("yes")
 							// If gRPC streaming data is disabled why do we need to process all stuff? So add another condition
 							if settings.GrpcSettings.Enable {
 								blobRect := b.GetCurrentRect()
@@ -276,6 +284,7 @@ func main() {
 							}
 							// result := gocv.IMWrite("dets/"+i.String()+".jpeg", cropImage)
 							// fmt.Println("saved?", result, i)
+							}
 						}
 					}
 				}
