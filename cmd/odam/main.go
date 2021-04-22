@@ -143,6 +143,7 @@ func main() {
 		}
 		currentMS := videoCapturer.Get(gocv.VideoCapturePosMsec)
 		msDiff := currentMS - lastMS
+		secDiff := msDiff / 1000.0,
 		lastTime = lastTime.Add(time.Duration(msDiff) * time.Millisecond)
 		lastMS = currentMS
 
@@ -171,7 +172,7 @@ func main() {
 						ClassName:        detected[i].ClassName,
 						MaxPointsInTrack: settings.TrackerSettings.DrawTrackSettings.MaxPointsInTrack,
 						Time:             lastTime,
-						TimeDeltaSeconds: msDiff / 1000.0,
+						TimeDeltaSeconds: secDiff,
 					}
 					if trackerType == odam.TRACKER_SIMPLE {
 						detectedObjects[i] = blob.NewSimpleBlobie(detected[i].Rect, &commonOptions)
