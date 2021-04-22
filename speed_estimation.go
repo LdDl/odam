@@ -4,7 +4,6 @@ import (
 	"image"
 	"math"
 	"time"
-
 	"gocv.io/x/gocv"
 )
 

@@ -21,7 +21,7 @@
     "mjpeg_settings":{
         "imshow_enable": false,
         "enable": true,
-        "port": 35678
+        "port": 35677
     },
     "grpc_settings": {
         "enable": false,

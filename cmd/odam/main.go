@@ -126,10 +126,14 @@ func main() {
 	if err != nil {
 		log.Fatalln("First preprocess step:", err)
 	}
-
+	
+	
 	// First step of processing
 	processFrame(img)
 	go performDetection(&neuralNet, settings.NeuralNetworkSettings.TargetClasses)
+
+	lastMS := 0.0
+	lastTime := time.Now()
 
 	// Read frames in a loop
 	for {
@@ -137,6 +141,12 @@ func main() {
 			fmt.Println("Can't read next frame, stop grabbing")
 			break
 		}
+		currentMS := videoCapturer.Get(gocv.VideoCapturePosMsec)
+		msDiff := currentMS - lastMS
+		lastTime = lastTime.Add(time.Duration(msDiff) * time.Millisecond)
+		lastMS = currentMS
+
+		// fpsProperty := videoCapturer.Get(gocv.VideoCaptureFPS)
 		if img.ImgSource.Empty() {
 			fmt.Println("Empty frame has been detected. Sleep for 400 ms")
 			time.Sleep(400 * time.Millisecond)
@@ -153,15 +163,15 @@ func main() {
 		case detected = <-detectedChannel:
 			processFrame(img)
 			if len(detected) != 0 {
-				currentTime := time.Now()
 				detectedObjects := make([]blob.Blobie, len(detected))
 				for i := range detected {
+					
 					commonOptions := blob.BlobOptions{
 						ClassID:          detected[i].ClassID,
 						ClassName:        detected[i].ClassName,
 						MaxPointsInTrack: settings.TrackerSettings.DrawTrackSettings.MaxPointsInTrack,
-						Time:             currentTime,
-						TimeDeltaSeconds: 1.0,
+						Time:             lastTime,
+						TimeDeltaSeconds: msDiff / 1000.0,
 					}
 					if trackerType == odam.TRACKER_SIMPLE {
 						detectedObjects[i] = blob.NewSimpleBlobie(detected[i].Rect, &commonOptions)
@@ -183,6 +193,7 @@ func main() {
 							lp := odam.STDPointToGoCVPoint2F(blobTrack[trackLen-1])
 							// fmt.Println(fp, lp, blobTimestamps[trackLen-1].Sub(blobTimestamps[0]).Hours(), trackLen)
 							//if blobTimestamps[trackLen-1].Sub(blobTimestamps[0]).Seconds() > 0.01 {
+							// fmt.Println("diff", blobTimestamps[0] == blobTimestamps[trackLen-1])
 							spd := odam.EstimateSpeed(fp, lp, blobTimestamps[0], blobTimestamps[trackLen-1], gisConverter)
 							// fmt.Println(id, spd)
 							_ = id
@@ -199,14 +210,13 @@ func main() {
 				}
 				for _, vline := range settings.TrackerSettings.LinesSettings {
 					for _, b := range allblobies.Objects {
-						shift := 20
 						className := b.GetClassName()
 						if stringInSlice(&className, vline.DetectClasses) { // Detect if object should be detected by virtual line (filter by classname)
 							crossedLine := false
 							if vline.VLine.LineType == odam.HORIZONTAL_LINE {
-								crossedLine = b.IsCrossedTheLineWithShift(vline.VLine.RightPT.Y, vline.VLine.LeftPT.X, vline.VLine.RightPT.X, vline.VLine.Direction, shift)
+								crossedLine = b.IsCrossedTheLine(vline.VLine.RightPT.Y, vline.VLine.LeftPT.X, vline.VLine.RightPT.X, vline.VLine.Direction)
 							} else if vline.VLine.LineType == odam.OBLIQUE_LINE {
-								crossedLine = b.IsCrossedTheObliqueLineWithShift(vline.VLine.RightPT.X, vline.VLine.RightPT.Y, vline.VLine.LeftPT.X, vline.VLine.LeftPT.Y, vline.VLine.Direction, shift)
+								crossedLine = b.IsCrossedTheObliqueLine(vline.VLine.RightPT.X, vline.VLine.RightPT.Y, vline.VLine.LeftPT.X, vline.VLine.LeftPT.Y, vline.VLine.Direction)
 							}
 							// If object crossed the virtual line
 							if crossedLine {
@@ -296,9 +306,9 @@ func main() {
 			for i := range settings.TrackerSettings.LinesSettings {
 				settings.TrackerSettings.LinesSettings[i].VLine.Draw(&img.ImgScaled)
 			}
-			for i, b := range (*allblobies).Objects {
+			for _, b := range (*allblobies).Objects {
 				if settings.TrackerSettings.DrawTrackSettings.DisplayObjectID {
-					b.DrawTrack(&img.ImgScaled, fmt.Sprintf("%v", i))
+					b.DrawTrack(&img.ImgScaled, fmt.Sprintf("%v", b.GetID()))
 				} else {
 					b.DrawTrack(&img.ImgScaled, "")
 				}
@@ -318,7 +328,7 @@ func main() {
 				stream.UpdateJPEG(buf)
 			}
 		}
-		gocv.WaitKey(25)
+		// gocv.WaitKey(int(fpsProperty)-1)
 	}
 
 	fmt.Println("Shutting down...")
