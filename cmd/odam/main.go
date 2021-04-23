@@ -143,7 +143,7 @@ func main() {
 		}
 		currentMS := videoCapturer.Get(gocv.VideoCapturePosMsec)
 		msDiff := currentMS - lastMS
-		secDiff := msDiff / 1000.0,
+		secDiff := msDiff / 1000.0
 		lastTime = lastTime.Add(time.Duration(msDiff) * time.Millisecond)
 		lastMS = currentMS
 
