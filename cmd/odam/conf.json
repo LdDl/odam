@@ -1,6 +1,6 @@
 {
     "video_settings": {
-        "source": "/home/dimitrii/sample.mp4",
+        "source": "./sample.mp4",
         "width": 1920,
         "height": 1080,
         "reduced_width": 640,
