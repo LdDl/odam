@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"image"
-	"image/color"
 	"image/jpeg"
 	"log"
 	"math"
@@ -88,17 +87,23 @@ func main() {
 	fmt.Printf("Using tracker: '%s'\n", settings.TrackerSettings.TrackerType)
 
 	// GIS converter (for speed estimation)
+	// It just helps to figure out what does [Longitude; Latitude] pair correspond to certain pixel
 	var gisConverter func(gocv.Point2f) gocv.Point2f
 	if settings.TrackerSettings.SpeedEstimationSettings.Enabled {
-		src := make([]gocv.Point2f, len(settings.TrackerSettings.SpeedEstimationSettings.Mapper))
-		dst := make([]gocv.Point2f, len(settings.TrackerSettings.SpeedEstimationSettings.Mapper))
-		for i := range settings.TrackerSettings.SpeedEstimationSettings.Mapper {
-			ptImage := settings.TrackerSettings.SpeedEstimationSettings.Mapper[i].ImageCoordinates
-			ptGIS := settings.TrackerSettings.SpeedEstimationSettings.Mapper[i].EPSG4326
-			src[i] = gocv.Point2f{ptImage[0], ptImage[1]}
-			dst[i] = gocv.Point2f{ptGIS[0], ptGIS[1]}
+		if len(settings.TrackerSettings.SpeedEstimationSettings.Mapper) != 4 {
+			fmt.Println("[WARNING] 'mapper' field in 'speed_estimation_settings' should contain exactly 4 elements. Disabling speed estimation feature...")
+			settings.TrackerSettings.SpeedEstimationSettings.Enabled = false
+		} else {
+			src := make([]gocv.Point2f, len(settings.TrackerSettings.SpeedEstimationSettings.Mapper))
+			dst := make([]gocv.Point2f, len(settings.TrackerSettings.SpeedEstimationSettings.Mapper))
+			for i := range settings.TrackerSettings.SpeedEstimationSettings.Mapper {
+				ptImage := settings.TrackerSettings.SpeedEstimationSettings.Mapper[i].ImageCoordinates
+				ptGIS := settings.TrackerSettings.SpeedEstimationSettings.Mapper[i].EPSG4326
+				src[i] = gocv.Point2f{ptImage[0], ptImage[1]}
+				dst[i] = gocv.Point2f{ptGIS[0], ptGIS[1]}
+			}
+			gisConverter = odam.GetPerspectiveTransformer(src, dst)
 		}
-		gisConverter = odam.GetPerspectiveTransformer(src, dst)
 	}
 
 	// Video capture
@@ -166,7 +171,6 @@ func main() {
 			if len(detected) != 0 {
 				detectedObjects := make([]blob.Blobie, len(detected))
 				for i := range detected {
-					
 					commonOptions := blob.BlobOptions{
 						ClassID:          detected[i].ClassID,
 						ClassName:        detected[i].ClassName,
@@ -183,29 +187,16 @@ func main() {
 				}
 				allblobies.MatchToExisting(detectedObjects)
 				if settings.TrackerSettings.SpeedEstimationSettings.Enabled {
-					for id, blob := range allblobies.Objects {
-						blobTrack := blob.GetTrack()
+					for _, b := range allblobies.Objects {
+						blobTrack := b.GetTrack()
 						trackLen := len(blobTrack)
+						// We can estimate speed if we have 2 points in track atleast
 						if trackLen >= 2 {
-							blobTimestamps := blob.GetTimestamps()
-							// currentRect := blob.GetCurrentRect()
-							currentCenter := blob.GetCenter()
-							fp := odam.STDPointToGoCVPoint2F(blobTrack[0])
-							lp := odam.STDPointToGoCVPoint2F(blobTrack[trackLen-1])
-							// fmt.Println(fp, lp, blobTimestamps[trackLen-1].Sub(blobTimestamps[0]).Hours(), trackLen)
-							//if blobTimestamps[trackLen-1].Sub(blobTimestamps[0]).Seconds() > 0.01 {
-							// fmt.Println("diff", blobTimestamps[0] == blobTimestamps[trackLen-1])
-							spd := odam.EstimateSpeed(fp, lp, blobTimestamps[0], blobTimestamps[trackLen-1], gisConverter)
-							// fmt.Println(id, spd)
-							_ = id
-							gocv.PutText(&img.ImgScaled, fmt.Sprintf("Speed: %0.3f", spd), currentCenter, gocv.FontHersheySimplex, 1.0, color.RGBA{255, 255, 0, 1.0}, 1.0)
-							// fmt.Println(blob.GetID(), currentRect, spd, blobTimestamps[trackLen-1].Sub(blobTimestamps[0]).Seconds())
-							// for kk := range blob.Track {
-							// // 	gisPtd := gisConverterReverse(odam.STDPointToGoCVPoint2F(blob.Track[kk]))
-							// // 	gisPt := fmt.Sprintf(`{"type": "Feature", "properties": {}, "geometry":{"type": "Point", "coordinates": [%f, %f]}},`,gisPtd.X, gisPtd.Y )
-							// // 	fmt.Println("\t", blob.Track[kk], "and", gisPt)
-							// // }
-							// }
+							blobTimestamps := b.GetTimestamps()
+							sourcePT := odam.STDPointToGoCVPoint2F(blobTrack[0])
+							targetPT := odam.STDPointToGoCVPoint2F(blobTrack[trackLen-1])
+							spd := odam.EstimateSpeed(sourcePT, targetPT, blobTimestamps[0], blobTimestamps[trackLen-1], gisConverter)
+							b.SetProperty("speed", spd)
 						}
 					}
 				}
@@ -221,7 +212,9 @@ func main() {
 							}
 							// If object crossed the virtual line
 							if crossedLine {
-								// If gRPC streaming data is disabled why do we need to process all stuff? So add another condition
+								catchedTimestamp := time.Now().UTC().Unix()
+								b.SetTracking(false)
+								// If gRPC streaming data is disabled why do we need to process all stuff? We add strict condition.
 								if settings.GrpcSettings.Enable {
 									blobRect := b.GetCurrentRect()
 									minx, miny := math.Floor(float64(blobRect.Min.X)*settings.VideoSettings.ScaleX), math.Floor(float64(blobRect.Min.Y)*settings.VideoSettings.ScaleY)
@@ -232,10 +225,12 @@ func main() {
 										int(maxx)+5,
 										int(maxy)+10,
 									)
+									// Make sure to be not out of image bounds
 									odam.FixRectForOpenCV(&cropRect, settings.VideoSettings.Width, settings.VideoSettings.Height)
-
 									buf := new(bytes.Buffer)
 									xtop, ytop := int32(cropRect.Min.X), int32(cropRect.Min.Y)
+
+									// Futher buffer preparation depends on 'crop_mode' in JSON'ed configuration file
 									if vline.VLine.CropObject {
 										cropImage := img.ImgSource.Region(cropRect)
 										copyCrop := cropImage.Clone()
@@ -267,10 +262,9 @@ func main() {
 										}
 									}
 									bytesBuffer := buf.Bytes()
-
 									sendData := odam.ObjectInformation{
 										CamId:     settings.VideoSettings.CameraID,
-										Timestamp: time.Now().UTC().Unix(),
+										Timestamp: catchedTimestamp,
 										Image:     bytesBuffer,
 										Detection: &odam.Detection{
 											XLeft:  xtop,
@@ -292,15 +286,15 @@ func main() {
 									}
 									go sendDataToServer(grpcConn, &sendData)
 								}
-								// result := gocv.IMWrite("dets/"+i.String()+".jpeg", cropImage)
-								// fmt.Println("saved?", result, i)
 							}
 						}
 					}
 				}
 			}
+			break
 		default:
 			// show current frame without blocking, so do nothing here
+			break
 		}
 
 		if settings.MjpegSettings.ImshowEnable || settings.MjpegSettings.Enable {
@@ -308,10 +302,20 @@ func main() {
 				settings.TrackerSettings.LinesSettings[i].VLine.Draw(&img.ImgScaled)
 			}
 			for _, b := range (*allblobies).Objects {
+				spd := float32(0.0)
+				if spdInterface, ok := b.GetProperty("speed"); ok {
+					switch spdInterface.(type) { // Want to be sure that interface is float32
+					case float32:
+						spd = spdInterface.(float32)
+						break
+					default:
+						break
+					}
+				}
 				if settings.TrackerSettings.DrawTrackSettings.DisplayObjectID {
-					b.DrawTrack(&img.ImgScaled, fmt.Sprintf("%v", b.GetID()))
+					b.DrawTrack(&img.ImgScaled, fmt.Sprintf("v = %.2f km/h", spd), fmt.Sprintf("%v", b.GetID()))
 				} else {
-					b.DrawTrack(&img.ImgScaled, "")
+					b.DrawTrack(&img.ImgScaled, fmt.Sprintf("v = %.2f km/h", spd))
 				}
 			}
 		}
@@ -329,7 +333,6 @@ func main() {
 				stream.UpdateJPEG(buf)
 			}
 		}
-		// gocv.WaitKey(int(fpsProperty)-1)
 	}
 
 	fmt.Println("Shutting down...")

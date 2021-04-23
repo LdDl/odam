@@ -33,8 +33,8 @@
         "lines_settings":[
             {
                 "line_id": 1,
-                "begin": [150, 800],
-                "end": [1600, 800],
+                "begin": [110, 600],
+                "end": [1750, 600],
                 "direction": "to_detector",
                 "detect_classes": ["car", "motorbike", "bus", "train", "truck"],
                 "rgba": [255, 0, 0, 0],
