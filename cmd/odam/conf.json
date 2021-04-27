@@ -1,6 +1,6 @@
 {
     "video_settings": {
-        "source": "./sample.mp4",
+        "source": "./video_example/video_2.mp4",
         "width": 1920,
         "height": 1080,
         "reduced_width": 640,

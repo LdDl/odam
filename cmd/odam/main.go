@@ -131,8 +131,7 @@ func main() {
 	if err != nil {
 		log.Fatalln("First preprocess step:", err)
 	}
-	
-	
+
 	// First step of processing
 	processFrame(img)
 	go performDetection(&neuralNet, settings.NeuralNetworkSettings.TargetClasses)
@@ -187,16 +186,30 @@ func main() {
 				}
 				allblobies.MatchToExisting(detectedObjects)
 				if settings.TrackerSettings.SpeedEstimationSettings.Enabled {
-					for _, b := range allblobies.Objects {
+					for id, b := range allblobies.Objects {
 						blobTrack := b.GetTrack()
 						trackLen := len(blobTrack)
-						// We can estimate speed if we have 2 points in track atleast
 						if trackLen >= 2 {
 							blobTimestamps := b.GetTimestamps()
-							sourcePT := odam.STDPointToGoCVPoint2F(blobTrack[0])
-							targetPT := odam.STDPointToGoCVPoint2F(blobTrack[trackLen-1])
-							spd := odam.EstimateSpeed(sourcePT, targetPT, blobTimestamps[0], blobTimestamps[trackLen-1], gisConverter)
+							// currentRect := blob.GetCurrentRect()
+							// currentCenter := b.GetCenter()
+							fp := odam.STDPointToGoCVPoint2F(blobTrack[0])
+							lp := odam.STDPointToGoCVPoint2F(blobTrack[trackLen-1])
+							// fmt.Println(fp, lp, blobTimestamps[trackLen-1].Sub(blobTimestamps[0]).Hours(), trackLen)
+							//if blobTimestamps[trackLen-1].Sub(blobTimestamps[0]).Seconds() > 0.01 {
+							// fmt.Println("diff", blobTimestamps[0] == blobTimestamps[trackLen-1])
+							spd := odam.EstimateSpeed(fp, lp, blobTimestamps[0], blobTimestamps[trackLen-1], gisConverter)
+							// fmt.Println(id, spd)
+							_ = id
 							b.SetProperty("speed", spd)
+							// gocv.PutText(&img.ImgScaled, fmt.Sprintf("Speed: %0.3f", spd), currentCenter, gocv.FontHersheySimplex, 1.0, color.RGBA{255, 255, 0, 1.0}, 1.0)
+							// fmt.Println(blob.GetID(), currentRect, spd, blobTimestamps[trackLen-1].Sub(blobTimestamps[0]).Seconds())
+							// for kk := range blob.Track {
+							// // 	gisPtd := gisConverterReverse(odam.STDPointToGoCVPoint2F(blob.Track[kk]))
+							// // 	gisPt := fmt.Sprintf(`{"type": "Feature", "properties": {}, "geometry":{"type": "Point", "coordinates": [%f, %f]}},`,gisPtd.X, gisPtd.Y )
+							// // 	fmt.Println("\t", blob.Track[kk], "and", gisPt)
+							// // }
+							// }
 						}
 					}
 				}
