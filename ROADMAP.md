@@ -41,6 +41,7 @@ New ideas, thoughts about needed features will be store in this file.
 * design: current BBoxes and text info on imshow()/mjpeg-server are...ugly
 * gRPC
     * extend gRPC-client to send more attributes (track info)
+* provide video examples to show what this software capable of.
 
 ### Planned
 * Stable core (need many tests as possible)
