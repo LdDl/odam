@@ -38,6 +38,7 @@ New ideas, thoughts about needed features will be store in this file.
 
 ### W.I.P
 * Extend configuration of conf.json file.
+    * Allow to configure draw methods for each type of detected objects
 * design: current BBoxes and text info on imshow()/mjpeg-server are...ugly
 * gRPC
     * extend gRPC-client to send more attributes (track info)
