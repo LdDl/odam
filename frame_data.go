@@ -13,7 +13,6 @@ type FrameData struct {
 	ImgSource gocv.Mat //  Source image
 	ImgScaled gocv.Mat // Scaled image
 	ImgSTD    image.Image
-	// ImgBytes  []byte   // Slice of bytes
 }
 
 // NewFrameData Simplify creation of FrameData

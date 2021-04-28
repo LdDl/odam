@@ -34,17 +34,14 @@ var (
 	allblobies      *blob.Blobies
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello world!")
-}
-
 func main() {
 
 	// Settings
 	flag.Parse()
 	settings, err := odam.NewSettings(*settingsFile)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
+		return
 	}
 
 	// MJPEG server
@@ -53,7 +50,10 @@ func main() {
 		go func() {
 			fmt.Printf("Starting MJPEG on http://localhost:%d\n", settings.MjpegSettings.Port)
 			http.Handle("/", stream)
-			log.Fatal(http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", settings.MjpegSettings.Port), nil))
+			err = http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", settings.MjpegSettings.Port), nil)
+			if err != nil {
+				log.Fatalln(err)
+			}
 		}()
 	}
 
@@ -68,6 +68,7 @@ func main() {
 		}
 		defer grpcConn.Close()
 	}
+
 	// Neural network
 	neuralNet := darknet.YOLONetwork{
 		GPUDeviceIndex:           0,
@@ -75,8 +76,10 @@ func main() {
 		WeightsFile:              settings.NeuralNetworkSettings.DarknetWeights,
 		Threshold:                float32(settings.NeuralNetworkSettings.ConfThreshold),
 	}
-	if err := neuralNet.Init(); err != nil {
-		log.Fatalln(err)
+	err = neuralNet.Init()
+	if err != nil {
+		log.Println(err)
+		return
 	}
 	defer neuralNet.Close()
 
@@ -99,8 +102,8 @@ func main() {
 			for i := range settings.TrackerSettings.SpeedEstimationSettings.Mapper {
 				ptImage := settings.TrackerSettings.SpeedEstimationSettings.Mapper[i].ImageCoordinates
 				ptGIS := settings.TrackerSettings.SpeedEstimationSettings.Mapper[i].EPSG4326
-				src[i] = gocv.Point2f{ptImage[0], ptImage[1]}
-				dst[i] = gocv.Point2f{ptGIS[0], ptGIS[1]}
+				src[i] = gocv.Point2f{X: ptImage[0], Y: ptImage[1]}
+				dst[i] = gocv.Point2f{X: ptGIS[0], Y: ptGIS[1]}
 			}
 			gisConverter = odam.GetPerspectiveTransformer(src, dst)
 		}
@@ -109,7 +112,8 @@ func main() {
 	// Video capture
 	videoCapturer, err := gocv.OpenVideoCapture(settings.VideoSettings.Source)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
+		return
 	}
 	if settings.MjpegSettings.ImshowEnable {
 		fmt.Println("Press 'ESC' to stop imshow()")
@@ -125,11 +129,13 @@ func main() {
 
 	// Read first frame
 	if ok := videoCapturer.Read(&img.ImgSource); !ok {
-		log.Fatalf("Error cannot read video %v\n", settings.VideoSettings.Source)
+		log.Printf("Error cannot read video '%s'\n", settings.VideoSettings.Source)
+		return
 	}
 	err = img.Preprocess(settings.VideoSettings.ReducedWidth, settings.VideoSettings.ReducedHeight)
 	if err != nil {
-		log.Fatalln("First preprocess step:", err)
+		log.Println("Error on first preprocessing step", err)
+		return
 	}
 
 	// First step of processing
@@ -142,7 +148,7 @@ func main() {
 	// Read frames in a loop
 	for {
 		if ok := videoCapturer.Read(&img.ImgSource); !ok {
-			fmt.Println("Can't read next frame, stop grabbing")
+			fmt.Println("Can't read next frame, stop grabbing...")
 			break
 		}
 		currentMS := videoCapturer.Get(gocv.VideoCapturePosMsec)
@@ -151,7 +157,6 @@ func main() {
 		lastTime = lastTime.Add(time.Duration(msDiff) * time.Millisecond)
 		lastMS = currentMS
 
-		// fpsProperty := videoCapturer.Get(gocv.VideoCaptureFPS)
 		if img.ImgSource.Empty() {
 			fmt.Println("Empty frame has been detected. Sleep for 400 ms")
 			time.Sleep(400 * time.Millisecond)
@@ -159,7 +164,7 @@ func main() {
 		}
 		err := img.Preprocess(settings.VideoSettings.ReducedWidth, settings.VideoSettings.ReducedHeight)
 		if err != nil {
-			fmt.Println("Can't preprocess. Sleep for 400ms:", err)
+			fmt.Printf("Can't preprocess. Error: %s. Sleep for 400ms\n", err.Error())
 			time.Sleep(400 * time.Millisecond)
 			continue
 		}
@@ -186,30 +191,15 @@ func main() {
 				}
 				allblobies.MatchToExisting(detectedObjects)
 				if settings.TrackerSettings.SpeedEstimationSettings.Enabled {
-					for id, b := range allblobies.Objects {
+					for _, b := range allblobies.Objects {
 						blobTrack := b.GetTrack()
 						trackLen := len(blobTrack)
 						if trackLen >= 2 {
 							blobTimestamps := b.GetTimestamps()
-							// currentRect := blob.GetCurrentRect()
-							// currentCenter := b.GetCenter()
 							fp := odam.STDPointToGoCVPoint2F(blobTrack[0])
 							lp := odam.STDPointToGoCVPoint2F(blobTrack[trackLen-1])
-							// fmt.Println(fp, lp, blobTimestamps[trackLen-1].Sub(blobTimestamps[0]).Hours(), trackLen)
-							//if blobTimestamps[trackLen-1].Sub(blobTimestamps[0]).Seconds() > 0.01 {
-							// fmt.Println("diff", blobTimestamps[0] == blobTimestamps[trackLen-1])
 							spd := odam.EstimateSpeed(fp, lp, blobTimestamps[0], blobTimestamps[trackLen-1], gisConverter)
-							// fmt.Println(id, spd)
-							_ = id
 							b.SetProperty("speed", spd)
-							// gocv.PutText(&img.ImgScaled, fmt.Sprintf("Speed: %0.3f", spd), currentCenter, gocv.FontHersheySimplex, 1.0, color.RGBA{255, 255, 0, 1.0}, 1.0)
-							// fmt.Println(blob.GetID(), currentRect, spd, blobTimestamps[trackLen-1].Sub(blobTimestamps[0]).Seconds())
-							// for kk := range blob.Track {
-							// // 	gisPtd := gisConverterReverse(odam.STDPointToGoCVPoint2F(blob.Track[kk]))
-							// // 	gisPt := fmt.Sprintf(`{"type": "Feature", "properties": {}, "geometry":{"type": "Point", "coordinates": [%f, %f]}},`,gisPtd.X, gisPtd.Y )
-							// // 	fmt.Println("\t", blob.Track[kk], "and", gisPt)
-							// // }
-							// }
 						}
 					}
 				}
@@ -341,7 +331,7 @@ func main() {
 		if settings.MjpegSettings.Enable {
 			buf, err := gocv.IMEncode(".jpg", img.ImgScaled)
 			if err != nil {
-				log.Println("Error while decoding to JPG (mjpeg)", err)
+				log.Printf("Error while decoding to JPG (mjpeg): %s", err.Error())
 			} else {
 				stream.UpdateJPEG(buf)
 			}
