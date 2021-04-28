@@ -28,6 +28,7 @@ New ideas, thoughts about needed features will be store in this file.
 * vehicle detection
     * detect vehicles
     * crop vehicle near detection line and prepare gRPC structure if needed
+    * speed estimation
 
 * added drawing options for tracker (conf.json)
 * Check memory leaking
@@ -37,8 +38,9 @@ New ideas, thoughts about needed features will be store in this file.
 
 ### W.I.P
 * Extend configuration of conf.json file.
-* vehicle detection
-    * speed estimation
+* design: current BBoxes and text info on imshow()/mjpeg-server are...ugly
+* gRPC
+    * extend gRPC-client to send more attributes (track info)
 
 ### Planned
 * Stable core (need many tests as possible)
@@ -48,8 +50,6 @@ New ideas, thoughts about needed features will be store in this file.
 * Some kind of wiki
 * Logo
 * Contributing guidelines
-* gRPC
-    * extend gRPC-client to send more attributes
 * Additional field 'targeted objects' in [odam.VirtualLine](virtual_lines.go#11) struct. After it's done odam.VirtualLine will be able to detect only pedestrians or only motorbikes for example.
 * pedestrian detection
     * detect pedestrians
