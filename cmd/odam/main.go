@@ -22,10 +22,7 @@ import (
 )
 
 var (
-	settingsFile = flag.String("settings", "conf.json", "Path to application's settings")
-)
-
-var (
+	settingsFile    = flag.String("settings", "conf.json", "Path to application's settings")
 	window          *gocv.Window
 	stream          *mjpeg.Stream
 	imagesChannel   chan *odam.FrameData
@@ -36,7 +33,7 @@ var (
 
 func main() {
 
-	// Settings
+	/* Read settings */
 	flag.Parse()
 	settings, err := odam.NewSettings(*settingsFile)
 	if err != nil {
@@ -44,7 +41,7 @@ func main() {
 		return
 	}
 
-	// MJPEG server
+	/* Initialize MJPEG server if needed */
 	if settings.MjpegSettings.Enable {
 		stream = mjpeg.NewStream()
 		go func() {
@@ -57,7 +54,7 @@ func main() {
 		}()
 	}
 
-	// gRPC sender
+	/* Initialize gRPC data forwarding if needed */
 	var grpcConn *grpc.ClientConn
 	if settings.GrpcSettings.Enable {
 		url := fmt.Sprintf("%s:%d", settings.GrpcSettings.ServerIP, settings.GrpcSettings.ServerPort)
@@ -69,7 +66,7 @@ func main() {
 		defer grpcConn.Close()
 	}
 
-	// Neural network
+	/* Initialize neural network */
 	neuralNet := darknet.YOLONetwork{
 		GPUDeviceIndex:           0,
 		NetworkConfigurationFile: settings.NeuralNetworkSettings.DarknetCFG,
@@ -83,13 +80,13 @@ func main() {
 	}
 	defer neuralNet.Close()
 
-	// Tracker
+	/* Initialize objects tracker */
 	allblobies = blob.NewBlobiesDefaults()
 	allblobies.DrawingOptions = settings.TrackerSettings.DrawOptions
 	trackerType := settings.TrackerSettings.GetTrackerType()
 	fmt.Printf("Using tracker: '%s'\n", settings.TrackerSettings.TrackerType)
 
-	// GIS converter (for speed estimation)
+	/* Initialize GIS converter (for speed estimation) if needed*/
 	// It just helps to figure out what does [Longitude; Latitude] pair correspond to certain pixel
 	var gisConverter func(gocv.Point2f) gocv.Point2f
 	if settings.TrackerSettings.SpeedEstimationSettings.Enabled {
@@ -109,59 +106,68 @@ func main() {
 		}
 	}
 
-	// Video capture
+	/* Open video capturer */
 	videoCapturer, err := gocv.OpenVideoCapture(settings.VideoSettings.Source)
 	if err != nil {
 		log.Println(err)
 		return
 	}
+	/* Open imshow() GUI in needed */
 	if settings.MjpegSettings.ImshowEnable {
 		fmt.Println("Press 'ESC' to stop imshow()")
-		window = gocv.NewWindow("ODAM v0.5.0")
+		window = gocv.NewWindow("ODAM v0.8.0")
 		window.ResizeWindow(settings.VideoSettings.ReducedWidth, settings.VideoSettings.ReducedHeight)
 		defer window.Close()
 	}
 
-	// Initial channels
+	/* Initialize channels */
 	imagesChannel = make(chan *odam.FrameData, 1)
 	detectedChannel = make(chan []*odam.DetectedObject)
 	img := odam.NewFrameData()
 
-	// Read first frame
+	/* Read first frame */
 	if ok := videoCapturer.Read(&img.ImgSource); !ok {
 		log.Printf("Error cannot read video '%s'\n", settings.VideoSettings.Source)
 		return
 	}
+	/* Scale first frame */
 	err = img.Preprocess(settings.VideoSettings.ReducedWidth, settings.VideoSettings.ReducedHeight)
 	if err != nil {
 		log.Println("Error on first preprocessing step", err)
 		return
 	}
-
-	// First step of processing
+	/* Process first frame */
 	processFrame(img)
+
+	/* Start goroutine for object detection purposes */
 	go performDetection(&neuralNet, settings.NeuralNetworkSettings.TargetClasses)
 
+	/* Initialize variables for evaluation of time difference between frames */
 	lastMS := 0.0
 	lastTime := time.Now()
 
-	// Read frames in a loop
+	/* Start continuous frame reading */
 	for {
+		/* Read frame */
 		if ok := videoCapturer.Read(&img.ImgSource); !ok {
 			fmt.Println("Can't read next frame, stop grabbing...")
 			break
 		}
+		/* Evaluate time difference */
 		currentMS := videoCapturer.Get(gocv.VideoCapturePosMsec)
 		msDiff := currentMS - lastMS
 		secDiff := msDiff / 1000.0
 		lastTime = lastTime.Add(time.Duration(msDiff) * time.Millisecond)
 		lastMS = currentMS
 
+		/* Skip empty frame */
 		if img.ImgSource.Empty() {
 			fmt.Println("Empty frame has been detected. Sleep for 400 ms")
 			time.Sleep(400 * time.Millisecond)
 			continue
 		}
+
+		/* Scale frame */
 		err := img.Preprocess(settings.VideoSettings.ReducedWidth, settings.VideoSettings.ReducedHeight)
 		if err != nil {
 			fmt.Printf("Can't preprocess. Error: %s. Sleep for 400ms\n", err.Error())
@@ -169,10 +175,12 @@ func main() {
 			continue
 		}
 
+		/* Read data from object detection goroutine */
 		select {
 		case detected = <-detectedChannel:
 			processFrame(img)
 			if len(detected) != 0 {
+				/* Prepare 'blobs' for each detected object */
 				detectedObjects := make([]blob.Blobie, len(detected))
 				for i := range detected {
 					commonOptions := blob.BlobOptions{
@@ -189,7 +197,10 @@ func main() {
 					}
 					detectedObjects[i].SetDraw(allblobies.DrawingOptions)
 				}
+				/* Match blobs to existing ones */
 				allblobies.MatchToExisting(detectedObjects)
+
+				/* Estimate speed if needed */
 				if settings.TrackerSettings.SpeedEstimationSettings.Enabled {
 					for _, b := range allblobies.Objects {
 						blobTrack := b.GetTrack()
@@ -300,6 +311,7 @@ func main() {
 			break
 		}
 
+		/* Draw info about detected objects when either MJPEG or imshow() GUI is enabled */
 		if settings.MjpegSettings.ImshowEnable || settings.MjpegSettings.Enable {
 			for i := range settings.TrackerSettings.LinesSettings {
 				settings.TrackerSettings.LinesSettings[i].VLine.Draw(&img.ImgScaled)
@@ -341,11 +353,11 @@ func main() {
 	fmt.Println("Shutting down...")
 	time.Sleep(2 * time.Second) // @todo temporary fix: need to wait a bit time for last call of neuralNet.Detect(...)
 
-	// hard release memory
+	// Hard release memory
 	img.Close()
 	neuralNet.Close()
 
-	// pprof
+	// pprof (for debuggin purposes)
 	if settings.MatPPROFSettings.Enable {
 		var b bytes.Buffer
 		// go run -tags matprofile main.go
@@ -365,30 +377,24 @@ func processFrame(fd *odam.FrameData) {
 func performDetection(neuralNet *darknet.YOLONetwork, targetClasses []string) {
 	fmt.Println("Start performDetection thread")
 	for {
-
 		frame := <-imagesChannel
-
 		darknetImage, err := darknet.Image2Float32(frame.ImgSTD)
 		if err != nil {
-			log.Println("Image2Float32 error:", err)
+			log.Printf("Can't convert image to Darknet's format due the error: %s. Sleep for 100ms", err.Error())
 			frame.Close()
-			// Error: no handling
 			time.Sleep(100 * time.Millisecond)
 			continue
 		}
-
 		dr, err := neuralNet.Detect(darknetImage)
 		if err != nil {
 			frame.Close()
 			darknetImage.Close()
-			fmt.Println("Detect error:", err)
+			log.Printf("Can't make detection: %s. Sleep for 100ms", err.Error())
 			time.Sleep(100 * time.Millisecond)
 			continue
 		}
-
 		darknetImage.Close() // free the memory
 		darknetImage = nil
-
 		detectedRects := make([]*odam.DetectedObject, 0, len(dr.Detections))
 		for _, d := range dr.Detections {
 			for i := range d.ClassIDs {
@@ -406,7 +412,6 @@ func performDetection(neuralNet *darknet.YOLONetwork, targetClasses []string) {
 				}
 			}
 		}
-
 		frame.Close() // free the memory
 		detectedChannel <- detectedRects
 	}
