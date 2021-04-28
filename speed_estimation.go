@@ -4,6 +4,7 @@ import (
 	"image"
 	"math"
 	"time"
+
 	"gocv.io/x/gocv"
 )
 
@@ -11,6 +12,7 @@ const (
 	earthRaidusKm = 6371 // radius of the earth in kilometers.
 )
 
+// GetPerspectiveTransformer Initializates gocv.Point2f for GIS conversion purposes
 func GetPerspectiveTransformer(srcPoints, dstPoints []gocv.Point2f) func(gocv.Point2f) gocv.Point2f {
 	transformMat := gocv.GetPerspectiveTransform2f(srcPoints, dstPoints)
 	return func(src gocv.Point2f) gocv.Point2f {
@@ -24,12 +26,15 @@ func GetPerspectiveTransformer(srcPoints, dstPoints []gocv.Point2f) func(gocv.Po
 	}
 }
 
+// EstimateSpeed Estimates speed approximately
 func EstimateSpeed(firstPoint, lastPoint gocv.Point2f, start, end time.Time, perspectiveTransformer func(gocv.Point2f) gocv.Point2f) float32 {
 	fpreal := perspectiveTransformer(firstPoint)
 	lpreal := perspectiveTransformer(lastPoint)
 	return Haversine(fpreal, lpreal) / float32(end.Sub(start).Hours())
 }
 
+// Haversine Calculates great circle distance between two points
+// https://en.wikipedia.org/wiki/Great-circle_distance#:~:text=The%20great%2Dcircle%20distance%2C%20orthodromic,line%20through%20the%20sphere's%20interior).
 func Haversine(src, dst gocv.Point2f) float32 {
 	lat1 := degreesToRadians(src.Y)
 	lon1 := degreesToRadians(src.X)
@@ -49,10 +54,11 @@ func Haversine(src, dst gocv.Point2f) float32 {
 	return float32(km)
 }
 
-func degreesToRadians(d float32) float64 {
-	return float64(d) * math.Pi / 180
-}
-
+// STDPointToGoCVPoint2F Convertes image.Point to gocv.Point2f
 func STDPointToGoCVPoint2F(p image.Point) gocv.Point2f {
 	return gocv.Point2f{X: float32(p.X), Y: float32(p.Y)}
+}
+
+func degreesToRadians(d float32) float64 {
+	return float64(d) * math.Pi / 180
 }

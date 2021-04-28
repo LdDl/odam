@@ -15,7 +15,7 @@ type FrameData struct {
 	ImgSTD    image.Image
 }
 
-// NewFrameData Simplify creation of FrameData
+// NewFrameData Simplifies creation of FrameData
 func NewFrameData() *FrameData {
 	fd := FrameData{
 		ImgSource: gocv.NewMat(),
@@ -30,6 +30,7 @@ func (fd *FrameData) Close() {
 	fd.ImgScaled.Close()
 }
 
+// Preprocess Scales image to given width and height
 func (fd *FrameData) Preprocess(width, height int) error {
 	gocv.Resize(fd.ImgSource, &fd.ImgScaled, image.Point{X: width, Y: height}, 0, 0, gocv.InterpolationDefault)
 	stdImage, err := fd.ImgScaled.ToImage()

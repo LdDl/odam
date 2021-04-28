@@ -255,10 +255,10 @@ type VideoSettings struct {
 
 // TrackerSettings Object tracker settings
 type TrackerSettings struct {
-	TrackerType       string `json:"tracker_type"`
-	trackerType       TRACKER_TYPE
-	LinesSettings     []LinesSetting    `json:"lines_settings"`
-	DrawTrackSettings DrawTrackSettings `json:"draw_track_settings"`
+	TrackerType             string `json:"tracker_type"`
+	trackerType             TRACKER_TYPE
+	LinesSettings           []LinesSetting          `json:"lines_settings"`
+	DrawTrackSettings       DrawTrackSettings       `json:"draw_track_settings"`
 	SpeedEstimationSettings SpeedEstimationSettings `json:"speed_estimation_settings"`
 
 	// Exported, but not from JSON
@@ -329,7 +329,7 @@ type SpeedEstimationSettings struct {
 // GISMapper Map image coordinates to GIS coordinates
 type GISMapper struct {
 	ImageCoordinates [2]float32 `json:"image_coordinates"`
-	EPSG4326 [2]float32 `json:"epsg4326"`
+	EPSG4326         [2]float32 `json:"epsg4326"`
 }
 
 type TRACKER_TYPE int
