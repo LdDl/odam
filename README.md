@@ -120,9 +120,9 @@ Usage of ./odam:
 ### notice: targeted for Linux users (no Windows/OSX instructions currenlty)
 
 * Prepare neural network stuff
-    * Download YOLO's weights, configuration file and *.names file. Your way may warry, but here is our script: [download_data.sh](cmd/odam/download_data.sh)
+    * Download YOLO's weights, configuration file and *.names file. Your way may warry, but here is our script: [download_data.sh](cmd/odam/download_data_v4.sh)
         ```
-        ./download_data_v3.sh
+        ./download_data_v4.sh
         ```
     * Make sure there is link to *.names file in YOLO's configuration file:
         ```

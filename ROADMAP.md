@@ -57,6 +57,7 @@ New ideas, thoughts about needed features will be store in this file.
     * detect pedestrians
     * count pedestrians
     * speed estimation
+* SORT - https://arxiv.org/abs/1602.00763
 * github tags: travis
 
 ### Continuous activity
