@@ -14,7 +14,10 @@ YOLOv4 Tiny + Kalman filter for tracking             |  YOLOv4 Tiny + simple cen
 <img src="screenshots/yolov4-tiny-kalman.gif" width="640">  |  <img src="screenshots/yolov4-tiny-simple.gif" width="640">
 
 ## Work in progress
-Notice that gRPC integration uses 'license_plate_recognition' protobuff (see gRPC server here https://github.com/LdDl/license_plate_recognition)
+
+We are working on this.
+
+Not too fast, but it is what it is.
 
 ## Table of Contents
 - [About](#about)
