@@ -5,8 +5,19 @@ ODaM is project aimed to do monitoring such as: pedestrian detection and countin
 
 It's written on Go with a lot of [CGO](https://golang.org/cmd/cgo/).
 
+YOLOv4 + Kalman filter for tracking             |  YOLOv4 + simple centroid tracking
+:-------------------------:|:-------------------------:
+<img src="screenshots/yolov4-kalman.gif" width="640">  |  <img src="screenshots/yolov4-simple.gif" width="640">
+
+YOLOv4 Tiny + Kalman filter for tracking             |  YOLOv4 Tiny + simple centroid tracking
+:-------------------------:|:-------------------------:
+<img src="screenshots/yolov4-tiny-kalman.gif" width="640">  |  <img src="screenshots/yolov4-tiny-simple.gif" width="640">
+
 ## Work in progress
-Notice that gRPC integration uses 'license_plate_recognition' protobuff (see gRPC server here https://github.com/LdDl/license_plate_recognition)
+
+We are working on this.
+
+Not too fast, but it is what it is.
 
 ## Table of Contents
 - [About](#about)
@@ -23,6 +34,7 @@ Notice that gRPC integration uses 'license_plate_recognition' protobuff (see gRP
 ODaM is tool for doing monitoring via Darknet's neural network called Yolo V4 (paper: https://arxiv.org/abs/2004.10934).
 
 It's built on top of [go-darknet](https://github.com/LdDl/go-darknet#go-darknet-go-bindings-for-darknet-yolo-v4-yolo-v3) which uses [AlexeyAB's fork of Darknet](https://github.com/AlexeyAB/darknet/#yolo-v4-and-yolo-v3v2-for-windows-and-linux). For doing computer vision stuff and video reading [GoCV](https://github.com/hybridgroup/gocv#gocv) is used.
+
 
 ## Installation
 ### notice: targeted for Linux users (no Windows/OSX instructions currenlty)
@@ -108,9 +120,9 @@ Usage of ./odam:
 ### notice: targeted for Linux users (no Windows/OSX instructions currenlty)
 
 * Prepare neural network stuff
-    * Download YOLO's weights, configuration file and *.names file. Your way may warry, but here is our script: [download_data.sh](cmd/odam/download_data.sh)
+    * Download YOLO's weights, configuration file and *.names file. Your way may warry, but here is our script: [download_data.sh](cmd/odam/download_data_v4.sh)
         ```
-        ./download_data_v3.sh
+        ./download_data_v4.sh
         ```
     * Make sure there is link to *.names file in YOLO's configuration file:
         ```
