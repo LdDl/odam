@@ -146,13 +146,6 @@ func main() {
 	lastMS := 0.0
 	lastTime := time.Now()
 
-	/* temporary code */
-	writer, err := gocv.VideoWriterFile("sample-yolov4-simple-tracker.mp4", "MP4V", 25, img.ImgScaled.Cols(), img.ImgScaled.Rows(), true)
-	if err != nil {
-		panic(err)
-	}
-	defer writer.Close()
-
 	/* Start continuous frame reading */
 	for {
 		/* Read frame */
@@ -355,7 +348,6 @@ func main() {
 				stream.UpdateJPEG(buf)
 			}
 		}
-		writer.Write(img.ImgScaled)
 	}
 
 	fmt.Println("Shutting down...")
