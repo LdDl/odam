@@ -1,7 +1,7 @@
 syntax = "proto3";
 package odam;
 
-option go_package = ".;odam";
+option go_package = "./;odam";
 
 // Reference info about detection, camera, timestamp and etc.
 message ObjectInformation{
@@ -17,6 +17,8 @@ message ObjectInformation{
     ClassInfo class = 5;
     // Reference information about virtual line (detection line)
     VirtualLineInfo virtual_line = 6;
+    // Reference information about tracking parameters of object (speed + track points)
+    TrackInfo track_information = 7;
 }
 
 // Reference information about detection rectangle
@@ -40,6 +42,30 @@ message VirtualLineInfo{
     int32 left_y = 3;
     int32 right_x = 4;
     int32 right_y = 5;
+}
+
+// Information about estimated speed and track itself
+message TrackInfo{
+    float estimated_speed = 1;
+    repeated Point points = 2;
+}
+
+// Union of EuclideanPoint and WGS84Point structures
+message Point{
+    EuclideanPoint euclidean_point = 1;
+    WGS84Point wgs84_point = 2;
+}
+
+// Representation of a point in Euclidean space
+message EuclideanPoint{
+    float x = 1;
+    float y = 2;
+}
+
+// Representation of a point in spatial system called WGS84. See ref. https://en.wikipedia.org/wiki/World_Geodetic_System#WGS84
+message WGS84Point{
+    float longitude = 1;
+    float latitude = 2;
 }
 
 // Response from server-side application

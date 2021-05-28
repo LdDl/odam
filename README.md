@@ -1,12 +1,23 @@
 # ODaM - Object Detection and Monitoring
 [![GoDoc](https://godoc.org/github.com/LdDl/odam?status.svg)](https://godoc.org/github.com/LdDl/odam) [![Sourcegraph](https://sourcegraph.com/github.com/LdDl/odam/-/badge.svg)](https://sourcegraph.com/github.com/LdDl/odam?badge) [![Go Report Card](https://goreportcard.com/badge/github.com/LdDl/odam)](https://goreportcard.com/report/github.com/LdDl/odam) [![GitHub tag](https://img.shields.io/github/tag/LdDl/odam.svg)](https://github.com/LdDl/odam/releases)
-# v0.7.0
+# v0.8.0
 ODaM is project aimed to do monitoring such as: pedestrian detection and counting, vehicle detection and counting, speed estimation of objects, sending detected objects to gRPC server for detailed analysis.
 
 It's written on Go with a lot of [CGO](https://golang.org/cmd/cgo/).
 
+YOLOv4 + Kalman filter for tracking             |  YOLOv4 + simple centroid tracking
+:-------------------------:|:-------------------------:
+<img src="screenshots/yolov4-kalman.gif" width="640">  |  <img src="screenshots/yolov4-simple.gif" width="640">
+
+YOLOv4 Tiny + Kalman filter for tracking             |  YOLOv4 Tiny + simple centroid tracking
+:-------------------------:|:-------------------------:
+<img src="screenshots/yolov4-tiny-kalman.gif" width="640">  |  <img src="screenshots/yolov4-tiny-simple.gif" width="640">
+
 ## Work in progress
-Notice that gRPC integration uses 'license_plate_recognition' protobuff (see gRPC server here https://github.com/LdDl/license_plate_recognition)
+
+We are working on this.
+
+Not too fast, but it is what it is.
 
 ## Table of Contents
 - [About](#about)
@@ -23,6 +34,7 @@ Notice that gRPC integration uses 'license_plate_recognition' protobuff (see gRP
 ODaM is tool for doing monitoring via Darknet's neural network called Yolo V4 (paper: https://arxiv.org/abs/2004.10934).
 
 It's built on top of [go-darknet](https://github.com/LdDl/go-darknet#go-darknet-go-bindings-for-darknet-yolo-v4-yolo-v3) which uses [AlexeyAB's fork of Darknet](https://github.com/AlexeyAB/darknet/#yolo-v4-and-yolo-v3v2-for-windows-and-linux). For doing computer vision stuff and video reading [GoCV](https://github.com/hybridgroup/gocv#gocv) is used.
+
 
 ## Installation
 ### notice: targeted for Linux users (no Windows/OSX instructions currenlty)
@@ -108,9 +120,9 @@ Usage of ./odam:
 ### notice: targeted for Linux users (no Windows/OSX instructions currenlty)
 
 * Prepare neural network stuff
-    * Download YOLO's weights, configuration file and *.names file. Your way may warry, but here is our script: [download_data.sh](cmd/odam/download_data.sh)
+    * Download YOLO's weights, configuration file and *.names file. Your way may warry, but here is our script: [download_data.sh](cmd/odam/download_data_v4.sh)
         ```
-        ./download_data_v3.sh
+        ./download_data_v4.sh
         ```
     * Make sure there is link to *.names file in YOLO's configuration file:
         ```
@@ -188,6 +200,18 @@ Usage of ./odam:
                 "font": "hershey_plain"
             },
             "display_object_id": true # If you want to display object identifier
+        },
+        "speed_estimation_settings": { # Setting for speed estimation bas on GIS convertion between different spatial systems
+            "enabled": false, # Enable this feature or not
+            "mapper": [ # Map pixel coordinate to EPSG4326 coordinates
+                # You should provide coordinates in correct order.
+                # E.g. right bottom -> left bottom -> left top -> right top
+                # Coordinates should match reduced_width and reduces_height attributes.
+                {"image_coordinates": [640, 360], "epsg4326": [37.61891380882616, 54.20564268115055]},
+                {"image_coordinates": [640, 0], "epsg4326": [37.61875545294513, 54.20546281228973]},
+                {"image_coordinates": [0, 0], "epsg4326": [37.61903085447736, 54.20543126804313]},
+                {"image_coordinates": [0, 360], "epsg4326": [37.61906183714973, 54.20562590237201]}
+            ]
         }
     },
     "matpprof_settings": { # pprof for GoCV. Useful for debugging

@@ -1,6 +1,6 @@
 {
     "video_settings": {
-        "source": "rtsp://127.0.0.1:554/h264",
+        "source": "./video_example/video_2.mp4",
         "width": 1920,
         "height": 1080,
         "reduced_width": 640,
@@ -29,12 +29,12 @@
         "server_port": 50051
     },
     "tracker_settings": {
-        "tracker_type": "simple",
+        "tracker_type": "kalman",
         "lines_settings":[
             {
                 "line_id": 1,
-                "begin": [150, 800],
-                "end": [1600, 800],
+                "begin": [110, 600],
+                "end": [1750, 600],
                 "direction": "to_detector",
                 "detect_classes": ["car", "motorbike", "bus", "train", "truck"],
                 "rgba": [255, 0, 0, 0],
@@ -59,6 +59,16 @@
                 "font": "hershey_simplex"
             },
             "display_object_id": true
+        },
+        "speed_estimation_settings": {
+            "enabled": true,
+            "send_grpc": true,
+            "mapper": [
+                {"image_coordinates": [640, 360], "epsg4326": [37.61891380882616, 54.20564268115055]},
+                {"image_coordinates": [640, 0], "epsg4326": [37.61875545294513, 54.20546281228973]},
+                {"image_coordinates": [0, 0], "epsg4326": [37.61903085447736, 54.20543126804313]},
+                {"image_coordinates": [0, 360], "epsg4326": [37.61906183714973, 54.20562590237201]}
+            ]
         }
     },
     "matpprof_settings": {
