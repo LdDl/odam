@@ -42,6 +42,8 @@ New ideas, thoughts about needed features will be store in this file.
     * Allow to configure draw methods for each type of detected objects
 * design: current BBoxes and text info on imshow()/mjpeg-server are...ugly
 * provide video examples to show what this software capable of.
+* gRPC
+    * optional scaling track in pixel representation
 
 ### Planned
 * Stable core (need many tests as possible)
