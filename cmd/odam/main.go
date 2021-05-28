@@ -300,7 +300,31 @@ func main() {
 									}
 									// If it is needed to send speed and track information
 									if settings.TrackerSettings.SpeedEstimationSettings.SendGRPC {
-										// @todo
+										// Extract estimated speed information
+										spd := float32(0.0)
+										if spdInterface, ok := b.GetProperty("speed"); ok {
+											switch spdInterface.(type) { // Want to be sure that interface is float32
+											case float32:
+												spd = spdInterface.(float32)
+												break
+											default:
+												break
+											}
+										}
+										trackPixels := b.GetTrack()
+										trackUnionInfo := make([]*odam.Point, len(trackPixels))
+										for i, stdPt := range trackPixels {
+											cvPt := odam.STDPointToGoCVPoint2F(stdPt)
+											gisPt := gisConverter(cvPt)
+											trackUnionInfo[i] = &odam.Point{
+												EuclideanPoint: &odam.EuclideanPoint{X: cvPt.X, Y: cvPt.Y},
+												Wgs84Point:     &odam.WGS84Point{Longitude: gisPt.X, Latitude: gisPt.Y},
+											}
+										}
+										sendData.TrackInformation = &odam.TrackInfo{
+											EstimatedSpeed: spd,
+											Points:         trackUnionInfo,
+										}
 									}
 									go sendDataToServer(grpcConn, &sendData)
 								}
