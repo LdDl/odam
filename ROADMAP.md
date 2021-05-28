@@ -43,6 +43,7 @@ New ideas, thoughts about needed features will be store in this file.
 * design: current BBoxes and text info on imshow()/mjpeg-server are...ugly
 * provide video examples to show what this software capable of.
 * gRPC
+    * optional information about scaling source image
     * optional scaling track in pixel representation
 
 ### Planned
