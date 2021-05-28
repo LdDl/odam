@@ -24,6 +24,7 @@ New ideas, thoughts about needed features will be store in this file.
     * prepare gRPC-client structure
     * create "sending" function
     * make gRPC-client server avaible as option
+    * extend gRPC-client to send more attributes (track info)
 
 * vehicle detection
     * detect vehicles
@@ -40,8 +41,6 @@ New ideas, thoughts about needed features will be store in this file.
 * Extend configuration of conf.json file.
     * Allow to configure draw methods for each type of detected objects
 * design: current BBoxes and text info on imshow()/mjpeg-server are...ugly
-* gRPC
-    * extend gRPC-client to send more attributes (track info)
 * provide video examples to show what this software capable of.
 
 ### Planned
