@@ -322,6 +322,8 @@ type TextSettings struct {
 type SpeedEstimationSettings struct {
 	// Is this feature enabled?
 	Enabled bool `json:"enabled"`
+	// Is gRPC sending needed? If yes make sure that 'grpc_settings.enable' is set to 'true' also
+	SendGRPC bool `json:"send_grpc"`
 	// Map image coordinates to GIS coordinates. EPSG 4326 is handled only currently
 	Mapper []GISMapper `json:"mapper"`
 }

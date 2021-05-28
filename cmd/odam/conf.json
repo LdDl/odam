@@ -62,6 +62,7 @@
         },
         "speed_estimation_settings": {
             "enabled": true,
+            "send_grpc": true,
             "mapper": [
                 {"image_coordinates": [640, 360], "epsg4326": [37.61891380882616, 54.20564268115055]},
                 {"image_coordinates": [640, 0], "epsg4326": [37.61875545294513, 54.20546281228973]},

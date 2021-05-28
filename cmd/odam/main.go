@@ -298,6 +298,10 @@ func main() {
 											RightY: int32(vline.VLine.SourceRightPT.Y),
 										},
 									}
+									// If it is needed to send speed and track information
+									if settings.TrackerSettings.SpeedEstimationSettings.SendGRPC {
+										// @todo
+									}
 									go sendDataToServer(grpcConn, &sendData)
 								}
 							}
