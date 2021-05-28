@@ -317,7 +317,7 @@ func main() {
 											cvPt := odam.STDPointToGoCVPoint2F(stdPt)
 											gisPt := gisConverter(cvPt)
 											trackUnionInfo[i] = &odam.Point{
-												EuclideanPoint: &odam.EuclideanPoint{X: cvPt.X, Y: cvPt.Y},
+												EuclideanPoint: &odam.EuclideanPoint{X: cvPt.X * float32(settings.VideoSettings.ScaleX), Y: cvPt.Y * float32(settings.VideoSettings.ScaleY)},
 												Wgs84Point:     &odam.WGS84Point{Longitude: gisPt.X, Latitude: gisPt.Y},
 											}
 										}
