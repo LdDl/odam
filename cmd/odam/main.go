@@ -320,6 +320,7 @@ func main() {
 												EuclideanPoint: &odam.EuclideanPoint{X: cvPt.X, Y: cvPt.Y},
 												Wgs84Point:     &odam.WGS84Point{Longitude: gisPt.X, Latitude: gisPt.Y},
 											}
+											fmt.Println("Debug", b.GetID(), cvPt.X, cvPt.Y, gisPt.X, gisPt.Y)
 										}
 										sendData.TrackInformation = &odam.TrackInfo{
 											EstimatedSpeed: spd,
