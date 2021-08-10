@@ -82,7 +82,6 @@ func main() {
 
 	/* Initialize objects tracker */
 	allblobies = blob.NewBlobiesDefaults()
-	allblobies.DrawingOptions = settings.TrackerSettings.DrawOptions
 	trackerType := settings.TrackerSettings.GetTrackerType()
 	fmt.Printf("Using tracker: '%s'\n", settings.TrackerSettings.TrackerType)
 
@@ -195,7 +194,9 @@ func main() {
 					} else if trackerType == odam.TRACKER_KALMAN {
 						detectedObjects[i] = blob.NewKalmanBlobie(detected[i].Rect, &commonOptions)
 					}
-					detectedObjects[i].SetDraw(allblobies.DrawingOptions)
+					if foundOptions, ok := settings.ClassesDrawOptions[detected[i].ClassName]; ok {
+						detectedObjects[i].SetDraw(foundOptions.DrawOptions)
+					}
 				}
 				/* Match blobs to existing ones */
 				allblobies.MatchToExisting(detectedObjects)
@@ -355,10 +356,12 @@ func main() {
 						break
 					}
 				}
-				if settings.TrackerSettings.DrawTrackSettings.DisplayObjectID {
-					b.DrawTrack(&img.ImgScaled, fmt.Sprintf("v = %.2f km/h", spd), fmt.Sprintf("%v", b.GetID()))
-				} else {
-					b.DrawTrack(&img.ImgScaled, fmt.Sprintf("v = %.2f km/h", spd))
+				if foundOptions, ok := settings.ClassesDrawOptions[b.GetClassName()]; ok {
+					if foundOptions.DisplayObjectID {
+						b.DrawTrack(&img.ImgScaled, fmt.Sprintf("v = %.2f km/h", spd), fmt.Sprintf("%v", b.GetID()))
+					} else {
+						b.DrawTrack(&img.ImgScaled, fmt.Sprintf("v = %.2f km/h", spd))
+					}
 				}
 			}
 		}

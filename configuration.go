@@ -9,9 +9,6 @@ import (
 	"math"
 	"os"
 	"strings"
-
-	blob "github.com/LdDl/gocv-blob/v2/blob"
-	"gocv.io/x/gocv"
 )
 
 // NewSettings Create new AppSettings from content of configuration file
@@ -33,30 +30,30 @@ func NewSettings(fname string) (*AppSettings, error) {
 
 	if appsettings.VideoSettings.Width <= 0 {
 		appsettings.VideoSettings.Width = 640
-		fmt.Println("Field 'width' in 'video_settings' has not been provided (or <=0). Using default 640 width")
+		fmt.Println("[WARNING] Field 'width' in 'video_settings' has not been provided (or <=0). Using default 640 width")
 	}
 
 	if appsettings.VideoSettings.Height <= 0 {
 		appsettings.VideoSettings.Height = 360
-		fmt.Println("Field 'height' in 'video_settings' has not been provided (or <=0). Using default 360 height")
+		fmt.Println("[WARNING] Field 'height' in 'video_settings' has not been provided (or <=0). Using default 360 height")
 	}
 
 	if appsettings.VideoSettings.ReducedWidth <= 0 {
 		appsettings.VideoSettings.ReducedWidth = appsettings.VideoSettings.Width
-		fmt.Println("Field 'reduced_width' in 'video_settings' has not been provided (or <=0). Using default reduced_width = width")
+		fmt.Println("[WARNING] Field 'reduced_width' in 'video_settings' has not been provided (or <=0). Using default reduced_width = width")
 	}
 	if appsettings.VideoSettings.ReducedHeight <= 0 {
 		appsettings.VideoSettings.ReducedHeight = appsettings.VideoSettings.Height
-		fmt.Println("Field 'reduced_height' in 'video_settings' has not been provided (or <=0). Using default reduced_height = height")
+		fmt.Println("[WARNING] Field 'reduced_height' in 'video_settings' has not been provided (or <=0). Using default reduced_height = height")
 	}
 
 	if appsettings.VideoSettings.ReducedWidth > appsettings.VideoSettings.Width {
 		appsettings.VideoSettings.ReducedWidth = appsettings.VideoSettings.Width
-		fmt.Println("Field 'reduced_width' in 'video_settings' > 'width'. Using default reduced_width = width")
+		fmt.Println("[WARNING] Field 'reduced_width' in 'video_settings' > 'width'. Using default reduced_width = width")
 	}
 	if appsettings.VideoSettings.ReducedHeight > appsettings.VideoSettings.Height {
 		appsettings.VideoSettings.ReducedHeight = appsettings.VideoSettings.Height
-		fmt.Println("Field 'reduced_height' in 'video_settings' > 'height'. Using default reduced_height = height")
+		fmt.Println("[WARNING] Field 'reduced_height' in 'video_settings' > 'height'. Using default reduced_height = height")
 	}
 
 	appsettings.VideoSettings.ScaleX = float64(appsettings.VideoSettings.Width) / float64(appsettings.VideoSettings.ReducedWidth)
@@ -82,7 +79,7 @@ func NewSettings(fname string) (*AppSettings, error) {
 		break
 	}
 	if len(appsettings.TrackerSettings.LinesSettings) == 0 {
-		fmt.Println("No 'lines_settings'? Please check it")
+		fmt.Println("[WARNING] No 'lines_settings'? Please check it")
 	}
 	for i := range appsettings.TrackerSettings.LinesSettings {
 		lsettings := &appsettings.TrackerSettings.LinesSettings[i]
@@ -121,75 +118,25 @@ func NewSettings(fname string) (*AppSettings, error) {
 		lsettings.VLine = &vline
 	}
 
-	// Prepare drawing options
 	if appsettings.TrackerSettings.MaxPointsInTrack < 1 {
 		fmt.Printf("[WARNING] Field 'max_points_in_track' shoudle be >= 1, but got '%d'. Setting default value = 10\n", appsettings.TrackerSettings.MaxPointsInTrack)
 		appsettings.TrackerSettings.MaxPointsInTrack = 10
 	}
-	bboxOpts := blob.DrawBBoxOptions{
-		Color: color.RGBA{
-			appsettings.TrackerSettings.DrawTrackSettings.BBoxSettings.RGBA[0],
-			appsettings.TrackerSettings.DrawTrackSettings.BBoxSettings.RGBA[1],
-			appsettings.TrackerSettings.DrawTrackSettings.BBoxSettings.RGBA[2],
-			appsettings.TrackerSettings.DrawTrackSettings.BBoxSettings.RGBA[3],
-		},
-		Thickness: appsettings.TrackerSettings.DrawTrackSettings.BBoxSettings.Thickness,
-	}
-	cenOpts := blob.DrawCentroidOptions{
-		Color: color.RGBA{
-			appsettings.TrackerSettings.DrawTrackSettings.CentroidSettings.RGBA[0],
-			appsettings.TrackerSettings.DrawTrackSettings.CentroidSettings.RGBA[1],
-			appsettings.TrackerSettings.DrawTrackSettings.CentroidSettings.RGBA[2],
-			appsettings.TrackerSettings.DrawTrackSettings.CentroidSettings.RGBA[3],
-		},
-		Radius:    appsettings.TrackerSettings.DrawTrackSettings.CentroidSettings.Radius,
-		Thickness: appsettings.TrackerSettings.DrawTrackSettings.CentroidSettings.Thickness,
-	}
-	textOpts := blob.DrawTextOptions{
-		Color: color.RGBA{
-			appsettings.TrackerSettings.DrawTrackSettings.TextSettings.RGBA[0],
-			appsettings.TrackerSettings.DrawTrackSettings.TextSettings.RGBA[1],
-			appsettings.TrackerSettings.DrawTrackSettings.TextSettings.RGBA[2],
-			appsettings.TrackerSettings.DrawTrackSettings.TextSettings.RGBA[3],
-		},
-		Scale:     appsettings.TrackerSettings.DrawTrackSettings.TextSettings.Scale,
-		Thickness: appsettings.TrackerSettings.DrawTrackSettings.TextSettings.Thickness,
-	}
-	switch strings.ToLower(appsettings.TrackerSettings.DrawTrackSettings.TextSettings.Font) {
-	case "hershey_simplex":
-		textOpts.Font = gocv.FontHersheySimplex
-		break
-	case "hershey_plain":
-		textOpts.Font = gocv.FontHersheyPlain
-		break
-	case "hershey_duplex":
-		textOpts.Font = gocv.FontHersheyDuplex
-		break
-	case "hershey_complex":
-		textOpts.Font = gocv.FontHersheyComplex
-		break
-	case "hershey_triplex":
-		textOpts.Font = gocv.FontHersheyTriplex
-		break
-	case "hershey_complex_small":
-		textOpts.Font = gocv.FontHersheyComplexSmall
-		break
-	case "hershey_script_simplex":
-		textOpts.Font = gocv.FontHersheyScriptSimplex
-		break
-	case "hershey_script_complex":
-		textOpts.Font = gocv.FontHersheyScriptComplex
-		break
-	case "italic":
-		textOpts.Font = gocv.FontItalic
-		break
-	default:
-		textOpts.Font = gocv.FontHersheyPlain
-		break
-	}
 
-	drOpts := blob.NewDrawOptions(bboxOpts, cenOpts, textOpts)
-	appsettings.TrackerSettings.DrawOptions = drOpts
+	// Prepare drawing options for each class defined in 'neural_network_settings'
+	appsettings.ClassesDrawOptions = make(map[string]*DrawOptions)
+	for _, class := range appsettings.NeuralNetworkSettings.TargetClasses {
+		appsettings.ClassesDrawOptions[class] = &DrawOptions{}
+	}
+	for _, classInfo := range appsettings.ClassesSettings {
+		drOpts := &DrawOptions{}
+		if _, ok := appsettings.ClassesDrawOptions[classInfo.ClassName]; !ok {
+			// Class is not found in 'neural_network_settings'
+			continue
+		}
+		drOpts = classInfo.PrepareDrawingOptions()
+		appsettings.ClassesDrawOptions[classInfo.ClassName] = drOpts
+	}
 
 	return &appsettings, nil
 }
@@ -201,8 +148,12 @@ type AppSettings struct {
 	CudaSettings          CudaSettings          `json:"cuda_settings"`
 	MjpegSettings         MjpegSettings         `json:"mjpeg_settings"`
 	GrpcSettings          GrpcSettings          `json:"grpc_settings"`
+	ClassesSettings       []*ClassesSettings    `json:"classes_settings"`
 	TrackerSettings       TrackerSettings       `json:"tracker_settings"`
 	MatPPROFSettings      MatPPROFSettings      `json:"matpprof_settings"`
+
+	// Exported, but not from JSON
+	ClassesDrawOptions map[string]*DrawOptions `json:"-"`
 }
 
 // CudaSettings CUDA settings
@@ -220,6 +171,26 @@ type GrpcSettings struct {
 	Enable     bool   `json:"enable"`
 	ServerIP   string `json:"server_ip"`
 	ServerPort int    `json:"server_port"`
+}
+
+// ClassesSettings Settings for each possible class
+type ClassesSettings struct {
+	// Classname basically
+	ClassName string `json:"class_name"`
+	// Options for visual output (usefull when either imshow or mjpeg output is used)
+	DrawingSettings *ObjectDrawingSettings `json:"drawing_settings"`
+}
+
+// ObjectDrawingSettings Drawing settings for MJPEG/imshow
+type ObjectDrawingSettings struct {
+	// Drawing options for detection rectangle
+	BBoxSettings BBoxSettings `json:"bbox_settings"`
+	// Drawing options for center of detection rectangle
+	CentroidSettings CentroidSettings `json:"centroid_settings"`
+	// Drawing options for text in top left corner of detection rectangle
+	TextSettings TextSettings `json:"text_settings"`
+	// Do you want to display ID of object (uuid)
+	DisplayObjectID bool `json:"display_object_id"`
 }
 
 // MjpegSettings settings for output
@@ -260,11 +231,7 @@ type TrackerSettings struct {
 	// Restriction for maximum points in single track
 	MaxPointsInTrack        int                     `json:"max_points_in_track"`
 	LinesSettings           []LinesSetting          `json:"lines_settings"`
-	DrawTrackSettings       DrawTrackSettings       `json:"draw_track_settings"`
 	SpeedEstimationSettings SpeedEstimationSettings `json:"speed_estimation_settings"`
-
-	// Exported, but not from JSON
-	DrawOptions *blob.DrawOptions `json:"-"`
 }
 
 // GetTrackerType Returns enum for tracker type option
@@ -283,18 +250,6 @@ type LinesSetting struct {
 	CropMode      string   `json:"crop_mode"`
 	// Exported, but not from JSON
 	VLine *VirtualLine `json:"-"`
-}
-
-// DrawTrackSettings Drawing settings for MJPEG/imshow
-type DrawTrackSettings struct {
-	// Drawing options for detection rectangle
-	BBoxSettings BBoxSettings `json:"bbox_settings"`
-	// Drawing options for center of detection rectangle
-	CentroidSettings CentroidSettings `json:"centroid_settings"`
-	// Drawing options for text in top left corner of detection rectangle
-	TextSettings TextSettings `json:"text_settings"`
-	// Do you want to display ID of object (uuid)
-	DisplayObjectID bool `json:"display_object_id"`
 }
 
 // BBoxSettings Options for detection rectangle
