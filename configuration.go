@@ -9,6 +9,7 @@ import (
 	"math"
 	"os"
 	"strings"
+	"sync"
 )
 
 // NewSettings Create new AppSettings from content of configuration file
@@ -124,21 +125,16 @@ func NewSettings(fname string) (*AppSettings, error) {
 	}
 
 	// Prepare drawing options for each class defined in 'neural_network_settings'
-	classesSet := make(map[string]int)
-	appsettings.ClassesDrawOptions = make([]*DrawOptions, len(appsettings.NeuralNetworkSettings.TargetClasses))
-	for classID, className := range appsettings.NeuralNetworkSettings.TargetClasses {
-		appsettings.ClassesDrawOptions[classID] = nil
-		classesSet[className] = classID
+	appsettings.ClassesDrawOptions = make(map[string]*DrawOptions)
+	for _, class := range appsettings.NeuralNetworkSettings.TargetClasses {
+		appsettings.ClassesDrawOptions[class] = nil
 	}
 	for _, classInfo := range appsettings.ClassesSettings {
-		drOpts := &DrawOptions{}
-		foundClass, ok := classesSet[classInfo.ClassName]
-		if !ok {
+		if _, ok := appsettings.ClassesDrawOptions[classInfo.ClassName]; !ok {
 			// Class is not found in 'neural_network_settings'
 			continue
 		}
-		drOpts = classInfo.PrepareDrawingOptions()
-		appsettings.ClassesDrawOptions[foundClass] = drOpts
+		appsettings.ClassesDrawOptions[classInfo.ClassName] = classInfo.PrepareDrawingOptions()
 	}
 	// Check if some of target classes haven't been described in classes settings
 	// If there are some then prepare default settings for them
@@ -147,6 +143,7 @@ func NewSettings(fname string) (*AppSettings, error) {
 			option = PrepareDrawingOptionsDefault()
 		}
 	}
+
 	return &appsettings, nil
 }
 
@@ -161,8 +158,19 @@ type AppSettings struct {
 	TrackerSettings       TrackerSettings       `json:"tracker_settings"`
 	MatPPROFSettings      MatPPROFSettings      `json:"matpprof_settings"`
 
+	sync.RWMutex
 	// Exported, but not from JSON
-	ClassesDrawOptions []*DrawOptions `json:"-"`
+	ClassesDrawOptions map[string]*DrawOptions `json:"-"`
+}
+
+func (settings *AppSettings) GetDrawOptions(className string) *DrawOptions {
+	settings.Lock()
+	found, ok := settings.ClassesDrawOptions[className]
+	settings.Unlock()
+	if ok {
+		return found
+	}
+	return nil
 }
 
 // CudaSettings CUDA settings
