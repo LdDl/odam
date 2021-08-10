@@ -33,32 +33,11 @@
             "class_name": "car",
             "drawing_settings": {
                 "bbox_settings": {
-                    "rgba": [255, 0, 0, 0],
+                    "rgba": [255, 255, 0, 0],
                     "thickness": 2
                 },
                 "centroid_settings": {
                     "rgba": [255, 0, 0, 0],
-                    "radius": 4,
-                    "thickness": 2
-                },
-                "text_settings": {
-                    "rgba": [255, 0, 0, 0],
-                    "scale": 0.5,
-                    "thickness": 1,
-                    "font": "hershey_simplex"
-                },
-                "display_object_id": true
-            }
-        },
-        {
-            "class_name": "motorbike",
-            "drawing_settings": {
-                "bbox_settings": {
-                    "rgba": [0, 255, 0, 0],
-                    "thickness": 2
-                },
-                "centroid_settings": {
-                    "rgba": [0, 255, 0, 0],
                     "radius": 4,
                     "thickness": 2
                 },
@@ -70,6 +49,10 @@
                 },
                 "display_object_id": true
             }
+        },
+        {
+            "class_name": "motorbike",
+            "drawing_settings": {}
         },
         {
             "class_name": "bus",
@@ -81,24 +64,7 @@
         },
         {
             "class_name": "truck",
-            "drawing_settings": {
-                "bbox_settings": {
-                    "rgba": [0, 0, 255, 0],
-                    "thickness": 2
-                },
-                "centroid_settings": {
-                    "rgba": [0, 0, 255, 0],
-                    "radius": 4,
-                    "thickness": 2
-                },
-                "text_settings": {
-                    "rgba": [0, 0, 255, 0],
-                    "scale": 0.5,
-                    "thickness": 1,
-                    "font": "hershey_simplex"
-                },
-                "display_object_id": true
-            }
+            "drawing_settings": {}
         }
     ],
     "tracker_settings": {

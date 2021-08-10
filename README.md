@@ -169,8 +169,48 @@ Usage of ./odam:
         "server_ip": "localhost", # gRPC server's IP
         "server_port": 50051 # gRPC server's listening port
     },
+    "classes_settings": [ # classes settings (according to 'target_classes' in 'neural_network_settings')
+        {
+            "class_name": "car", # Corresponding class label
+            "drawing_settings": {
+                "bbox_settings": { # Setting for bounding boxes (detected objects)
+                    "rgba": [255, 255, 0, 0], # Color of bounding box border
+                    "thickness": 2 # Thickness as is
+                },
+                "centroid_settings": { # Setting for centroid of bounding boxes
+                    "rgba": [255, 0, 0, 0], # Color of circle
+                    "radius": 4, # Radius of circle
+                    "thickness": 2 # Thickness as is
+                },
+                "text_settings": { # Setting for text above bounding boxes
+                    "rgba": [0, 255, 0, 0], # Text color
+                    "scale": 0.5, # Size of text
+                    "thickness": 1, # Thickness as is
+                    "font": "hershey_simplex" # Text font
+                },
+                "display_object_id": true # If you want to display object identifier
+            }
+        },
+        {
+            "class_name": "motorbike", # see "car" ref.
+            "drawing_settings": {} # if propetry is empty, then default values are used
+        },
+        {
+            "class_name": "bus", # see "car" ref.
+            "drawing_settings": {} # if propetry is empty, then default values are used
+        },
+        {
+            "class_name": "train", # see "car" ref.
+            "drawing_settings": {} # if propetry is empty, then default values are used
+        },
+        {
+            "class_name": "truck", # see "car" ref.
+            "drawing_settings": {} # if propetry is empty, then default values are used
+        }
+    ],
     "tracker_settings": { # Tracked settings
         "tracker_type": "simple/kalman" # Use one of supported trackers. Simple tracker should fit realy simple scenes, while Kalman should be used with complicated scenes.
+        "max_points_in_track": 150, # Restriction for maximum points in single track (>=1). Default value 10 (in case of value less than 1)
         "lines_settings":[
             {
                 "line_id": 1, # Unique ID for line id (useful for 'client-server' model)
@@ -182,25 +222,6 @@ Usage of ./odam:
                 "crop_mode": "crop" # When 'grpc_settings' field 'enable' is set to TRUE this option will be used for sending either cropped detected object (bbox==crop) or full image with bbox info to gRPC server-side application. Default is 'crop'
             }
         ],
-        "draw_track_settings": { # Tracker drawing settings (for WOW effect in imshow() or MJPEG streaming)
-            "max_points_in_track": 150, # Restriction for maximum points in single track (>=1). Default value 10 (in case of value less than 1)
-            "bbox_settings": { # Setting for bounding boxes (detected objects)
-                "rgba": [255, 255, 0, 0], # Color of bounding box border
-                "thickness": 2 # Thickness as is
-            },
-            "centroid_settings": { Setting for centroid of bounding boxes
-                "rgba": [255, 0, 0, 0], # Color of circle
-                "radius": 4, # Radius of circle
-                "thickness": 2 # Thickness as is
-            },
-            "text_settings": { Setting for text above bounding boxes
-                "rgba": [0, 255, 0, 0], # Text color
-                "scale": 1.2, # Size of text
-                "thickness": 2, # Thickness as is
-                "font": "hershey_plain"
-            },
-            "display_object_id": true # If you want to display object identifier
-        },
         "speed_estimation_settings": { # Setting for speed estimation bas on GIS convertion between different spatial systems
             "enabled": false, # Enable this feature or not
             "mapper": [ # Map pixel coordinate to EPSG4326 coordinates
