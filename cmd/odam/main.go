@@ -186,7 +186,7 @@ func main() {
 					commonOptions := blob.BlobOptions{
 						ClassID:          detected[i].ClassID,
 						ClassName:        detected[i].ClassName,
-						MaxPointsInTrack: settings.TrackerSettings.DrawTrackSettings.MaxPointsInTrack,
+						MaxPointsInTrack: settings.TrackerSettings.MaxPointsInTrack,
 						Time:             lastTime,
 						TimeDeltaSeconds: secDiff,
 					}

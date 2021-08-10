@@ -122,9 +122,9 @@ func NewSettings(fname string) (*AppSettings, error) {
 	}
 
 	// Prepare drawing options
-	if appsettings.TrackerSettings.DrawTrackSettings.MaxPointsInTrack < 1 {
-		fmt.Printf("[WARNING] Field 'max_points_in_track' shoudle be >= 1, but got '%d'. Setting default value = 10\n", appsettings.TrackerSettings.DrawTrackSettings.MaxPointsInTrack)
-		appsettings.TrackerSettings.DrawTrackSettings.MaxPointsInTrack = 10
+	if appsettings.TrackerSettings.MaxPointsInTrack < 1 {
+		fmt.Printf("[WARNING] Field 'max_points_in_track' shoudle be >= 1, but got '%d'. Setting default value = 10\n", appsettings.TrackerSettings.MaxPointsInTrack)
+		appsettings.TrackerSettings.MaxPointsInTrack = 10
 	}
 	bboxOpts := blob.DrawBBoxOptions{
 		Color: color.RGBA{
@@ -255,8 +255,10 @@ type VideoSettings struct {
 
 // TrackerSettings Object tracker settings
 type TrackerSettings struct {
-	TrackerType             string `json:"tracker_type"`
-	trackerType             TRACKER_TYPE
+	TrackerType string `json:"tracker_type"`
+	trackerType TRACKER_TYPE
+	// Restriction for maximum points in single track
+	MaxPointsInTrack        int                     `json:"max_points_in_track"`
 	LinesSettings           []LinesSetting          `json:"lines_settings"`
 	DrawTrackSettings       DrawTrackSettings       `json:"draw_track_settings"`
 	SpeedEstimationSettings SpeedEstimationSettings `json:"speed_estimation_settings"`
@@ -285,8 +287,6 @@ type LinesSetting struct {
 
 // DrawTrackSettings Drawing settings for MJPEG/imshow
 type DrawTrackSettings struct {
-	// Restriction for maximum points in single track
-	MaxPointsInTrack int `json:"max_points_in_track"`
 	// Drawing options for detection rectangle
 	BBoxSettings BBoxSettings `json:"bbox_settings"`
 	// Drawing options for center of detection rectangle

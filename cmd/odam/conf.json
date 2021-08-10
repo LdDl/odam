@@ -30,6 +30,7 @@
     },
     "tracker_settings": {
         "tracker_type": "kalman",
+        "max_points_in_track": 150,
         "lines_settings":[
             {
                 "line_id": 1,
@@ -42,7 +43,6 @@
             }
         ],
         "draw_track_settings": {
-            "max_points_in_track": 150,
             "bbox_settings": {
                 "rgba": [255, 255, 0, 0],
                 "thickness": 2
