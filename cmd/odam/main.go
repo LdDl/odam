@@ -356,7 +356,7 @@ func main() {
 						break
 					}
 				}
-				if foundOptions := settings.GetDrawOptions(detected[i].ClassName); foundOptions != nil {
+				if foundOptions := settings.GetDrawOptions(b.GetClassName()); foundOptions != nil {
 					if foundOptions.DisplayObjectID {
 						b.DrawTrack(&img.ImgScaled, fmt.Sprintf("v = %.2f km/h", spd), fmt.Sprintf("%v", b.GetID()))
 					} else {
