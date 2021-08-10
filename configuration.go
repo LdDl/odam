@@ -138,9 +138,9 @@ func NewSettings(fname string) (*AppSettings, error) {
 	}
 	// Check if some of target classes haven't been described in classes settings
 	// If there are some then prepare default settings for them
-	for _, option := range appsettings.ClassesDrawOptions {
+	for className, option := range appsettings.ClassesDrawOptions {
 		if option == nil {
-			option = PrepareDrawingOptionsDefault()
+			appsettings.ClassesDrawOptions[className] = PrepareDrawingOptionsDefault()
 		}
 	}
 
