@@ -14,6 +14,13 @@ type DrawOptions struct {
 	DisplayObjectID bool
 }
 
+func PrepareDrawingOptionsDefault() *DrawOptions {
+	return &DrawOptions{
+		blob.NewDrawOptionsDefault(),
+		true,
+	}
+}
+
 // PrepareDrawingOptions Prepares drawing options for blob library
 func (classInfo *ClassesSettings) PrepareDrawingOptions() *DrawOptions {
 	drOpts := &blob.DrawOptions{}

@@ -124,20 +124,29 @@ func NewSettings(fname string) (*AppSettings, error) {
 	}
 
 	// Prepare drawing options for each class defined in 'neural_network_settings'
-	appsettings.ClassesDrawOptions = make(map[string]*DrawOptions)
-	for _, class := range appsettings.NeuralNetworkSettings.TargetClasses {
-		appsettings.ClassesDrawOptions[class] = &DrawOptions{}
+	classesSet := make(map[string]int)
+	appsettings.ClassesDrawOptions = make([]*DrawOptions, len(appsettings.NeuralNetworkSettings.TargetClasses))
+	for classID, className := range appsettings.NeuralNetworkSettings.TargetClasses {
+		appsettings.ClassesDrawOptions[classID] = nil
+		classesSet[className] = classID
 	}
 	for _, classInfo := range appsettings.ClassesSettings {
 		drOpts := &DrawOptions{}
-		if _, ok := appsettings.ClassesDrawOptions[classInfo.ClassName]; !ok {
+		foundClass, ok := classesSet[classInfo.ClassName]
+		if !ok {
 			// Class is not found in 'neural_network_settings'
 			continue
 		}
 		drOpts = classInfo.PrepareDrawingOptions()
-		appsettings.ClassesDrawOptions[classInfo.ClassName] = drOpts
+		appsettings.ClassesDrawOptions[foundClass] = drOpts
 	}
-
+	// Check if some of target classes haven't been described in classes settings
+	// If there are some then prepare default settings for them
+	for _, option := range appsettings.ClassesDrawOptions {
+		if option == nil {
+			option = PrepareDrawingOptionsDefault()
+		}
+	}
 	return &appsettings, nil
 }
 
@@ -153,7 +162,7 @@ type AppSettings struct {
 	MatPPROFSettings      MatPPROFSettings      `json:"matpprof_settings"`
 
 	// Exported, but not from JSON
-	ClassesDrawOptions map[string]*DrawOptions `json:"-"`
+	ClassesDrawOptions []*DrawOptions `json:"-"`
 }
 
 // CudaSettings CUDA settings
