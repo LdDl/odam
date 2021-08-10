@@ -36,15 +36,15 @@ New ideas, thoughts about needed features will be store in this file.
 * github tags: godoc, go-report, tagnum, sourcegraph
 * integration with go modules
 * Integrate Kalman tracker
-
-### W.I.P
 * Extend configuration of conf.json file.
     * Allow to configure draw methods for each type of detected objects
+### W.I.P
 * design: current BBoxes and text info on imshow()/mjpeg-server are...ugly
 * provide video examples to show what this software capable of.
 * gRPC
     * optional information about scaling source image
     * optional scaling track in pixel representation
+* codebase improvements (design, optimizations, clarifications and etc.)
 
 ### Planned
 * Stable core (need many tests as possible)

@@ -28,8 +28,48 @@
         "server_ip": "localhost",
         "server_port": 50051
     },
+    "classes_settings": [
+        {
+            "class_name": "car",
+            "drawing_settings": {
+                "bbox_settings": {
+                    "rgba": [255, 255, 0, 0],
+                    "thickness": 2
+                },
+                "centroid_settings": {
+                    "rgba": [255, 0, 0, 0],
+                    "radius": 4,
+                    "thickness": 2
+                },
+                "text_settings": {
+                    "rgba": [0, 255, 0, 0],
+                    "scale": 0.5,
+                    "thickness": 1,
+                    "font": "hershey_simplex"
+                },
+                "display_object_id": true
+            }
+        },
+        {
+            "class_name": "motorbike",
+            "drawing_settings": {}
+        },
+        {
+            "class_name": "bus",
+            "drawing_settings": {}
+        },
+        {
+            "class_name": "train",
+            "drawing_settings": {}
+        },
+        {
+            "class_name": "truck",
+            "drawing_settings": {}
+        }
+    ],
     "tracker_settings": {
         "tracker_type": "kalman",
+        "max_points_in_track": 150,
         "lines_settings":[
             {
                 "line_id": 1,
@@ -41,28 +81,9 @@
                 "crop_mode": "crop"
             }
         ],
-        "draw_track_settings": {
-            "max_points_in_track": 150,
-            "bbox_settings": {
-                "rgba": [255, 255, 0, 0],
-                "thickness": 2
-            },
-            "centroid_settings": {
-                "rgba": [255, 0, 0, 0],
-                "radius": 4,
-                "thickness": 2
-            },
-            "text_settings": {
-                "rgba": [0, 255, 0, 0],
-                "scale": 0.5,
-                "thickness": 1,
-                "font": "hershey_simplex"
-            },
-            "display_object_id": true
-        },
         "speed_estimation_settings": {
             "enabled": true,
-            "send_grpc": true,
+            "send_grpc": false,
             "mapper": [
                 {"image_coordinates": [640, 360], "epsg4326": [37.61891380882616, 54.20564268115055]},
                 {"image_coordinates": [640, 0], "epsg4326": [37.61875545294513, 54.20546281228973]},
