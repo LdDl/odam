@@ -1,6 +1,6 @@
 # ODaM - Object Detection and Monitoring
 [![GoDoc](https://godoc.org/github.com/LdDl/odam?status.svg)](https://godoc.org/github.com/LdDl/odam) [![Sourcegraph](https://sourcegraph.com/github.com/LdDl/odam/-/badge.svg)](https://sourcegraph.com/github.com/LdDl/odam?badge) [![Go Report Card](https://goreportcard.com/badge/github.com/LdDl/odam)](https://goreportcard.com/report/github.com/LdDl/odam) [![GitHub tag](https://img.shields.io/github/tag/LdDl/odam.svg)](https://github.com/LdDl/odam/releases)
-# v0.8.0
+# v0.8.2
 ODaM is project aimed to do monitoring such as: pedestrian detection and counting, vehicle detection and counting, speed estimation of objects, sending detected objects to gRPC server for detailed analysis.
 
 It's written on Go with a lot of [CGO](https://golang.org/cmd/cgo/).
@@ -102,8 +102,7 @@ It's built on top of [go-darknet](https://github.com/LdDl/go-darknet#go-darknet-
 
 After steps above done:
 ```
-go get github.com/LdDl/odam
-go install github.com/LdDl/odam
+go install github.com/LdDl/odam/cmd/odam@v0.8.2
 ```
 Check if executable available
 ```
