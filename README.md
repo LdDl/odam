@@ -21,6 +21,7 @@ Not too fast, but it is what it is.
 
 ## Table of Contents
 - [About](#about)
+- [QA section](#qa-section)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Screenshots](#screenshots)
@@ -34,6 +35,53 @@ Not too fast, but it is what it is.
 ODaM is tool for doing monitoring via Darknet's neural network called Yolo V4 (paper: https://arxiv.org/abs/2004.10934).
 
 It's built on top of [go-darknet](https://github.com/LdDl/go-darknet#go-darknet-go-bindings-for-darknet-yolo-v4-yolo-v3) which uses [AlexeyAB's fork of Darknet](https://github.com/AlexeyAB/darknet/#yolo-v4-and-yolo-v3v2-for-windows-and-linux). For doing computer vision stuff and video reading [GoCV](https://github.com/hybridgroup/gocv#gocv) is used.
+
+## QA section
+> Who are you and what do you do?
+
+There is info about me here: https://github.com/LdDl
+
+You can have chat with me in Telegram/Gmail
+
+> Is this library / software or even framework?
+
+I think about it as software with library capabilities.
+
+> What it capable of?
+
+Not that much currently:
+
+* Object detection via darknet: both YOLOv3 and YOLOv4 (thanks to [Go bindings](https://github.com/LdDl/go-darknet#go-darknet-go-bindings-for-darknet-yolo-v4-yolo-v3) for it)
+* Object tracking via two possible techniques: Kalman tracking (filtering) or Centroid tracking;
+* Sending data to dedicated gRPC server;
+* MJPEG / imshow optional visual output;
+* Speed estimation based of GIS calculations (via matching pixels to WGS84).
+
+> Why Go?
+
+Well, C++ is a killer in computer vision field and Python has a great battery included bindings for C++ code.
+
+But I do no think that I'm ready to build gRPC/REST or any other web components of this software in C++ or Python (C++ is not that easy and Python...I just don't like Python syntax). That's why I prefer to stick with Go.
+
+> Why did you pick JSON for configuration purposes instead of TOML/YAML/INI or any other well-suited formats?
+
+1. Compared to TOML,JSON is not that 'human friendly', but still readable.
+2. It is in standart Go's library.
+3. Well, it is in standart Go's library.
+4. You got the idea.
+
+> Why bindings to Darknet instead of Opencv included stuff?
+
+Sometimes you just do not need full OpenCV installation for object detection. I have such ANPR projet here: https://github.com/LdDl/license_plate_recognition
+I guess when I'm done with stable core I might switch from Go's Darknet bindings to OpenCV one (since this project requires OpenCV installation obviously)
+
+> What are your plans?
+There is [ROADMAP.md](ROADMAP.md), but overall I am planning to extend capabilities of software: 
+* Improve perfomance
+* Implement some cool tracking techniques (e.g. [SORT](https://arxiv.org/abs/1602.00763))
+* Do gRPC accepting microservice for enabling software to catch information from external devices/systems/microservices and etc. E.g: you want to send message 'there is red light on traffic light" to instance of software, then it would look like _grpcServer.Send('there is red light on traffic light')_. After that any captured object will have state with message above in it. So you can catch traffic offenders.
+* Introduce convex polygon based calculations (same as virtual lines but for polygons)
+
 
 
 ## Installation
