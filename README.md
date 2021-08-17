@@ -82,7 +82,11 @@ There is [ROADMAP.md](ROADMAP.md), but overall I am planning to extend capabilit
 * Do gRPC accepting microservice for enabling software to catch information from external devices/systems/microservices and etc. E.g: you want to send message 'there is red light on traffic light" to instance of software, then it would look like _grpcServer.Send('there is red light on traffic light')_. After that any captured object will have state with message above in it. So you can catch traffic offenders.
 * Introduce convex polygon based calculations (same as virtual lines but for polygons)
 
+> How to help you?
 
+If you are here, then you are already helped a lot, since you noticed my existence :harold_face:
+
+If you want to make PR for some undone features (algorithms mainly) I'll glad to take a look.
 
 ## Installation
 ### notice: targeted for Linux users (no Windows/OSX instructions currenlty)
