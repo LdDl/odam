@@ -73,9 +73,10 @@ But I do no think that I'm ready to build gRPC/REST or any other web components 
 > Why bindings to Darknet instead of Opencv included stuff?
 
 Sometimes you just do not need full OpenCV installation for object detection. I have such ANPR projet here: https://github.com/LdDl/license_plate_recognition
-I guess when I'm done with stable core I might switch from Go's Darknet bindings to OpenCV one (since this project requires OpenCV installation obviously)
+I guess when I'm done with stable core I might switch from Go's Darknet bindings to OpenCV one (since ODaM-project requires OpenCV installation obviously)
 
 > What are your plans?
+
 There is [ROADMAP.md](ROADMAP.md), but overall I am planning to extend capabilities of software: 
 * Improve perfomance
 * Implement some cool tracking techniques (e.g. [SORT](https://arxiv.org/abs/1602.00763))
