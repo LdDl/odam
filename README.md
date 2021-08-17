@@ -102,7 +102,7 @@ It's built on top of [go-darknet](https://github.com/LdDl/go-darknet#go-darknet-
 
 After steps above done:
 ```
-go install github.com/LdDl/odam/cmd/odam@v0.8.2
+go install github.com/LdDl/odam/cmd/odam
 ```
 Check if executable available
 ```
