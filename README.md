@@ -65,7 +65,7 @@ But I do no think that I'm ready to build gRPC/REST or any other web components 
 
 > Why did you pick JSON for configuration purposes instead of TOML/YAML/INI or any other well-suited formats?
 
-1. Compared to TOML,JSON is not that 'human friendly', but still readable.
+1. Compared to TOML, JSON is not that 'human friendly', but still readable.
 2. It is in standart Go's library.
 3. Well, it is in standart Go's library.
 4. You got the idea.
