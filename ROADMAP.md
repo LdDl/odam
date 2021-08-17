@@ -45,6 +45,12 @@ New ideas, thoughts about needed features will be store in this file.
     * optional information about scaling source image
     * optional scaling track in pixel representation
 * codebase improvements (design, optimizations, clarifications and etc.)
+* Additional field 'targeted objects' in [odam.VirtualLine](virtual_lines.go#11) struct. After it's done odam.VirtualLine will be able to detect e.g. only pedestrians or only motorbikes for example.
+* Tracking in convex polygon:
+    * estimated time spent in polygon
+    * estimated speed (via GIS 'mapper' technique)
+    * objects filtering (same as with VirtualLine)
+    * integrate into gRPC
 
 ### Planned
 * Stable core (need many tests as possible)
@@ -54,12 +60,11 @@ New ideas, thoughts about needed features will be store in this file.
 * Some kind of wiki
 * Logo
 * Contributing guidelines
-* Additional field 'targeted objects' in [odam.VirtualLine](virtual_lines.go#11) struct. After it's done odam.VirtualLine will be able to detect only pedestrians or only motorbikes for example.
 * pedestrian detection
     * detect pedestrians
     * count pedestrians
     * speed estimation
-* SORT - https://arxiv.org/abs/1602.00763
+* Implement SORT - https://arxiv.org/abs/1602.00763
 * github tags: travis
 
 ### Continuous activity
