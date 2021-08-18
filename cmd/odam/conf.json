@@ -19,7 +19,7 @@
         "enable": true
     },
     "mjpeg_settings":{
-        "imshow_enable": false,
+        "imshow_enable": true,
         "enable": true,
         "port": 35678
     },

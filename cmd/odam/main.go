@@ -278,54 +278,16 @@ func main() {
 									}
 									bytesBuffer := buf.Bytes()
 									sendData := odam.ObjectInformation{
-										CamId:     settings.VideoSettings.CameraID,
-										Timestamp: catchedTimestamp,
-										Image:     bytesBuffer,
-										Detection: &odam.Detection{
-											XLeft:  xtop,
-											YTop:   ytop,
-											Width:  int32(cropRect.Dx()),
-											Height: int32(cropRect.Dy()),
-										},
-										Class: &odam.ClassInfo{
-											ClassId:   int32(b.GetClassID()),
-											ClassName: className,
-										},
-										VirtualLine: &odam.VirtualLineInfo{
-											Id:     vline.LineID,
-											LeftX:  int32(vline.VLine.SourceLeftPT.X),
-											LeftY:  int32(vline.VLine.SourceLeftPT.Y),
-											RightX: int32(vline.VLine.SourceRightPT.X),
-											RightY: int32(vline.VLine.SourceRightPT.Y),
-										},
+										CamId:       settings.VideoSettings.CameraID,
+										Timestamp:   catchedTimestamp,
+										Image:       bytesBuffer,
+										Detection:   odam.DetectionInfoGRPC(xtop, ytop, int32(cropRect.Dx()), int32(cropRect.Dy())),
+										Class:       odam.ClassInfoGRPC(b),
+										VirtualLine: odam.VirtualLineInfoGRPC(vline.LineID, vline.VLine),
 									}
 									// If it is needed to send speed and track information
 									if settings.TrackerSettings.SpeedEstimationSettings.SendGRPC {
-										// Extract estimated speed information
-										spd := float32(0.0)
-										if spdInterface, ok := b.GetProperty("speed"); ok {
-											switch spdInterface.(type) { // Want to be sure that interface is float32
-											case float32:
-												spd = spdInterface.(float32)
-												break
-											default:
-												break
-											}
-										}
-										trackPixels := b.GetTrack()
-										trackUnionInfo := make([]*odam.Point, len(trackPixels))
-										for i, stdPt := range trackPixels {
-											cvPt := odam.STDPointToGoCVPoint2F(stdPt)
-											gisPt := gisConverter(cvPt)
-											trackUnionInfo[i] = &odam.Point{
-												EuclideanPoint: &odam.EuclideanPoint{X: cvPt.X * float32(settings.VideoSettings.ScaleX), Y: cvPt.Y * float32(settings.VideoSettings.ScaleY)},
-												Wgs84Point:     &odam.WGS84Point{Longitude: gisPt.X, Latitude: gisPt.Y},
-											}
-										}
-										sendData.TrackInformation = &odam.TrackInfo{
-											EstimatedSpeed: spd,
-											Points:         trackUnionInfo,
-										}
+										sendData.TrackInformation = odam.TrackInfoInfoGRPC(b, "speed", float32(settings.VideoSettings.ScaleX), float32(settings.VideoSettings.ScaleY), gisConverter)
 									}
 									go sendDataToServer(grpcConn, &sendData)
 								}
