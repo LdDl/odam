@@ -327,8 +327,9 @@ You can check it [here](LICENSE.md)
 
 ## Developers
 
-cpllbstr https://github.com/cpllbstr
-
 LdDl https://github.com/LdDl
 
 Pavel7824 https://github.com/Pavel7824
+
+Former one: cpllbstr https://github.com/cpllbstr
+

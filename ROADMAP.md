@@ -38,6 +38,7 @@ New ideas, thoughts about needed features will be store in this file.
 * Integrate Kalman tracker
 * Extend configuration of conf.json file.
     * Allow to configure draw methods for each type of detected objects
+    
 ### W.I.P
 * design: current BBoxes and text info on imshow()/mjpeg-server are...ugly
 * provide video examples to show what this software capable of.
