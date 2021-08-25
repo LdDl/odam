@@ -3,10 +3,8 @@ package odam
 import (
 	"encoding/json"
 	"fmt"
-	"image"
 	"image/color"
 	"io/ioutil"
-	"math"
 	"os"
 	"strings"
 	"sync"
@@ -84,23 +82,8 @@ func NewSettings(fname string) (*AppSettings, error) {
 	}
 	for i := range appsettings.TrackerSettings.LinesSettings {
 		lsettings := &appsettings.TrackerSettings.LinesSettings[i]
-		x1 := math.Round(float64(lsettings.Begin[0]) / appsettings.VideoSettings.ScaleX)
-		y1 := math.Round(float64(lsettings.Begin[1]) / appsettings.VideoSettings.ScaleY)
-		x2 := math.Round(float64(lsettings.End[0]) / appsettings.VideoSettings.ScaleX)
-		y2 := math.Round(float64(lsettings.End[1]) / appsettings.VideoSettings.ScaleY)
-		vline := VirtualLine{
-			LeftPT:        image.Point{X: int(x1), Y: int(y1)},
-			RightPT:       image.Point{X: int(x2), Y: int(y2)},
-			SourceLeftPT:  image.Point{X: lsettings.Begin[0], Y: lsettings.Begin[1]},
-			SourceRightPT: image.Point{X: lsettings.End[0], Y: lsettings.End[1]},
-			Direction:     true,
-			Color:         color.RGBA{lsettings.RGBA[0], lsettings.RGBA[1], lsettings.RGBA[2], lsettings.RGBA[3]},
-		}
-		if int(y1) == int(y2) {
-			vline.LineType = HORIZONTAL_LINE
-		} else {
-			vline.LineType = OBLIQUE_LINE
-		}
+		vline := NewVirtualLine(lsettings.Begin[0], lsettings.Begin[1], lsettings.End[0], lsettings.End[1], appsettings.VideoSettings.ScaleX, appsettings.VideoSettings.ScaleY)
+		vline.Color = color.RGBA{lsettings.RGBA[0], lsettings.RGBA[1], lsettings.RGBA[2], lsettings.RGBA[3]}
 		if lsettings.Direction == "from_detector" {
 			vline.Direction = false
 		}
@@ -116,7 +99,7 @@ func NewSettings(fname string) (*AppSettings, error) {
 			vline.CropObject = true
 			break
 		}
-		lsettings.VLine = &vline
+		lsettings.VLine = vline
 	}
 
 	if appsettings.TrackerSettings.MaxPointsInTrack < 1 {
