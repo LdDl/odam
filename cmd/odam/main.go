@@ -219,12 +219,7 @@ func main() {
 					for _, b := range allblobies.Objects {
 						className := b.GetClassName()
 						if stringInSlice(&className, vline.DetectClasses) { // Detect if object should be detected by virtual line (filter by classname)
-							crossedLine := false
-							if vline.VLine.LineType == odam.HORIZONTAL_LINE {
-								crossedLine = b.IsCrossedTheLine(vline.VLine.RightPT.Y, vline.VLine.LeftPT.X, vline.VLine.RightPT.X, vline.VLine.Direction)
-							} else if vline.VLine.LineType == odam.OBLIQUE_LINE {
-								crossedLine = b.IsCrossedTheObliqueLine(vline.VLine.RightPT.X, vline.VLine.RightPT.Y, vline.VLine.LeftPT.X, vline.VLine.LeftPT.Y, vline.VLine.Direction)
-							}
+							crossedLine := vline.VLine.IsBlobCrossedLine(b)
 							// If object crossed the virtual line
 							if crossedLine {
 								catchedTimestamp := time.Now().UTC().Unix()
