@@ -41,26 +41,32 @@ type VirtualLine struct {
 // Constructor for VirtualLine
 // (x1, y1) - Left
 // (x2, y2) - Right
-// (scaleX, scaleY) - How to scale source (x1,y1) and (x2,y2) coordinates
-// @todo scaling in black box - pretty bad idea. I guess we must have .Scale(x,y) method to call it if needed.
-func NewVirtualLine(x1, y1, x2, y2 int, scaleX, scaleY float64) *VirtualLine {
-	x1Scaled := int(math.Round(float64(x1) / scaleX))
-	y1Scaled := int(math.Round(float64(y1) / scaleY))
-	x2Scaled := int(math.Round(float64(x2) / scaleX))
-	y2Scaled := int(math.Round(float64(y2) / scaleY))
+func NewVirtualLine(x1, y1, x2, y2 int) *VirtualLine {
 	vline := VirtualLine{
-		LeftPT:        image.Point{X: x1Scaled, Y: y1Scaled},
-		RightPT:       image.Point{X: x2Scaled, Y: y2Scaled},
+		LeftPT:        image.Point{X: x1, Y: y1},
+		RightPT:       image.Point{X: x2, Y: y2},
 		SourceLeftPT:  image.Point{X: x1, Y: y1},
 		SourceRightPT: image.Point{X: x2, Y: y2},
 		Direction:     true,
 	}
-	if y1Scaled == y2Scaled {
+	if y1 == y2 {
 		vline.LineType = HORIZONTAL_LINE
 	} else {
 		vline.LineType = OBLIQUE_LINE
 	}
 	return &vline
+}
+
+// Scale Scales down (so scale factor can be > 1.0 ) virtual line
+// (scaleX, scaleY) - How to scale source (x1,y1) and (x2,y2) coordinates
+// Important notice:
+// 1. Source coordinates won't be modified
+// 2. Source coordinates would be used for scaling. So you can't scale line multiple times
+func (vline *VirtualLine) Scale(scaleX, scaleY float64) {
+	vline.LeftPT.X = int(math.Round(float64(vline.SourceLeftPT.X) / scaleX))
+	vline.LeftPT.Y = int(math.Round(float64(vline.SourceLeftPT.Y) / scaleY))
+	vline.RightPT.X = int(math.Round(float64(vline.SourceRightPT.X) / scaleX))
+	vline.RightPT.Y = int(math.Round(float64(vline.SourceRightPT.Y) / scaleY))
 }
 
 // Draw Draw virtual line on image

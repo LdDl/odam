@@ -82,7 +82,8 @@ func NewSettings(fname string) (*AppSettings, error) {
 	}
 	for i := range appsettings.TrackerSettings.LinesSettings {
 		lsettings := &appsettings.TrackerSettings.LinesSettings[i]
-		vline := NewVirtualLine(lsettings.Begin[0], lsettings.Begin[1], lsettings.End[0], lsettings.End[1], appsettings.VideoSettings.ScaleX, appsettings.VideoSettings.ScaleY)
+		vline := NewVirtualLine(lsettings.Begin[0], lsettings.Begin[1], lsettings.End[0], lsettings.End[1])
+		vline.Scale(appsettings.VideoSettings.ScaleX, appsettings.VideoSettings.ScaleY)
 		vline.Color = color.RGBA{lsettings.RGBA[0], lsettings.RGBA[1], lsettings.RGBA[2], lsettings.RGBA[3]}
 		if lsettings.Direction == "from_detector" {
 			vline.Direction = false
