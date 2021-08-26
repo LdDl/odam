@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"math"
 
+	blob "github.com/LdDl/gocv-blob/v2/blob"
 	"gocv.io/x/gocv"
 )
 
@@ -72,4 +73,20 @@ func (vline *VirtualLine) Scale(scaleX, scaleY float64) {
 // Draw Draw virtual line on image
 func (vline *VirtualLine) Draw(img *gocv.Mat) {
 	gocv.Line(img, vline.LeftPT, vline.RightPT, vline.Color, 3)
+}
+
+// IsBlobCrossedLine Wrapper around b.IsCrossedTheLine(y2,x1,y1,direction) and b.IsCrossedTheObliqueLine(x2,y2,x1,y1,direction).
+// See ref. https://github.com/LdDl/gocv-blob/blob/master/v2/blob/line_cross.go
+func (vline *VirtualLine) IsBlobCrossedLine(b blob.Blobie) bool {
+	switch vline.LineType {
+	case HORIZONTAL_LINE:
+		return b.IsCrossedTheLine(vline.RightPT.Y, vline.LeftPT.X, vline.RightPT.X, vline.Direction)
+	case OBLIQUE_LINE:
+		return b.IsCrossedTheObliqueLine(vline.RightPT.X, vline.RightPT.Y, vline.LeftPT.X, vline.LeftPT.Y, vline.Direction)
+	default:
+		// This actually should not happen
+		// Is this really needed to have error returning in this function?
+		break
+	}
+	return false
 }
