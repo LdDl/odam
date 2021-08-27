@@ -95,7 +95,7 @@ func TestLineCross(t *testing.T) {
 	// Opossite direction
 	for i, vline := range vlines {
 		vline.Direction = !constDirections[i]
-		/* Creating same set of blobies every time because b.IsCrossedTheLine(...) and b.(...) methods modifies IsCrossedTheObliqueLine private field of blob (blob.crossedLine) */
+		/* Creating same set of blobies every time because b.IsCrossedTheLine(...) and b.IsCrossedTheObliqueLine(...) methods modifies private field of blob (blob.crossedLine) */
 		allblobies := blob.NewBlobiesDefaults()
 		simpleB_time0 := blob.NewSimpleBlobie(image.Rect(26, 8, 44, 18), nil)
 		simpleB_time1 := blob.NewSimpleBlobie(image.Rect(26, 20, 44, 30), nil)
