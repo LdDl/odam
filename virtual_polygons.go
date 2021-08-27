@@ -6,12 +6,12 @@ import (
 	"math"
 )
 
-// POLYGON_TYPE Alias to int
-type POLYGON_TYPE int
+// VIRTUAL_POLYGON_TYPE Alias to int
+type VIRTUAL_POLYGON_TYPE int
 
 const (
 	// CONVEX_POLYGON See ref. https://en.wikipedia.org/wiki/Convex_polygon
-	CONVEX_POLYGON = POLYGON_TYPE(iota + 1)
+	CONVEX_POLYGON = VIRTUAL_POLYGON_TYPE(iota + 1)
 	// CONCAVE_POLYGON See ref. https://en.wikipedia.org/wiki/Concave_polygon
 	CONCAVE_POLYGON
 )
@@ -25,20 +25,20 @@ type VirtualPolygon struct {
 	// Information about coordinates [non-scaled]
 	SourceCoordinates []image.Point `json:"-"`
 	// Type of virtual polygon: could be convex or concave
-	PolygonType POLYGON_TYPE `json:"-"`
+	PolygonType VIRTUAL_POLYGON_TYPE `json:"-"`
 }
 
 // Constructor for VirtualPolygon
 // (x1, y1) - Left
 // (x2, y2) - Right
-func NewVirtualPolygon(pairs ...[2]int) *VirtualPolygon {
+func NewVirtualPolygon(pairs ...image.Point) *VirtualPolygon {
 	vpolygon := VirtualPolygon{
 		Coordinates:       make([]image.Point, len(pairs)),
 		SourceCoordinates: make([]image.Point, len(pairs)),
 	}
 	for i := range pairs {
-		vpolygon.Coordinates[i] = image.Point{X: pairs[i][0], Y: pairs[i][1]}
-		vpolygon.SourceCoordinates[i] = image.Point{X: pairs[i][0], Y: pairs[i][1]}
+		vpolygon.Coordinates[i] = image.Point{X: pairs[i].X, Y: pairs[i].X}
+		vpolygon.SourceCoordinates[i] = image.Point{X: pairs[i].X, Y: pairs[i].Y}
 	}
 	if vpolygon.isConvex() {
 		vpolygon.PolygonType = CONVEX_POLYGON
