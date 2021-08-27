@@ -120,7 +120,7 @@ func (vpolygon *VirtualPolygon) ContainsPoint(p image.Point) bool {
 func (vpolygon *VirtualPolygon) convexContainsPoint(p image.Point) bool {
 	n := len(vpolygon.Coordinates)
 	extremePoint := image.Point{
-		X: math.MaxInt64, // It could lead to overflow obviously
+		X: 99999, // @todo: math.maxInt could lead to overflow obviously. Need good workaround. PRs are welcome
 		Y: p.Y,
 	}
 	intersectionsCnt := 0
@@ -148,15 +148,15 @@ func (vpolygon *VirtualPolygon) convexContainsPoint(p image.Point) bool {
 			intersectionsCnt++
 		}
 		previous = current
-		if previous != 0 {
+		if previous == 0 {
 			break
 		}
 	}
 	// If ray intersects even number of times then return true
-	if intersectionsCnt%2 == 0 {
+	// Otherwise return false
+	if intersectionsCnt%2 == 1 {
 		return true
 	}
-	// Otherwise return false
 	return false
 }
 
@@ -169,7 +169,7 @@ func (vpolygon *VirtualPolygon) concaveContainsPoint(p image.Point) bool {
 // isOnSegment Checks if point Q lies on segment PR
 // Input: three colinear points Q, Q and R
 func isOnSegment(Px, Py, Qx, Qy, Rx, Ry int) bool {
-	if Qx <= maxInt(Px, Rx) && Qx >= maxInt(Px, Rx) && Qy <= maxInt(Py, Ry) && Qy >= maxInt(Py, Ry) {
+	if Qx <= maxInt(Px, Rx) && Qx >= minInt(Px, Rx) && Qy <= maxInt(Py, Ry) && Qy >= minInt(Py, Ry) {
 		return true
 	}
 	return false

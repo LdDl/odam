@@ -15,6 +15,13 @@ func maxInt(x, y int) int {
 	return y
 }
 
+func minInt(x, y int) int {
+	if x < y {
+		return x
+	}
+	return y
+}
+
 // Round Rounds float64 to int
 func Round(v float64) int {
 	if v >= 0 {
