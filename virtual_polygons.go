@@ -1,6 +1,7 @@
 package odam
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"math"
@@ -37,7 +38,7 @@ func NewVirtualPolygon(pairs ...image.Point) *VirtualPolygon {
 		SourceCoordinates: make([]image.Point, len(pairs)),
 	}
 	for i := range pairs {
-		vpolygon.Coordinates[i] = image.Point{X: pairs[i].X, Y: pairs[i].X}
+		vpolygon.Coordinates[i] = image.Point{X: pairs[i].X, Y: pairs[i].Y}
 		vpolygon.SourceCoordinates[i] = image.Point{X: pairs[i].X, Y: pairs[i].Y}
 	}
 	if vpolygon.isConvex() {
@@ -59,6 +60,14 @@ func (vpolygon *VirtualPolygon) isConvex() bool {
 	previousCrossProduct := 0
 	currentCrossProduct := 0
 	for i := range vpolygon.Coordinates {
+		fmt.Println("temp", vpolygon.Coordinates[i], vpolygon.Coordinates[(i+1)%n], vpolygon.Coordinates[(i+2)%n])
+
+		// temp (0,0) (0,0) (5,5)
+		// temp (0,0) (5,5) (10,10)
+		// temp (5,5) (10,10) (10,10)
+		// temp (10,10) (10,10) (0,0)
+		// temp (10,10) (0,0) (0,0)
+
 		currentCrossProduct = crossProduct(vpolygon.Coordinates[i], vpolygon.Coordinates[(i+1)%n], vpolygon.Coordinates[(i+2)%n])
 		if currentCrossProduct != 0 {
 			if currentCrossProduct*previousCrossProduct < 0 {
