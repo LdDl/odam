@@ -11,8 +11,8 @@ type POLYGON_TYPE int
 const (
 	// CONVEX_POLYGON See ref. https://en.wikipedia.org/wiki/Convex_polygon
 	CONVEX_POLYGON = POLYGON_TYPE(iota + 1)
-	// NOT_CONVEX_POLYGON See ref. https://en.wikipedia.org/wiki/Concave_polygon
-	NOT_CONVEX_POLYGON
+	// CONCAVE_POLYGON See ref. https://en.wikipedia.org/wiki/Concave_polygon
+	CONCAVE_POLYGON
 )
 
 // VirtualPolygon Detection polygon attributes
@@ -42,7 +42,7 @@ func NewVirtualPolygon(pairs ...[2]int) *VirtualPolygon {
 	if vpolygon.isConvex() {
 		vpolygon.PolygonType = CONVEX_POLYGON
 	} else {
-		vpolygon.PolygonType = NOT_CONVEX_POLYGON
+		vpolygon.PolygonType = CONCAVE_POLYGON
 	}
 	return &vpolygon
 }
