@@ -48,7 +48,9 @@ func NewVirtualPolygon(pairs ...[2]int) *VirtualPolygon {
 	return &vpolygon
 }
 
+// isConvex check if polygon either convex or concave
 func (vpolygon *VirtualPolygon) isConvex() bool {
+	// time complexity: O(n)
 	n := len(vpolygon.Coordinates)
 	if n < 3 {
 		// Well, this is not that strange if polygon have been prepared wrongly
@@ -69,6 +71,7 @@ func (vpolygon *VirtualPolygon) isConvex() bool {
 	return true
 }
 
+// crossProduct Cross product of two vectors
 func crossProduct(a image.Point, b image.Point, c image.Point) int {
 	// direction of vector b.x -> a.x
 	x1 := b.X - a.X
