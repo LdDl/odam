@@ -1,7 +1,6 @@
 package odam
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"math"
@@ -60,14 +59,6 @@ func (vpolygon *VirtualPolygon) isConvex() bool {
 	previousCrossProduct := 0
 	currentCrossProduct := 0
 	for i := range vpolygon.Coordinates {
-		fmt.Println("temp", vpolygon.Coordinates[i], vpolygon.Coordinates[(i+1)%n], vpolygon.Coordinates[(i+2)%n])
-
-		// temp (0,0) (0,0) (5,5)
-		// temp (0,0) (5,5) (10,10)
-		// temp (5,5) (10,10) (10,10)
-		// temp (10,10) (10,10) (0,0)
-		// temp (10,10) (0,0) (0,0)
-
 		currentCrossProduct = crossProduct(vpolygon.Coordinates[i], vpolygon.Coordinates[(i+1)%n], vpolygon.Coordinates[(i+2)%n])
 		if currentCrossProduct != 0 {
 			if currentCrossProduct*previousCrossProduct < 0 {
@@ -90,7 +81,7 @@ func crossProduct(a image.Point, b image.Point, c image.Point) int {
 	x2 := c.X - a.X
 	// direction of vector c.y -> a.y
 	y2 := c.Y - a.Y
-	return x1*y2 + y1*x2
+	return x1*y2 - y1*x2
 }
 
 // Scale Scales down (so scale factor can be > 1.0 ) virtual polygon
