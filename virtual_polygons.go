@@ -3,6 +3,7 @@ package odam
 import (
 	"image"
 	"image/color"
+	"math"
 )
 
 // POLYGON_TYPE Alias to int
@@ -78,4 +79,16 @@ func crossProduct(a image.Point, b image.Point, c image.Point) int {
 	// direction of vector c.y -> a.y
 	y2 := c.Y - a.Y
 	return x1*y2 + y1*x2
+}
+
+// Scale Scales down (so scale factor can be > 1.0 ) virtual polygon
+// (scaleX, scaleY) - How to scale source (x1,y1) and (x2,y2) coordinates
+// Important notice:
+// 1. Source coordinates won't be modified
+// 2. Source coordinates would be used for scaling. So you can't scale polygon multiple times
+func (vpolygon *VirtualPolygon) Scale(scaleX, scaleY float64) {
+	for i := range vpolygon.Coordinates {
+		vpolygon.Coordinates[i].X = int(math.Round(float64(vpolygon.Coordinates[i].X) / scaleX))
+		vpolygon.Coordinates[i].Y = int(math.Round(float64(vpolygon.Coordinates[i].Y) / scaleY))
+	}
 }
