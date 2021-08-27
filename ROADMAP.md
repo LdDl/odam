@@ -47,7 +47,7 @@ New ideas, thoughts about needed features will be store in this file.
     * optional scaling track in pixel representation
 * codebase improvements (design, optimizations, clarifications and etc.)
 * Additional field 'targeted objects' in [odam.VirtualLine](virtual_lines.go#11) struct. After it's done odam.VirtualLine will be able to detect e.g. only pedestrians or only motorbikes for example.
-* Tracking in convex polygon: <<=== Current state (24.08.2021) Done with polygons. But need to do proper spatial convertions and calculations
+* Tracking in convex polygon: <<=== Current state (27.08.2021) Done with convex polygons main math.
     * estimated time spent in polygon
     * estimated speed (via GIS 'mapper' technique)
     * objects filtering (same as with VirtualLine)
