@@ -24,7 +24,7 @@ func TestPolygonType(t *testing.T) {
 			image.Point{X: 0, Y: 0},
 			image.Point{X: 5, Y: 0},
 			image.Point{X: 5, Y: 5},
-			image.Point{X: 7, Y: 3},
+			image.Point{X: 3, Y: 7},
 			image.Point{X: 0, Y: 1},
 		),
 	}
