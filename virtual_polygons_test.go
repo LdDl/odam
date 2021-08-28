@@ -3,6 +3,8 @@ package odam
 import (
 	"image"
 	"testing"
+
+	blob "github.com/LdDl/gocv-blob/v2/blob"
 )
 
 func TestPolygonType(t *testing.T) {
@@ -43,8 +45,7 @@ func TestPolygonType(t *testing.T) {
 		}
 	}
 }
-
-func TestPolygonContains(t *testing.T) {
+func TestPolygonContainsPoint(t *testing.T) {
 	vpolygons := []*VirtualPolygon{
 		NewVirtualPolygon(
 			image.Point{X: 0, Y: 0},
@@ -109,4 +110,20 @@ func TestPolygonContains(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestPolygonContainsBlob(t *testing.T) {
+	simpleA := blob.NewSimpleBlobie(image.Rect(26, 8, 44, 18), nil)
+	simpleB := blob.NewSimpleBlobie(image.Rect(59, 8, 77, 23), nil)
+	simpleC := blob.NewSimpleBlobie(image.Rect(40, 29, 61, 46), nil)
+	_, _, _ = simpleA, simpleB, simpleC
+	// @todo
+}
+
+func TestPolygonBlobEnter(t *testing.T) {
+	// @todo
+}
+
+func TestPolygonBlobLeft(t *testing.T) {
+	// @todo
 }
