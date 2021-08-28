@@ -24,7 +24,7 @@ import (
 var (
 	settingsFile    = flag.String("settings", "conf.json", "Path to application's settings")
 	imagesChannel   chan *odam.FrameData
-	detectedChannel chan []*odam.DetectedObject
+	detectedChannel chan odam.DetectedObjects
 )
 
 func main() {
@@ -119,7 +119,7 @@ func main() {
 
 	/* Initialize channels */
 	imagesChannel = make(chan *odam.FrameData, 1)
-	detectedChannel = make(chan []*odam.DetectedObject)
+	detectedChannel = make(chan odam.DetectedObjects)
 	img := odam.NewFrameData()
 
 	/* Read first frame */
@@ -137,7 +137,7 @@ func main() {
 	processFrame(img)
 
 	/* Prepare variable for channel reading */
-	detected := []*odam.DetectedObject{}
+	detected := odam.DetectedObjects{}
 
 	/* Start goroutine for object detection purposes */
 	go performDetection(&neuralNet, settings.NeuralNetworkSettings.TargetClasses)
