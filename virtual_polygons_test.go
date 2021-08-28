@@ -142,21 +142,33 @@ func TestPolygonContainsBlob(t *testing.T) {
 }
 
 func TestPolygonBlobEnter(t *testing.T) {
-	simpleTime0 := blob.NewSimpleBlobie(image.Rect(30, 2, 43, 13), nil)
-	simpleTime1 := blob.NewSimpleBlobie(image.Rect(28, 8, 41, 18), nil)
-	simpleTime2 := blob.NewSimpleBlobie(image.Rect(29, 17, 43, 26), nil)
-	allblobies := blob.NewBlobiesDefaults()
-	allblobies.MatchToExisting([]blob.Blobie{simpleTime0, simpleTime1, simpleTime2})
+	simpleATime0 := blob.NewSimpleBlobie(image.Rect(30, 2, 43, 13), nil)
+	simpleATime1 := blob.NewSimpleBlobie(image.Rect(28, 8, 41, 18), nil)
+	simpleATime2 := blob.NewSimpleBlobie(image.Rect(29, 17, 43, 26), nil)
+	allblobiesEnter := blob.NewBlobiesDefaults()
+	allblobiesEnter.MatchToExisting([]blob.Blobie{simpleATime0, simpleATime1, simpleATime2})
 	vpolygon := NewVirtualPolygon(
 		image.Point{X: 23, Y: 15},
 		image.Point{X: 67, Y: 15},
 		image.Point{X: 67, Y: 41},
 		image.Point{X: 23, Y: 41},
 	)
-	for _, b := range allblobies.Objects {
+	for _, b := range allblobiesEnter.Objects {
 		center := b.GetCenter()
 		if !vpolygon.BlobEntered(b) {
 			t.Errorf("Blob with center at [%d, %d] should has been entered to polygon with coordinates %v", center.X, center.Y, vpolygon.Coordinates)
+		}
+	}
+
+	simpleBTime0 := blob.NewSimpleBlobie(image.Rect(38, 32, 52, 39), nil)
+	simpleBTime1 := blob.NewSimpleBlobie(image.Rect(40, 35, 53, 42), nil)
+	simpleBTime2 := blob.NewSimpleBlobie(image.Rect(42, 42, 56, 50), nil)
+	allblobiesLeft := blob.NewBlobiesDefaults()
+	allblobiesLeft.MatchToExisting([]blob.Blobie{simpleBTime0, simpleBTime1, simpleBTime2})
+	for _, b := range allblobiesLeft.Objects {
+		center := b.GetCenter()
+		if vpolygon.BlobEntered(b) {
+			t.Errorf("Blob with center at [%d, %d] should has NOT been entered to polygon with coordinates %v", center.X, center.Y, vpolygon.Coordinates)
 		}
 	}
 }
