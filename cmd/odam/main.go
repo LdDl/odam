@@ -28,7 +28,6 @@ var (
 	imagesChannel   chan *odam.FrameData
 	detectedChannel chan []*odam.DetectedObject
 	detected        []*odam.DetectedObject
-	allblobies      *blob.Blobies
 )
 
 func main() {
@@ -81,7 +80,7 @@ func main() {
 	defer neuralNet.Close()
 
 	/* Initialize objects tracker */
-	allblobies = blob.NewBlobiesDefaults()
+	allblobies := blob.NewBlobiesDefaults()
 	trackerType := settings.TrackerSettings.GetTrackerType()
 	fmt.Printf("Using tracker: '%s'\n", settings.TrackerSettings.TrackerType)
 
