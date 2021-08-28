@@ -28,7 +28,7 @@ func (trs *TrackerSettings) GetTrackerType() TRACKER_TYPE {
 	return trs.trackerType
 }
 
-// Prepare Prepares some fields for some internals
+// Prepare Prepares this structure for further usage
 func (trs *TrackerSettings) Prepare() {
 	switch strings.ToLower(trs.TrackerType) {
 	case "simple":

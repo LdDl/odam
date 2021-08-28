@@ -25,38 +25,16 @@ func NewSettings(fname string) (*AppSettings, error) {
 		return nil, err
 	}
 
-	if appsettings.VideoSettings.Width <= 0 {
-		appsettings.VideoSettings.Width = 640
-		fmt.Println("[WARNING] Field 'width' in 'video_settings' has not been provided (or <=0). Using default 640 width")
+	// Prepare video settings
+	if appsettings.VideoSettings == nil {
+		return nil, fmt.Errorf("Field 'video_settings' has not been provided in configuration file")
 	}
-
-	if appsettings.VideoSettings.Height <= 0 {
-		appsettings.VideoSettings.Height = 360
-		fmt.Println("[WARNING] Field 'height' in 'video_settings' has not been provided (or <=0). Using default 360 height")
-	}
-
-	if appsettings.VideoSettings.ReducedWidth <= 0 {
-		appsettings.VideoSettings.ReducedWidth = appsettings.VideoSettings.Width
-		fmt.Println("[WARNING] Field 'reduced_width' in 'video_settings' has not been provided (or <=0). Using default reduced_width = width")
-	}
-	if appsettings.VideoSettings.ReducedHeight <= 0 {
-		appsettings.VideoSettings.ReducedHeight = appsettings.VideoSettings.Height
-		fmt.Println("[WARNING] Field 'reduced_height' in 'video_settings' has not been provided (or <=0). Using default reduced_height = height")
-	}
-
-	if appsettings.VideoSettings.ReducedWidth > appsettings.VideoSettings.Width {
-		appsettings.VideoSettings.ReducedWidth = appsettings.VideoSettings.Width
-		fmt.Println("[WARNING] Field 'reduced_width' in 'video_settings' > 'width'. Using default reduced_width = width")
-	}
-	if appsettings.VideoSettings.ReducedHeight > appsettings.VideoSettings.Height {
-		appsettings.VideoSettings.ReducedHeight = appsettings.VideoSettings.Height
-		fmt.Println("[WARNING] Field 'reduced_height' in 'video_settings' > 'height'. Using default reduced_height = height")
-	}
-
-	appsettings.VideoSettings.ScaleX = float64(appsettings.VideoSettings.Width) / float64(appsettings.VideoSettings.ReducedWidth)
-	appsettings.VideoSettings.ScaleY = float64(appsettings.VideoSettings.Height) / float64(appsettings.VideoSettings.ReducedHeight)
+	appsettings.VideoSettings.Prepare()
 
 	// Prepare tracker settings
+	if appsettings.TrackerSettings == nil {
+		return nil, fmt.Errorf("Field 'tracker_settings' has not been provided in configuration file")
+	}
 	appsettings.TrackerSettings.Prepare()
 	// Scale virtual line
 	for _, lsettings := range appsettings.TrackerSettings.LinesSettings {
@@ -88,13 +66,13 @@ func NewSettings(fname string) (*AppSettings, error) {
 
 // AppSettings Settings for application
 type AppSettings struct {
-	VideoSettings         VideoSettings         `json:"video_settings"`
+	VideoSettings         *VideoSettings        `json:"video_settings"`
 	NeuralNetworkSettings NeuralNetworkSettings `json:"neural_network_settings"`
 	CudaSettings          CudaSettings          `json:"cuda_settings"`
 	MjpegSettings         MjpegSettings         `json:"mjpeg_settings"`
 	GrpcSettings          GrpcSettings          `json:"grpc_settings"`
 	ClassesSettings       []*ClassesSettings    `json:"classes_settings"`
-	TrackerSettings       TrackerSettings       `json:"tracker_settings"`
+	TrackerSettings       *TrackerSettings      `json:"tracker_settings"`
 	MatPPROFSettings      MatPPROFSettings      `json:"matpprof_settings"`
 
 	sync.RWMutex
@@ -164,20 +142,6 @@ type NeuralNetworkSettings struct {
 	ConfThreshold float64  `json:"conf_threshold"`
 	NmsThreshold  float64  `json:"nms_threshold"`
 	TargetClasses []string `json:"target_classes"`
-}
-
-// VideoSettings Settings for video
-type VideoSettings struct {
-	Source        string `json:"source"`
-	Width         int    `json:"width"`
-	Height        int    `json:"height"`
-	ReducedWidth  int    `json:"reduced_width"`
-	ReducedHeight int    `json:"reduced_height"`
-	CameraID      string `json:"camera_id"`
-
-	// Exported, but not from JSON
-	ScaleX float64 `json:"-"`
-	ScaleY float64 `json:"-"`
 }
 
 // LinesSetting Virtual lines
