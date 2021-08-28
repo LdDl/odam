@@ -89,7 +89,7 @@ func TestPolygonContainsPoint(t *testing.T) {
 		image.Point{X: 7, Y: 2},
 		image.Point{X: -2, Y: 12},
 	}
-	correctAnswer := []bool{
+	correctAnswers := []bool{
 		false,
 		true,
 		true,
@@ -102,8 +102,8 @@ func TestPolygonContainsPoint(t *testing.T) {
 			t.Errorf("Polygon with coordinates %v should be of convex, but it is not. Got type: '%d'", vpolygon.Coordinates, vpolygon.PolygonType)
 		}
 		answer := vpolygon.ContainsPoint(points[i])
-		if answer != correctAnswer[i] {
-			if correctAnswer[i] {
+		if answer != correctAnswers[i] {
+			if correctAnswers[i] {
 				t.Errorf("Polygon with coordinates %v should contain point [%d, %d]. Actual answer is %t", vpolygon.Coordinates, points[i].X, points[i].Y, answer)
 			} else {
 				t.Errorf("Polygon with coordinates %v should not contain point [%d, %d]. Actual answer is %t", vpolygon.Coordinates, points[i].X, points[i].Y, answer)
@@ -116,8 +116,29 @@ func TestPolygonContainsBlob(t *testing.T) {
 	simpleA := blob.NewSimpleBlobie(image.Rect(26, 8, 44, 18), nil)
 	simpleB := blob.NewSimpleBlobie(image.Rect(59, 8, 77, 23), nil)
 	simpleC := blob.NewSimpleBlobie(image.Rect(40, 29, 61, 46), nil)
-	_, _, _ = simpleA, simpleB, simpleC
-	// @todo
+	blobies := []blob.Blobie{simpleA, simpleB, simpleC}
+	vpolygon := NewVirtualPolygon(
+		image.Point{X: 23, Y: 15},
+		image.Point{X: 67, Y: 15},
+		image.Point{X: 67, Y: 41},
+		image.Point{X: 23, Y: 41},
+	)
+	correctAnswers := []bool{
+		false,
+		false,
+		true,
+	}
+	for i, b := range blobies {
+		center := b.GetCenter()
+		answer := vpolygon.ContainsBlob(b)
+		if answer != correctAnswers[i] {
+			if correctAnswers[i] {
+				t.Errorf("Polygon with coordinates %v should contain blob center at [%d, %d]. Actual answer is %t", vpolygon.Coordinates, center.X, center.Y, answer)
+			} else {
+				t.Errorf("Polygon with coordinates %v should not contain blob with center at [%d, %d]. Actual answer is %t", vpolygon.Coordinates, center.X, center.Y, answer)
+			}
+		}
+	}
 }
 
 func TestPolygonBlobEnter(t *testing.T) {
