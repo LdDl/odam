@@ -3,10 +3,8 @@ package odam
 import (
 	"encoding/json"
 	"fmt"
-	"image/color"
 	"io/ioutil"
 	"os"
-	"strings"
 	"sync"
 )
 
@@ -58,54 +56,11 @@ func NewSettings(fname string) (*AppSettings, error) {
 	appsettings.VideoSettings.ScaleX = float64(appsettings.VideoSettings.Width) / float64(appsettings.VideoSettings.ReducedWidth)
 	appsettings.VideoSettings.ScaleY = float64(appsettings.VideoSettings.Height) / float64(appsettings.VideoSettings.ReducedHeight)
 
-	switch strings.ToLower(appsettings.TrackerSettings.TrackerType) {
-	case "simple":
-		appsettings.TrackerSettings.TrackerType = strings.ToLower(appsettings.TrackerSettings.TrackerType)
-		appsettings.TrackerSettings.trackerType = TRACKER_SIMPLE
-		break
-	case "kalman":
-		appsettings.TrackerSettings.TrackerType = strings.ToLower(appsettings.TrackerSettings.TrackerType)
-		appsettings.TrackerSettings.trackerType = TRACKER_KALMAN
-		break
-	case "":
-		fmt.Println("[WARNING]: Field 'tracker_type' is empty. Settings default value 'simple'")
-		appsettings.TrackerSettings.TrackerType = "simple"
-		appsettings.TrackerSettings.trackerType = TRACKER_SIMPLE
-	default:
-		fmt.Printf("[WARNING]: Value '%s' 'tracker_type' is not supported. Settings default value 'simple'\n", appsettings.TrackerSettings.TrackerType)
-		appsettings.TrackerSettings.TrackerType = "simple"
-		appsettings.TrackerSettings.trackerType = TRACKER_SIMPLE
-		break
-	}
-	if len(appsettings.TrackerSettings.LinesSettings) == 0 {
-		fmt.Println("[WARNING] No 'lines_settings'? Please check it")
-	}
-	for i := range appsettings.TrackerSettings.LinesSettings {
-		lsettings := &appsettings.TrackerSettings.LinesSettings[i]
-		vline := NewVirtualLine(lsettings.Begin[0], lsettings.Begin[1], lsettings.End[0], lsettings.End[1])
-		vline.Scale(appsettings.VideoSettings.ScaleX, appsettings.VideoSettings.ScaleY)
-		vline.Color = color.RGBA{lsettings.RGBA[0], lsettings.RGBA[1], lsettings.RGBA[2], lsettings.RGBA[3]}
-		if lsettings.Direction == "from_detector" {
-			vline.Direction = false
-		}
-		switch lsettings.CropMode {
-		case "crop":
-			vline.CropObject = true
-			break
-		case "no_crop":
-			vline.CropObject = false
-			break
-		default:
-			fmt.Printf("[WARNING] Field 'crop_mode' for line (id = '%d') can't be '%s'. Setting default value = 'crop'\n", lsettings.LineID, lsettings.CropMode)
-			vline.CropObject = true
-			break
-		}
-		lsettings.VLine = vline
-	}
-
-	if appsettings.TrackerSettings.MaxPointsInTrack < 1 {
-		fmt.Printf("[WARNING] Field 'max_points_in_track' shoudle be >= 1, but got '%d'. Setting default value = 10\n", appsettings.TrackerSettings.MaxPointsInTrack)
-		appsettings.TrackerSettings.MaxPointsInTrack = 10
+	// Prepare tracker settings
+	appsettings.TrackerSettings.Prepare()
+	// Scale virtual line
+	for _, lsettings := range appsettings.TrackerSettings.LinesSettings {
+		lsettings.VLine.Scale(appsettings.VideoSettings.ScaleX, appsettings.VideoSettings.ScaleY)
 	}
 
 	// Prepare drawing options for each class defined in 'neural_network_settings'
