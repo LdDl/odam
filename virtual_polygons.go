@@ -99,6 +99,8 @@ func (vpolygon *VirtualPolygon) Scale(scaleX, scaleY float64) {
 }
 
 // BlobEntered Checks if an object has entered the polygon
+// Let's clarify for future questions: we are assuming the object is represented by a center, not a bounding box
+// So object has entered polygon when its center had entered polygon too
 func (vpolygon *VirtualPolygon) BlobEntered(b blob.Blobie) bool {
 	track := b.GetTrack()
 	n := len(track)
@@ -116,6 +118,8 @@ func (vpolygon *VirtualPolygon) BlobEntered(b blob.Blobie) bool {
 }
 
 // BlobLeft Checks if an object has left the polygon
+// Let's clarify for future questions: we are assuming the object is represented by a center, not a bounding box
+// So object has left polygon when its center had left polygon too
 func (vpolygon *VirtualPolygon) BlobLeft(b blob.Blobie) bool {
 	track := b.GetTrack()
 	n := len(track)
@@ -130,6 +134,13 @@ func (vpolygon *VirtualPolygon) BlobLeft(b blob.Blobie) bool {
 		return true
 	}
 	return false
+}
+
+// ContainsBlob Checks if polygon contains the given object
+// Let's clarify for future questions: we are assuming the object is represented by a center, not a bounding box
+// So object is inside of polygon when its center is inside of polygon too
+func (vpolygon *VirtualPolygon) ContainsBlob(b blob.Blobie) bool {
+	return vpolygon.ContainsPoint(b.GetCenter())
 }
 
 // ContainsPoint Checks if polygon contains the given point
