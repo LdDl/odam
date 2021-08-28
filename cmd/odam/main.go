@@ -23,8 +23,6 @@ import (
 
 var (
 	settingsFile    = flag.String("settings", "conf.json", "Path to application's settings")
-	window          *gocv.Window
-	stream          *mjpeg.Stream
 	imagesChannel   chan *odam.FrameData
 	detectedChannel chan []*odam.DetectedObject
 	detected        []*odam.DetectedObject
@@ -41,6 +39,7 @@ func main() {
 	}
 
 	/* Initialize MJPEG server if needed */
+	var stream *mjpeg.Stream
 	if settings.MjpegSettings.Enable {
 		stream = mjpeg.NewStream()
 		go func() {
@@ -111,6 +110,7 @@ func main() {
 		return
 	}
 	/* Open imshow() GUI in needed */
+	var window *gocv.Window
 	if settings.MjpegSettings.ImshowEnable {
 		fmt.Println("Press 'ESC' to stop imshow()")
 		window = gocv.NewWindow("ODAM v0.8.0")
