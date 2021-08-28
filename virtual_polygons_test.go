@@ -171,6 +171,30 @@ func TestPolygonBlobEnter(t *testing.T) {
 			t.Errorf("Blob with center at [%d, %d] should has NOT been entered to polygon with coordinates %v", center.X, center.Y, vpolygon.Coordinates)
 		}
 	}
+
+	simpleCTime0 := blob.NewSimpleBlobie(image.Rect(49, 16, 64, 23), nil)
+	simpleCTime1 := blob.NewSimpleBlobie(image.Rect(48, 20, 63, 27), nil)
+	simpleCTime2 := blob.NewSimpleBlobie(image.Rect(48, 25, 63, 33), nil)
+	allblobiesInside := blob.NewBlobiesDefaults()
+	allblobiesInside.MatchToExisting([]blob.Blobie{simpleCTime0, simpleCTime1, simpleCTime2})
+	for _, b := range allblobiesInside.Objects {
+		center := b.GetCenter()
+		if vpolygon.BlobEntered(b) {
+			t.Errorf("Blob with center at [%d, %d] should has NOT been entered to polygon with coordinates %v", center.X, center.Y, vpolygon.Coordinates)
+		}
+	}
+
+	simpleDTime0 := blob.NewSimpleBlobie(image.Rect(49, 16, 64, 23), nil)
+	simpleDTime1 := blob.NewSimpleBlobie(image.Rect(48, 20, 63, 27), nil)
+	simpleDTime2 := blob.NewSimpleBlobie(image.Rect(48, 25, 63, 33), nil)
+	allblobiesOutside := blob.NewBlobiesDefaults()
+	allblobiesOutside.MatchToExisting([]blob.Blobie{simpleDTime0, simpleDTime1, simpleDTime2})
+	for _, b := range allblobiesOutside.Objects {
+		center := b.GetCenter()
+		if vpolygon.BlobEntered(b) {
+			t.Errorf("Blob with center at [%d, %d] should has NOT been entered to polygon with coordinates %v", center.X, center.Y, vpolygon.Coordinates)
+		}
+	}
 }
 
 func TestPolygonBlobLeft(t *testing.T) {
