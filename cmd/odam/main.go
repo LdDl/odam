@@ -23,12 +23,8 @@ import (
 
 var (
 	settingsFile    = flag.String("settings", "conf.json", "Path to application's settings")
-	window          *gocv.Window
-	stream          *mjpeg.Stream
 	imagesChannel   chan *odam.FrameData
-	detectedChannel chan []*odam.DetectedObject
-	detected        []*odam.DetectedObject
-	allblobies      *blob.Blobies
+	detectedChannel chan odam.DetectedObjects
 )
 
 func main() {
@@ -42,6 +38,7 @@ func main() {
 	}
 
 	/* Initialize MJPEG server if needed */
+	var stream *mjpeg.Stream
 	if settings.MjpegSettings.Enable {
 		stream = mjpeg.NewStream()
 		go func() {
@@ -81,7 +78,7 @@ func main() {
 	defer neuralNet.Close()
 
 	/* Initialize objects tracker */
-	allblobies = blob.NewBlobiesDefaults()
+	allblobies := blob.NewBlobiesDefaults()
 	trackerType := settings.TrackerSettings.GetTrackerType()
 	fmt.Printf("Using tracker: '%s'\n", settings.TrackerSettings.TrackerType)
 
@@ -112,6 +109,7 @@ func main() {
 		return
 	}
 	/* Open imshow() GUI in needed */
+	var window *gocv.Window
 	if settings.MjpegSettings.ImshowEnable {
 		fmt.Println("Press 'ESC' to stop imshow()")
 		window = gocv.NewWindow("ODAM v0.8.0")
@@ -121,7 +119,7 @@ func main() {
 
 	/* Initialize channels */
 	imagesChannel = make(chan *odam.FrameData, 1)
-	detectedChannel = make(chan []*odam.DetectedObject)
+	detectedChannel = make(chan odam.DetectedObjects)
 	img := odam.NewFrameData()
 
 	/* Read first frame */
@@ -137,6 +135,9 @@ func main() {
 	}
 	/* Process first frame */
 	processFrame(img)
+
+	/* Prepare variable for channel reading */
+	detected := odam.DetectedObjects{}
 
 	/* Start goroutine for object detection purposes */
 	go performDetection(&neuralNet, settings.NeuralNetworkSettings.TargetClasses)
