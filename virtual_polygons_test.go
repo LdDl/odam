@@ -133,7 +133,7 @@ func TestPolygonContainsBlob(t *testing.T) {
 		answer := vpolygon.ContainsBlob(b)
 		if answer != correctAnswers[i] {
 			if correctAnswers[i] {
-				t.Errorf("Polygon with coordinates %v should contain blob center at [%d, %d]. Actual answer is %t", vpolygon.Coordinates, center.X, center.Y, answer)
+				t.Errorf("Polygon with coordinates %v should contain blob with center at [%d, %d]. Actual answer is %t", vpolygon.Coordinates, center.X, center.Y, answer)
 			} else {
 				t.Errorf("Polygon with coordinates %v should not contain blob with center at [%d, %d]. Actual answer is %t", vpolygon.Coordinates, center.X, center.Y, answer)
 			}
@@ -142,7 +142,23 @@ func TestPolygonContainsBlob(t *testing.T) {
 }
 
 func TestPolygonBlobEnter(t *testing.T) {
-	// @todo
+	simpleTime0 := blob.NewSimpleBlobie(image.Rect(30, 2, 43, 13), nil)
+	simpleTime1 := blob.NewSimpleBlobie(image.Rect(28, 8, 41, 18), nil)
+	simpleTime2 := blob.NewSimpleBlobie(image.Rect(29, 17, 43, 26), nil)
+	allblobies := blob.NewBlobiesDefaults()
+	allblobies.MatchToExisting([]blob.Blobie{simpleTime0, simpleTime1, simpleTime2})
+	vpolygon := NewVirtualPolygon(
+		image.Point{X: 23, Y: 15},
+		image.Point{X: 67, Y: 15},
+		image.Point{X: 67, Y: 41},
+		image.Point{X: 23, Y: 41},
+	)
+	for _, b := range allblobies.Objects {
+		center := b.GetCenter()
+		if !vpolygon.BlobEntered(b) {
+			t.Errorf("Blob with center at [%d, %d] should has been entered to polygon with coordinates %v", center.X, center.Y, vpolygon.Coordinates)
+		}
+	}
 }
 
 func TestPolygonBlobLeft(t *testing.T) {
