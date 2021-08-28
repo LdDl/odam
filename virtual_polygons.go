@@ -4,6 +4,8 @@ import (
 	"image"
 	"image/color"
 	"math"
+
+	blob "github.com/LdDl/gocv-blob/v2/blob"
 )
 
 // VIRTUAL_POLYGON_TYPE Alias to int
@@ -94,6 +96,40 @@ func (vpolygon *VirtualPolygon) Scale(scaleX, scaleY float64) {
 		vpolygon.Coordinates[i].X = int(math.Round(float64(vpolygon.Coordinates[i].X) / scaleX))
 		vpolygon.Coordinates[i].Y = int(math.Round(float64(vpolygon.Coordinates[i].Y) / scaleY))
 	}
+}
+
+// BlobEntered Checks if an object has entered the polygon
+func (vpolygon *VirtualPolygon) BlobEntered(b blob.Blobie) bool {
+	track := b.GetTrack()
+	n := len(track)
+	if n < 2 {
+		// Blob can't have one coordinates pair in track
+		return false
+	}
+	lastPosition := track[len(track)-1]
+	secondLastPosition := track[len(track)-2]
+	// If P(xN-1,yN-1) is not inside of polygon and P(xN,yN) is inside of polygon then object has entered the polygon
+	if !vpolygon.ContainsPoint(secondLastPosition) && vpolygon.ContainsPoint(lastPosition) {
+		return true
+	}
+	return false
+}
+
+// BlobLeft Checks if an object has left the polygon
+func (vpolygon *VirtualPolygon) BlobLeft(b blob.Blobie) bool {
+	track := b.GetTrack()
+	n := len(track)
+	if n < 2 {
+		// Blob can't have one coordinates pair in track
+		return false
+	}
+	lastPosition := track[len(track)-1]
+	secondLastPosition := track[len(track)-2]
+	// If P(xN-1,yN-1) is inside of polygon and P(xN,yN) is not inside of polygon then object has left the polygon
+	if vpolygon.ContainsPoint(secondLastPosition) && !vpolygon.ContainsPoint(lastPosition) {
+		return true
+	}
+	return false
 }
 
 // ContainsPoint Checks if polygon contains the given point
