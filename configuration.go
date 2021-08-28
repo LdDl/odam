@@ -225,21 +225,6 @@ type VideoSettings struct {
 	ScaleY float64 `json:"-"`
 }
 
-// TrackerSettings Object tracker settings
-type TrackerSettings struct {
-	TrackerType string `json:"tracker_type"`
-	trackerType TRACKER_TYPE
-	// Restriction for maximum points in single track
-	MaxPointsInTrack        int                     `json:"max_points_in_track"`
-	LinesSettings           []LinesSetting          `json:"lines_settings"`
-	SpeedEstimationSettings SpeedEstimationSettings `json:"speed_estimation_settings"`
-}
-
-// GetTrackerType Returns enum for tracker type option
-func (trs *TrackerSettings) GetTrackerType() TRACKER_TYPE {
-	return trs.trackerType
-}
-
 // LinesSetting Virtual lines
 type LinesSetting struct {
 	LineID        int64    `json:"line_id"`
@@ -289,10 +274,3 @@ type GISMapper struct {
 	ImageCoordinates [2]float32 `json:"image_coordinates"`
 	EPSG4326         [2]float32 `json:"epsg4326"`
 }
-
-type TRACKER_TYPE int
-
-const (
-	TRACKER_SIMPLE = TRACKER_TYPE(1)
-	TRACKER_KALMAN = TRACKER_TYPE(2)
-)
