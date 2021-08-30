@@ -6,6 +6,7 @@ import (
 	"math"
 
 	blob "github.com/LdDl/gocv-blob/v2/blob"
+	"gocv.io/x/gocv"
 )
 
 // VIRTUAL_POLYGON_TYPE Alias to int
@@ -28,6 +29,8 @@ type VirtualPolygon struct {
 	SourceCoordinates []image.Point `json:"-"`
 	// Type of virtual polygon: could be convex or concave
 	PolygonType VIRTUAL_POLYGON_TYPE `json:"-"`
+
+	gocvPoly gocv.PointsVector
 }
 
 // Constructor for VirtualPolygon
@@ -47,7 +50,13 @@ func NewVirtualPolygon(pairs ...image.Point) *VirtualPolygon {
 	} else {
 		vpolygon.PolygonType = CONCAVE_POLYGON
 	}
+	vpolygon.gocvPoly = gocv.NewPointsVectorFromPoints([][]image.Point{vpolygon.Coordinates})
 	return &vpolygon
+}
+
+// Draw Draw virtual polygon on image
+func (vpolygon *VirtualPolygon) Draw(img *gocv.Mat) {
+	gocv.FillPolyWithParams(img, vpolygon.gocvPoly, vpolygon.Color, gocv.Filled, 0, image.Point{0, 0})
 }
 
 // isConvex check if polygon either convex or concave
