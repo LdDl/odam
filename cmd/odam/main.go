@@ -303,6 +303,10 @@ func main() {
 			for i := range settings.TrackerSettings.LinesSettings {
 				settings.TrackerSettings.LinesSettings[i].VLine.Draw(&img.ImgScaled)
 			}
+			for i := range settings.TrackerSettings.PolygonsSettings {
+				settings.TrackerSettings.PolygonsSettings[i].VPolygon.Draw(&img.ImgScaled)
+			}
+
 			for _, b := range (*allblobies).Objects {
 				spd := float32(0.0)
 				if spdInterface, ok := b.GetProperty("speed"); ok {
