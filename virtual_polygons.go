@@ -56,7 +56,7 @@ func NewVirtualPolygon(pairs ...image.Point) *VirtualPolygon {
 
 // Draw Draw virtual polygon on image
 func (vpolygon *VirtualPolygon) Draw(img *gocv.Mat) {
-	gocv.Polylines(img, vpolygon.gocvPoly, false, vpolygon.Color, 2)
+	gocv.Polylines(img, vpolygon.gocvPoly, true, vpolygon.Color, 2)
 }
 
 // isConvex check if polygon either convex or concave
