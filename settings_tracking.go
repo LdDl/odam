@@ -81,9 +81,9 @@ func (trs *TrackerSettings) Prepare() {
 	if len(trs.PolygonsSettings) == 0 {
 		fmt.Println("[WARNING] No 'polygons_settings'? Please check if it is true")
 	}
-	for i, psettings := range trs.PolygonsSettings {
+	for _, psettings := range trs.PolygonsSettings {
 		ptsCollected := make([]image.Point, len(psettings.Coordinates))
-		for _, pair := range psettings.Coordinates {
+		for i, pair := range psettings.Coordinates {
 			ptsCollected[i] = image.Point{X: pair[0], Y: pair[1]}
 		}
 		vpolygon := NewVirtualPolygon(ptsCollected...)
