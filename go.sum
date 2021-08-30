@@ -5,10 +5,6 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/LdDl/go-darknet v1.3.5 h1:oOMpWesW0+8ZLOdZcGS4LfjKKS48cHUceNrBy1MU7aM=
 github.com/LdDl/go-darknet v1.3.5/go.mod h1:vNpwlxHd2mevaqWDYG9r/ABi1+cQrXw0HUuSPaDKuD8=
-github.com/LdDl/gocv-blob/v2 v2.2.8 h1:omSyAsI0LH0dysVdlAcx43qmtzqIvVCil1P9RTN+UbU=
-github.com/LdDl/gocv-blob/v2 v2.2.8/go.mod h1:N+KAWtURhZp+iD9iR3hbQlcTyPjebyJcRYgdvlpZ3os=
-github.com/LdDl/gocv-blob/v2 v2.2.9 h1:Gom9tJXjM6FWBOjrjF9F1oErR2tyKcLF/38jCgTzOPc=
-github.com/LdDl/gocv-blob/v2 v2.2.9/go.mod h1:N+KAWtURhZp+iD9iR3hbQlcTyPjebyJcRYgdvlpZ3os=
 github.com/LdDl/gocv-blob/v2 v2.2.10 h1:0eruaryQFV1SocQWebo7vwX2mQq0JKHDuKBqAWVfrGw=
 github.com/LdDl/gocv-blob/v2 v2.2.10/go.mod h1:N+KAWtURhZp+iD9iR3hbQlcTyPjebyJcRYgdvlpZ3os=
 github.com/LdDl/kalman-filter v0.1.1 h1:HAfi2q9PVxvFt/O8hfn78ekTwFBZJDuuKQaUqnph1vc=
@@ -57,6 +53,7 @@ github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfn
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
+github.com/pascaldekloe/goe v0.1.0/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/phpdave11/gofpdf v1.4.2/go.mod h1:zpO6xFn9yxo3YLyMvW8HcKWVdbNqgIfOOp2dXMnm1mY=
 github.com/phpdave11/gofpdi v1.0.12/go.mod h1:vBmVV0Do6hSBHC8uKUQ71JGW+ZGQq74llk/7bXwjDoI=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
@@ -68,8 +65,9 @@ github.com/ruudk/golang-pdf417 v0.0.0-20181029194003-1af4ab5afa58/go.mod h1:6lfF
 github.com/satori/go.uuid v1.2.0 h1:0uYX9dsZ2yD7q2RtLRtPSdGDWzjeM3TbMJP9utgA0ww=
 github.com/satori/go.uuid v1.2.0/go.mod h1:dA0hQrYB0VpLJoorglMZABFdXlWrHn1NEOzdhQKdks0=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
-gocv.io/x/gocv v0.23.0 h1:3Fgbt06/uR8Zf9emWndhjbUjdrw+nto69R/b4noFydY=
 gocv.io/x/gocv v0.23.0/go.mod h1:Rar2PS6DV+T4FL+PM535EImD/h13hGVaHhnCu1xarBs=
+gocv.io/x/gocv v0.28.0 h1:hweRS9Js60YEZPZzjhU5I+0E2ngazquLlO78zwnrFvY=
+gocv.io/x/gocv v0.28.0/go.mod h1:oc6FvfYqfBp99p+yOEzs9tbYF9gOrAQSeL/dyIPefJU=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20190510104115-cbcb75029529/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
 golang.org/x/exp v0.0.0-20180321215751-8460e604b9de/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
