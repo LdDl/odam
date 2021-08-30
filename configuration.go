@@ -40,6 +40,10 @@ func NewSettings(fname string) (*AppSettings, error) {
 	for _, lsettings := range appsettings.TrackerSettings.LinesSettings {
 		lsettings.VLine.Scale(appsettings.VideoSettings.ScaleX, appsettings.VideoSettings.ScaleY)
 	}
+	// Scale virtual polygons
+	for _, psettings := range appsettings.TrackerSettings.PolygonsSettings {
+		psettings.VPolygon.Scale(appsettings.VideoSettings.ScaleX, appsettings.VideoSettings.ScaleY)
+	}
 
 	// Prepare drawing options for each class defined in 'neural_network_settings'
 	appsettings.ClassesDrawOptions = make(map[string]*DrawOptions)

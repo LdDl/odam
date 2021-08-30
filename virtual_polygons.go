@@ -106,6 +106,7 @@ func (vpolygon *VirtualPolygon) Scale(scaleX, scaleY float64) {
 		vpolygon.Coordinates[i].X = int(math.Round(float64(vpolygon.Coordinates[i].X) / scaleX))
 		vpolygon.Coordinates[i].Y = int(math.Round(float64(vpolygon.Coordinates[i].Y) / scaleY))
 	}
+	vpolygon.gocvPoly = gocv.NewPointsVectorFromPoints([][]image.Point{vpolygon.Coordinates})
 }
 
 // BlobEntered Checks if an object has entered the polygon
