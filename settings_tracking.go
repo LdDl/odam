@@ -2,6 +2,7 @@ package odam
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 	"strings"
 )
@@ -20,6 +21,7 @@ type TrackerSettings struct {
 	// Restriction for maximum points in single track
 	MaxPointsInTrack        int                     `json:"max_points_in_track"`
 	LinesSettings           []*LinesSetting         `json:"lines_settings"`
+	PolygonsSettings        []*PolygonsSetting      `json:"polygons_settings"`
 	SpeedEstimationSettings SpeedEstimationSettings `json:"speed_estimation_settings"`
 }
 
@@ -50,7 +52,7 @@ func (trs *TrackerSettings) Prepare() {
 		break
 	}
 	if len(trs.LinesSettings) == 0 {
-		fmt.Println("[WARNING] No 'lines_settings'? Please check it")
+		fmt.Println("[WARNING] No 'lines_settings'? Please check if it is true")
 	}
 	for _, lsettings := range trs.LinesSettings {
 		vline := NewVirtualLine(lsettings.Begin[0], lsettings.Begin[1], lsettings.End[0], lsettings.End[1])
@@ -75,5 +77,17 @@ func (trs *TrackerSettings) Prepare() {
 	if trs.MaxPointsInTrack < 1 {
 		fmt.Printf("[WARNING] Field 'max_points_in_track' shoudle be >= 1, but got '%d'. Setting default value = 10\n", trs.MaxPointsInTrack)
 		trs.MaxPointsInTrack = 10
+	}
+	if len(trs.PolygonsSettings) == 0 {
+		fmt.Println("[WARNING] No 'polygons_settings'? Please check if it is true")
+	}
+	for _, psettings := range trs.PolygonsSettings {
+		ptsCollected := make([]image.Point, len(psettings.Coordinates))
+		for _, pair := range psettings.Coordinates {
+			ptsCollected = append(ptsCollected, image.Point{X: pair[0], Y: pair[1]})
+		}
+		vpolygon := NewVirtualPolygon(ptsCollected...)
+		vpolygon.Color = color.RGBA{psettings.RGBA[0], psettings.RGBA[1], psettings.RGBA[2], psettings.RGBA[3]}
+		psettings.VPolygon = vpolygon
 	}
 }

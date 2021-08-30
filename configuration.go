@@ -157,6 +157,16 @@ type LinesSetting struct {
 	VLine *VirtualLine `json:"-"`
 }
 
+// PolygonsSetting Virtual polygons
+type PolygonsSetting struct {
+	PolygonID     int64    `json:"polygon_id"`
+	Coordinates   [][2]int `json:"coordinates"`
+	DetectClasses []string `json:"detect_classes"`
+	RGBA          [4]uint8 `json:"rgba"`
+	// Exported, but not from JSON
+	VPolygon *VirtualPolygon `json:"-"`
+}
+
 // BBoxSettings Options for detection rectangle
 type BBoxSettings struct {
 	RGBA      [4]uint8 `json:"rgba"`

@@ -81,6 +81,14 @@
                 "crop_mode": "crop"
             }
         ],
+        "polygons_settings":[
+            {
+                "polygon_id": 1,
+                "coordinates": [ [110, 600] , [1750, 600], [1750, 300], [110, 300] ],
+                "detect_classes": ["car", "motorbike", "bus", "train", "truck"],
+                "rgba": [255, 0, 0, 0]
+            }
+        ],
         "speed_estimation_settings": {
             "enabled": true,
             "send_grpc": false,
