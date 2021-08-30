@@ -55,7 +55,7 @@ New ideas, thoughts about needed features will be store in this file.
     * convex polygons math
     * JSON configuration
     * store information about visited polygons somewhere
-
+    * draw polygons
 ### Planned
 * Stable core (need many tests as possible)
 * Extend [conf.json](cmd/odam/conf.json) for such settings as: color of virtual lines, color of boxes and similar stuff.
