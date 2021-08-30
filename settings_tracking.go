@@ -81,10 +81,10 @@ func (trs *TrackerSettings) Prepare() {
 	if len(trs.PolygonsSettings) == 0 {
 		fmt.Println("[WARNING] No 'polygons_settings'? Please check if it is true")
 	}
-	for _, psettings := range trs.PolygonsSettings {
+	for i, psettings := range trs.PolygonsSettings {
 		ptsCollected := make([]image.Point, len(psettings.Coordinates))
 		for _, pair := range psettings.Coordinates {
-			ptsCollected = append(ptsCollected, image.Point{X: pair[0], Y: pair[1]})
+			ptsCollected[i] = image.Point{X: pair[0], Y: pair[1]}
 		}
 		vpolygon := NewVirtualPolygon(ptsCollected...)
 		vpolygon.Color = color.RGBA{psettings.RGBA[0], psettings.RGBA[1], psettings.RGBA[2], psettings.RGBA[3]}
