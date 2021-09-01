@@ -56,6 +56,10 @@ New ideas, thoughts about needed features will be store in this file.
     * JSON configuration
     * store information about visited polygons somewhere
     * draw polygons
+* Virtual lines
+   * Split ID and other additional information for next paragraph
+   * Make additional information optional for sending via gRPC. Sometimes reciever-side already knows everything about lines and just need its IDs.
+  
 ### Planned
 * Stable core (need many tests as possible)
 * Extend [conf.json](cmd/odam/conf.json) for such settings as: color of virtual lines, color of boxes and similar stuff.
@@ -70,6 +74,8 @@ New ideas, thoughts about needed features will be store in this file.
     * speed estimation
 * Implement SORT - https://arxiv.org/abs/1602.00763
 * github tags: travis
+* gRPC server-side for mutation and querying reference info
+* REST server-side for mutation and querying reference info (may be by code wrapping gRPC-based code?)
 
 ### Continuous activity
 * README
