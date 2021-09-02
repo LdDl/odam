@@ -191,13 +191,17 @@ func main() {
 						TimeDeltaSeconds: secDiff,
 					}
 					if trackerType == odam.TRACKER_SIMPLE {
-						detectedObjects[i] = blob.NewSimpleBlobie(detected[i].Rect, &commonOptions)
+						detected[i].Blobie = blob.NewSimpleBlobie(detected[i].Rect, &commonOptions)
+						// detectedObjects[i] = blob.NewSimpleBlobie(detected[i].Rect, &commonOptions)
 					} else if trackerType == odam.TRACKER_KALMAN {
-						detectedObjects[i] = blob.NewKalmanBlobie(detected[i].Rect, &commonOptions)
+						detected[i].Blobie = blob.NewKalmanBlobie(detected[i].Rect, &commonOptions)
+						// detectedObjects[i] = blob.NewKalmanBlobie(detected[i].Rect, &commonOptions)
 					}
 					if foundOptions := settings.GetDrawOptions(detected[i].ClassName); foundOptions != nil {
-						detectedObjects[i].SetDraw(foundOptions.DrawOptions)
+						detected[i].Blobie.SetDraw(foundOptions.DrawOptions)
+						// detectedObjects[i].SetDraw(foundOptions.DrawOptions)
 					}
+					detectedObjects[i] = detected[i]
 				}
 				/* Match blobs to existing ones */
 				allblobies.MatchToExisting(detectedObjects)
@@ -303,7 +307,7 @@ func main() {
 			for i := range settings.TrackerSettings.LinesSettings {
 				settings.TrackerSettings.LinesSettings[i].VLine.Draw(&img.ImgScaled)
 			}
-			for _, b := range (*allblobies).Objects {
+			for _, b := range allblobies.Objects {
 				spd := float32(0.0)
 				if spdInterface, ok := b.GetProperty("speed"); ok {
 					switch spdInterface.(type) { // Want to be sure that interface is float32
