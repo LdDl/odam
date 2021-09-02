@@ -38,7 +38,8 @@ New ideas, thoughts about needed features will be store in this file.
 * Integrate Kalman tracker
 * Extend configuration of conf.json file.
     * Allow to configure draw methods for each type of detected objects
-    
+* Additional field 'targeted objects' (it's called 'detect_classes' actually) in [odam.VirtualLine](virtual_lines.go#11) struct. After it's done odam.VirtualLine will be able to detect e.g. only pedestrians or only motorbikes 
+
 ### W.I.P
 * design: current BBoxes and text info on imshow()/mjpeg-server are...ugly
 * provide video examples to show what this software capable of.
@@ -46,7 +47,7 @@ New ideas, thoughts about needed features will be store in this file.
     * optional information about scaling source image
     * optional scaling track in pixel representation
 * codebase improvements (design, optimizations, clarifications and etc.)
-* Additional field 'targeted objects' in [odam.VirtualLine](virtual_lines.go#11) struct. After it's done odam.VirtualLine will be able to detect e.g. only pedestrians or only motorbikes for example.
+for example.
 * Tracking in convex polygon: <<=== Current state (30.08.2021) Almost Done with convex polygons 
     * estimated time spent in polygon
     * estimated speed (via GIS 'mapper' technique)
