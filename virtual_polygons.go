@@ -21,6 +21,8 @@ const (
 
 // VirtualPolygon Detection polygon attributes
 type VirtualPolygon struct {
+	// Polygon's identifier (inherited by wrapping structure)
+	ID int64 `json:"-"`
 	// Color of stroke line
 	Color color.RGBA `json:"-"`
 	// Information about coordinates [scaled]
@@ -36,8 +38,9 @@ type VirtualPolygon struct {
 // Constructor for VirtualPolygon
 // (x1, y1) - Left
 // (x2, y2) - Right
-func NewVirtualPolygon(pairs ...image.Point) *VirtualPolygon {
+func NewVirtualPolygon(polygonID int64, pairs ...image.Point) *VirtualPolygon {
 	vpolygon := VirtualPolygon{
+		ID:                polygonID,
 		Coordinates:       make([]image.Point, len(pairs)),
 		SourceCoordinates: make([]image.Point, len(pairs)),
 	}
@@ -122,6 +125,7 @@ func (vpolygon *VirtualPolygon) BlobEntered(b blob.Blobie) bool {
 	secondLastPosition := track[len(track)-2]
 	// If P(xN-1,yN-1) is not inside of polygon and P(xN,yN) is inside of polygon then object has entered the polygon
 	if !vpolygon.ContainsPoint(secondLastPosition) && vpolygon.ContainsPoint(lastPosition) {
+		b.SetProperty("polygon_id", vpolygon.ID)
 		return true
 	}
 	return false
@@ -141,6 +145,7 @@ func (vpolygon *VirtualPolygon) BlobLeft(b blob.Blobie) bool {
 	secondLastPosition := track[len(track)-2]
 	// If P(xN-1,yN-1) is inside of polygon and P(xN,yN) is not inside of polygon then object has left the polygon
 	if vpolygon.ContainsPoint(secondLastPosition) && !vpolygon.ContainsPoint(lastPosition) {
+		b.SetProperty("polygon_id", -1)
 		return true
 	}
 	return false

@@ -86,7 +86,7 @@ func (trs *TrackerSettings) Prepare() {
 		for i, pair := range psettings.Coordinates {
 			ptsCollected[i] = image.Point{X: pair[0], Y: pair[1]}
 		}
-		vpolygon := NewVirtualPolygon(ptsCollected...)
+		vpolygon := NewVirtualPolygon(psettings.PolygonID, ptsCollected...)
 		vpolygon.Color = color.RGBA{psettings.RGBA[0], psettings.RGBA[1], psettings.RGBA[2], psettings.RGBA[3]}
 		psettings.VPolygon = vpolygon
 	}

@@ -10,12 +10,14 @@ import (
 func TestPolygonType(t *testing.T) {
 	vpolygons := []*VirtualPolygon{
 		NewVirtualPolygon(
+			1,
 			image.Point{X: 0, Y: 0},
 			image.Point{X: 1, Y: 0},
 			image.Point{X: 1, Y: 1},
 			image.Point{X: 0, Y: 1},
 		),
 		NewVirtualPolygon(
+			2,
 			image.Point{X: 0, Y: 0},
 			image.Point{X: 5, Y: 0},
 			image.Point{X: 5, Y: 5},
@@ -23,6 +25,7 @@ func TestPolygonType(t *testing.T) {
 			image.Point{X: 0, Y: 1},
 		),
 		NewVirtualPolygon(
+			3,
 			image.Point{X: 0, Y: 0},
 			image.Point{X: 5, Y: 0},
 			image.Point{X: 5, Y: 5},
@@ -48,33 +51,39 @@ func TestPolygonType(t *testing.T) {
 func TestPolygonContainsPoint(t *testing.T) {
 	vpolygons := []*VirtualPolygon{
 		NewVirtualPolygon(
+			1,
 			image.Point{X: 0, Y: 0},
 			image.Point{X: 5, Y: 0},
 			image.Point{X: 5, Y: 5},
 			image.Point{X: 0, Y: 5},
 		),
 		NewVirtualPolygon(
+			2,
 			image.Point{X: 0, Y: 0},
 			image.Point{X: 5, Y: 0},
 			image.Point{X: 5, Y: 5},
 			image.Point{X: 0, Y: 5},
 		),
 		NewVirtualPolygon(
+			3,
 			image.Point{X: 0, Y: 0},
 			image.Point{X: 5, Y: 5},
 			image.Point{X: 5, Y: 0},
 		),
 		NewVirtualPolygon(
+			4,
 			image.Point{X: 0, Y: 0},
 			image.Point{X: 5, Y: 5},
 			image.Point{X: 5, Y: 0},
 		),
 		NewVirtualPolygon(
+			5,
 			image.Point{X: 0, Y: 0},
 			image.Point{X: 5, Y: 5},
 			image.Point{X: 5, Y: 0},
 		),
 		NewVirtualPolygon(
+			6,
 			image.Point{X: 0, Y: 0},
 			image.Point{X: 5, Y: 0},
 			image.Point{X: 5, Y: 5},
@@ -118,6 +127,7 @@ func TestPolygonContainsBlob(t *testing.T) {
 	simpleC := blob.NewSimpleBlobie(image.Rect(40, 29, 61, 46), nil)
 	blobies := []blob.Blobie{simpleA, simpleB, simpleC}
 	vpolygon := NewVirtualPolygon(
+		1,
 		image.Point{X: 23, Y: 15},
 		image.Point{X: 67, Y: 15},
 		image.Point{X: 67, Y: 41},
@@ -148,6 +158,7 @@ func TestPolygonBlobEnter(t *testing.T) {
 	allblobiesEnter := blob.NewBlobiesDefaults()
 	allblobiesEnter.MatchToExisting([]blob.Blobie{simpleATime0, simpleATime1, simpleATime2})
 	vpolygon := NewVirtualPolygon(
+		1,
 		image.Point{X: 23, Y: 15},
 		image.Point{X: 67, Y: 15},
 		image.Point{X: 67, Y: 41},
@@ -206,6 +217,7 @@ func TestPolygonBlobLeft(t *testing.T) {
 	allblobiesEnter := blob.NewBlobiesDefaults()
 	allblobiesEnter.MatchToExisting([]blob.Blobie{simpleATime0, simpleATime1, simpleATime2})
 	vpolygon := NewVirtualPolygon(
+		1,
 		image.Point{X: 23, Y: 15},
 		image.Point{X: 67, Y: 15},
 		image.Point{X: 67, Y: 41},
