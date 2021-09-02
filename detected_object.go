@@ -26,6 +26,8 @@ type DetectedObject struct {
 // DetectedObjects Just alias to slice of DetectedObject
 type DetectedObjects []*DetectedObject
 
+// CastBlobToDetectedObject Handy interface caster
+// blob.Blobie -> *odam.DetectedObject
 func CastBlobToDetectedObject(b blob.Blobie) (*DetectedObject, error) {
 	switch b.(type) {
 	case *DetectedObject:
