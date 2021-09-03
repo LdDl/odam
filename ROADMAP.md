@@ -38,7 +38,8 @@ New ideas, thoughts about needed features will be store in this file.
 * Integrate Kalman tracker
 * Extend configuration of conf.json file.
     * Allow to configure draw methods for each type of detected objects
-    
+* Additional field 'targeted objects' (it's called 'detect_classes' actually) in [odam.VirtualLine](virtual_lines.go#11) struct. After it's done odam.VirtualLine will be able to detect e.g. only pedestrians or only motorbikes 
+
 ### W.I.P
 * design: current BBoxes and text info on imshow()/mjpeg-server are...ugly
 * provide video examples to show what this software capable of.
@@ -46,13 +47,20 @@ New ideas, thoughts about needed features will be store in this file.
     * optional information about scaling source image
     * optional scaling track in pixel representation
 * codebase improvements (design, optimizations, clarifications and etc.)
-* Additional field 'targeted objects' in [odam.VirtualLine](virtual_lines.go#11) struct. After it's done odam.VirtualLine will be able to detect e.g. only pedestrians or only motorbikes for example.
-* Tracking in convex polygon: <<=== Current state (27.08.2021) Done with convex polygons main math.
+for example.
+* Tracking in convex polygon: <<=== Current state (30.08.2021) Almost Done with convex polygons 
     * estimated time spent in polygon
     * estimated speed (via GIS 'mapper' technique)
     * objects filtering (same as with VirtualLine)
     * integrate into gRPC
-
+    * convex polygons math
+    * JSON configuration
+    * store information about visited polygons somewhere
+    * draw polygons
+* Virtual lines
+   * Split ID and other additional information for next paragraph
+   * Make additional information optional for sending via gRPC. Sometimes reciever-side already knows everything about lines and just need its IDs.
+  
 ### Planned
 * Stable core (need many tests as possible)
 * Extend [conf.json](cmd/odam/conf.json) for such settings as: color of virtual lines, color of boxes and similar stuff.
@@ -67,6 +75,8 @@ New ideas, thoughts about needed features will be store in this file.
     * speed estimation
 * Implement SORT - https://arxiv.org/abs/1602.00763
 * github tags: travis
+* gRPC server-side for mutation and querying reference info
+* REST server-side for mutation and querying reference info (may be by code wrapping gRPC-based code?)
 
 ### Continuous activity
 * README

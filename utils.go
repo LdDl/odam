@@ -97,6 +97,13 @@ func TrackInfoInfoGRPC(b blob.Blobie, speedKey string, scalex, scaley float32, g
 			break
 		}
 	}
+	// spd := float32(0.0)
+	// do, err := CastBlobToDetectedObject(b)
+	// if err != nil {
+	// 	fmt.Println("[WARNING] Can't cast blob.Blobie to *odam.DetectedObject:", err)
+	// } else {
+	// 	spd = do.GetSpeed()
+	// }
 	// Collect track information
 	trackPixels := b.GetTrack()
 	trackUnionInfo := make([]*Point, len(trackPixels))
