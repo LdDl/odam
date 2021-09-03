@@ -191,17 +191,17 @@ func main() {
 						TimeDeltaSeconds: secDiff,
 					}
 					if trackerType == odam.TRACKER_SIMPLE {
-						detected[i].Blobie = blob.NewSimpleBlobie(detected[i].Rect, &commonOptions)
-						// detectedObjects[i] = blob.NewSimpleBlobie(detected[i].Rect, &commonOptions)
+						// detected[i].Blobie = blob.NewSimpleBlobie(detected[i].Rect, &commonOptions)
+						detectedObjects[i] = blob.NewSimpleBlobie(detected[i].Rect, &commonOptions)
 					} else if trackerType == odam.TRACKER_KALMAN {
-						detected[i].Blobie = blob.NewKalmanBlobie(detected[i].Rect, &commonOptions)
-						// detectedObjects[i] = blob.NewKalmanBlobie(detected[i].Rect, &commonOptions)
+						// detected[i].Blobie = blob.NewKalmanBlobie(detected[i].Rect, &commonOptions)
+						detectedObjects[i] = blob.NewKalmanBlobie(detected[i].Rect, &commonOptions)
 					}
 					if foundOptions := settings.GetDrawOptions(detected[i].ClassName); foundOptions != nil {
-						detected[i].Blobie.SetDraw(foundOptions.DrawOptions)
-						// detectedObjects[i].SetDraw(foundOptions.DrawOptions)
+						// detected[i].Blobie.SetDraw(foundOptions.DrawOptions)
+						detectedObjects[i].SetDraw(foundOptions.DrawOptions)
 					}
-					detectedObjects[i] = detected[i]
+					// detectedObjects[i] = detected[i]
 				}
 				/* Match blobs to existing ones */
 				allblobies.MatchToExisting(detectedObjects)
@@ -216,13 +216,13 @@ func main() {
 							fp := odam.STDPointToGoCVPoint2F(blobTrack[0])
 							lp := odam.STDPointToGoCVPoint2F(blobTrack[trackLen-1])
 							spd := odam.EstimateSpeed(fp, lp, blobTimestamps[0], blobTimestamps[trackLen-1], gisConverter)
-							// b.SetProperty("speed", spd)
-							do, err := odam.CastBlobToDetectedObject(b)
-							if err != nil {
-								fmt.Println("[WARNING] Can't cast blob.Blobie to *odam.DetectedObject:", err)
-								continue
-							}
-							do.SetSpeed(spd)
+							b.SetProperty("speed", spd)
+							// do, err := odam.CastBlobToDetectedObject(b)
+							// if err != nil {
+							// 	fmt.Println("[WARNING] Can't cast blob.Blobie to *odam.DetectedObject:", err)
+							// 	continue
+							// }
+							// do.SetSpeed(spd)
 						}
 					}
 				}
@@ -314,22 +314,22 @@ func main() {
 				settings.TrackerSettings.LinesSettings[i].VLine.Draw(&img.ImgScaled)
 			}
 			for _, b := range allblobies.Objects {
-				// spd := float32(0.0)
-				// if spdInterface, ok := b.GetProperty("speed"); ok {
-				// 	switch spdInterface.(type) { // Want to be sure that interface is float32
-				// 	case float32:
-				// 		spd = spdInterface.(float32)
-				// 		break
-				// 	default:
-				// 		break
-				// 	}
-				// }
-				do, err := odam.CastBlobToDetectedObject(b)
-				if err != nil {
-					fmt.Println("[WARNING] Can't cast blob.Blobie to *odam.DetectedObject:", err)
-					continue
+				spd := float32(0.0)
+				if spdInterface, ok := b.GetProperty("speed"); ok {
+					switch spdInterface.(type) { // Want to be sure that interface is float32
+					case float32:
+						spd = spdInterface.(float32)
+						break
+					default:
+						break
+					}
 				}
-				spd := do.GetSpeed()
+				// do, err := odam.CastBlobToDetectedObject(b)
+				// if err != nil {
+				// 	fmt.Println("[WARNING] Can't cast blob.Blobie to *odam.DetectedObject:", err)
+				// 	continue
+				// }
+				// spd := do.GetSpeed()
 				if foundOptions := settings.GetDrawOptions(b.GetClassName()); foundOptions != nil {
 					if foundOptions.DisplayObjectID {
 						b.DrawTrack(&img.ImgScaled, fmt.Sprintf("v = %.2f km/h", spd), fmt.Sprintf("%v", b.GetID()))
