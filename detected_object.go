@@ -5,7 +5,9 @@ import (
 	"image"
 	reflect "reflect"
 
+	darknet "github.com/LdDl/go-darknet"
 	blob "github.com/LdDl/gocv-blob/v2/blob"
+	"github.com/pkg/errors"
 )
 
 // DetectedObject Store detected object info
@@ -48,4 +50,20 @@ func (do *DetectedObject) SetSpeed(v float32) {
 // GetSpeed Returns last measured value of speed
 func (do *DetectedObject) GetSpeed() float32 {
 	return do.speed
+}
+
+// DetectObjects Detect objects for provided Go's image via neural network
+func DetectObjects(neuralNet *darknet.YOLONetwork, imgSTD image.Image) (*darknet.DetectionResult, error) {
+	darknetImage, err := darknet.Image2Float32(imgSTD)
+	if err != nil {
+		return nil, errors.Wrap(err, "Can't convert image to Darknet's format")
+	}
+	dr, err := neuralNet.Detect(darknetImage)
+	if err != nil {
+		darknetImage.Close()
+		return nil, errors.Wrap(err, "Can't make detection on Darknet image")
+	}
+	darknetImage.Close() // free the memory
+	darknetImage = nil
+	return dr, nil
 }
