@@ -8,6 +8,15 @@ import (
 	"gocv.io/x/gocv"
 )
 
+func stringInSlice(str *string, sl []string) bool {
+	for i := range sl {
+		if sl[i] == *str {
+			return true
+		}
+	}
+	return false
+}
+
 // Round Rounds float64 to int
 func Round(v float64) int {
 	if v >= 0 {

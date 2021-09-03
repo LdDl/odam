@@ -89,12 +89,3 @@ func DetectObjects(neuralNet *darknet.YOLONetwork, imgSTD image.Image, filters .
 	}
 	return detectedRects, nil
 }
-
-func stringInSlice(str *string, sl []string) bool {
-	for i := range sl {
-		if sl[i] == *str {
-			return true
-		}
-	}
-	return false
-}
