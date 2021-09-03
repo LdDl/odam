@@ -216,7 +216,13 @@ func main() {
 							fp := odam.STDPointToGoCVPoint2F(blobTrack[0])
 							lp := odam.STDPointToGoCVPoint2F(blobTrack[trackLen-1])
 							spd := odam.EstimateSpeed(fp, lp, blobTimestamps[0], blobTimestamps[trackLen-1], gisConverter)
-							b.SetProperty("speed", spd)
+							// b.SetProperty("speed", spd)
+							do, err := odam.CastBlobToDetectedObject(b)
+							if err != nil {
+								fmt.Println("[WARNING] Can't cast blob.Blobie to *odam.DetectedObject:", err)
+								continue
+							}
+							do.SetSpeed(spd)
 						}
 					}
 				}
@@ -308,16 +314,22 @@ func main() {
 				settings.TrackerSettings.LinesSettings[i].VLine.Draw(&img.ImgScaled)
 			}
 			for _, b := range allblobies.Objects {
-				spd := float32(0.0)
-				if spdInterface, ok := b.GetProperty("speed"); ok {
-					switch spdInterface.(type) { // Want to be sure that interface is float32
-					case float32:
-						spd = spdInterface.(float32)
-						break
-					default:
-						break
-					}
+				// spd := float32(0.0)
+				// if spdInterface, ok := b.GetProperty("speed"); ok {
+				// 	switch spdInterface.(type) { // Want to be sure that interface is float32
+				// 	case float32:
+				// 		spd = spdInterface.(float32)
+				// 		break
+				// 	default:
+				// 		break
+				// 	}
+				// }
+				do, err := odam.CastBlobToDetectedObject(b)
+				if err != nil {
+					fmt.Println("[WARNING] Can't cast blob.Blobie to *odam.DetectedObject:", err)
+					continue
 				}
+				spd := do.GetSpeed()
 				if foundOptions := settings.GetDrawOptions(b.GetClassName()); foundOptions != nil {
 					if foundOptions.DisplayObjectID {
 						b.DrawTrack(&img.ImgScaled, fmt.Sprintf("v = %.2f km/h", spd), fmt.Sprintf("%v", b.GetID()))

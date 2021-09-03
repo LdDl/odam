@@ -1,6 +1,7 @@
 package odam
 
 import (
+	"fmt"
 	"image"
 	"math"
 
@@ -73,15 +74,22 @@ func VirtualLineInfoGRPC(lineID int64, virtualLine *VirtualLine) *VirtualLineInf
 // Coverter function (from pixel to WGS84)
 func TrackInfoInfoGRPC(b blob.Blobie, speedKey string, scalex, scaley float32, gisConverter func(gocv.Point2f) gocv.Point2f) *TrackInfo {
 	// Extract estimated speed information
+	// spd := float32(0.0)
+	// if spdInterface, ok := b.GetProperty(speedKey); ok {
+	// 	switch spdInterface.(type) { // Want to be sure that interface is float32
+	// 	case float32:
+	// 		spd = spdInterface.(float32)
+	// 		break
+	// 	default:
+	// 		break
+	// 	}
+	// }
 	spd := float32(0.0)
-	if spdInterface, ok := b.GetProperty(speedKey); ok {
-		switch spdInterface.(type) { // Want to be sure that interface is float32
-		case float32:
-			spd = spdInterface.(float32)
-			break
-		default:
-			break
-		}
+	do, err := CastBlobToDetectedObject(b)
+	if err != nil {
+		fmt.Println("[WARNING] Can't cast blob.Blobie to *odam.DetectedObject:", err)
+	} else {
+		spd = do.GetSpeed()
 	}
 	// Collect track information
 	trackPixels := b.GetTrack()

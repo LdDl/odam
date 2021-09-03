@@ -19,6 +19,9 @@ type DetectedObject struct {
 	// The probability that an object belongs to the specified class
 	Confidence float32
 
+	// Unexported
+	speed float32
+
 	/*  Wrap blob.Blobie for duck typing */
 	blob.Blobie
 }
@@ -35,4 +38,14 @@ func CastBlobToDetectedObject(b blob.Blobie) (*DetectedObject, error) {
 	default:
 		return nil, fmt.Errorf("Blob should be of type *odam.DetectedObject, but got %s", reflect.TypeOf(b))
 	}
+}
+
+// SetSpeed Sets last measured speed value
+func (do *DetectedObject) SetSpeed(v float32) {
+	do.speed = v
+}
+
+// GetSpeed Returns last measured value of speed
+func (do *DetectedObject) GetSpeed() float32 {
+	return do.speed
 }
