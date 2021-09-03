@@ -136,9 +136,6 @@ func main() {
 	/* Process first frame */
 	processFrame(img)
 
-	/* Prepare variable for channel reading */
-	detected := odam.DetectedObjects{}
-
 	/* Start goroutine for object detection purposes */
 	go performDetection(&neuralNet, settings.NeuralNetworkSettings.TargetClasses)
 
@@ -177,7 +174,8 @@ func main() {
 
 		/* Read data from object detection goroutine */
 		select {
-		case detected = <-detectedChannel:
+		/* Prepare variable for channel reading */
+		case detected := <-detectedChannel:
 			processFrame(img)
 			if len(detected) != 0 {
 				/* Prepare 'blobs' for each detected object */
