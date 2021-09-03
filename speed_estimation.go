@@ -14,7 +14,9 @@ const (
 
 // GetPerspectiveTransformer Initializates gocv.Point2f for GIS conversion purposes
 func GetPerspectiveTransformer(srcPoints, dstPoints []gocv.Point2f) func(gocv.Point2f) gocv.Point2f {
-	transformMat := gocv.GetPerspectiveTransform2f(srcPoints, dstPoints)
+	src := gocv.NewPoint2fVectorFromPoints(srcPoints)
+	trgt := gocv.NewPoint2fVectorFromPoints(dstPoints)
+	transformMat := gocv.GetPerspectiveTransform2f(src, trgt)
 	return func(src gocv.Point2f) gocv.Point2f {
 		pmat := gocv.NewMatWithSize(3, 1, gocv.MatTypeCV64F)
 		pmat.SetDoubleAt(0, 0, float64(src.X))

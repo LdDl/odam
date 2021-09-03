@@ -348,7 +348,7 @@ func main() {
 			if err != nil {
 				log.Printf("Error while decoding to JPG (mjpeg): %s", err.Error())
 			} else {
-				stream.UpdateJPEG(buf)
+				stream.UpdateJPEG(buf.GetBytes())
 			}
 		}
 	}
