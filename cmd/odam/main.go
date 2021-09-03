@@ -136,9 +136,6 @@ func main() {
 	/* Process first frame */
 	processFrame(img)
 
-	/* Prepare variable for channel reading */
-	detected := odam.DetectedObjects{}
-
 	/* Start goroutine for object detection purposes */
 	go performDetection(&neuralNet, settings.NeuralNetworkSettings.TargetClasses)
 
@@ -177,7 +174,8 @@ func main() {
 
 		/* Read data from object detection goroutine */
 		select {
-		case detected = <-detectedChannel:
+		/* Prepare variable for channel reading */
+		case detected := <-detectedChannel:
 			processFrame(img)
 			if len(detected) != 0 {
 				/* Prepare 'blobs' for each detected object */
@@ -387,23 +385,13 @@ func performDetection(neuralNet *darknet.YOLONetwork, targetClasses []string) {
 	fmt.Println("Start performDetection thread")
 	for {
 		frame := <-imagesChannel
-		darknetImage, err := darknet.Image2Float32(frame.ImgSTD)
+		dr, err := odam.DetectObjects(neuralNet, frame.ImgSTD)
 		if err != nil {
-			log.Printf("Can't convert image to Darknet's format due the error: %s. Sleep for 100ms", err.Error())
+			log.Printf("Can't detect objects on provided image due the error: %s. Sleep for 100ms", err.Error())
 			frame.Close()
 			time.Sleep(100 * time.Millisecond)
 			continue
 		}
-		dr, err := neuralNet.Detect(darknetImage)
-		if err != nil {
-			frame.Close()
-			darknetImage.Close()
-			log.Printf("Can't make detection: %s. Sleep for 100ms", err.Error())
-			time.Sleep(100 * time.Millisecond)
-			continue
-		}
-		darknetImage.Close() // free the memory
-		darknetImage = nil
 		detectedRects := make([]*odam.DetectedObject, 0, len(dr.Detections))
 		for _, d := range dr.Detections {
 			for i := range d.ClassIDs {
