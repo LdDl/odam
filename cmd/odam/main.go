@@ -136,9 +136,6 @@ func main() {
 	/* Process first frame */
 	processFrame(img)
 
-	/* Prepare variable for channel reading */
-	detected := odam.DetectedObjects{}
-
 	/* Start goroutine for object detection purposes */
 	go performDetection(&neuralNet, settings.NeuralNetworkSettings.TargetClasses)
 
@@ -177,7 +174,8 @@ func main() {
 
 		/* Read data from object detection goroutine */
 		select {
-		case detected = <-detectedChannel:
+		/* Prepare variable for channel reading */
+		case detected := <-detectedChannel:
 			processFrame(img)
 			if len(detected) != 0 {
 				/* Prepare 'blobs' for each detected object */
@@ -191,13 +189,17 @@ func main() {
 						TimeDeltaSeconds: secDiff,
 					}
 					if trackerType == odam.TRACKER_SIMPLE {
+						// detected[i].Blobie = blob.NewSimpleBlobie(detected[i].Rect, &commonOptions)
 						detectedObjects[i] = blob.NewSimpleBlobie(detected[i].Rect, &commonOptions)
 					} else if trackerType == odam.TRACKER_KALMAN {
+						// detected[i].Blobie = blob.NewKalmanBlobie(detected[i].Rect, &commonOptions)
 						detectedObjects[i] = blob.NewKalmanBlobie(detected[i].Rect, &commonOptions)
 					}
 					if foundOptions := settings.GetDrawOptions(detected[i].ClassName); foundOptions != nil {
+						// detected[i].Blobie.SetDraw(foundOptions.DrawOptions)
 						detectedObjects[i].SetDraw(foundOptions.DrawOptions)
 					}
+					// detectedObjects[i] = detected[i]
 				}
 				/* Match blobs to existing ones */
 				allblobies.MatchToExisting(detectedObjects)
@@ -213,6 +215,12 @@ func main() {
 							lp := odam.STDPointToGoCVPoint2F(blobTrack[trackLen-1])
 							spd := odam.EstimateSpeed(fp, lp, blobTimestamps[0], blobTimestamps[trackLen-1], gisConverter)
 							b.SetProperty("speed", spd)
+							// do, err := odam.CastBlobToDetectedObject(b)
+							// if err != nil {
+							// 	fmt.Println("[WARNING] Can't cast blob.Blobie to *odam.DetectedObject:", err)
+							// 	continue
+							// }
+							// do.SetSpeed(spd)
 						}
 					}
 				}
@@ -322,7 +330,7 @@ func main() {
 				settings.TrackerSettings.PolygonsSettings[i].VPolygon.Draw(&img.ImgScaled)
 			}
 
-			for _, b := range (*allblobies).Objects {
+			for _, b := range allblobies.Objects {
 				spd := float32(0.0)
 				if spdInterface, ok := b.GetProperty("speed"); ok {
 					switch spdInterface.(type) { // Want to be sure that interface is float32
@@ -333,6 +341,12 @@ func main() {
 						break
 					}
 				}
+				// do, err := odam.CastBlobToDetectedObject(b)
+				// if err != nil {
+				// 	fmt.Println("[WARNING] Can't cast blob.Blobie to *odam.DetectedObject:", err)
+				// 	continue
+				// }
+				// spd := do.GetSpeed()
 				if foundOptions := settings.GetDrawOptions(b.GetClassName()); foundOptions != nil {
 					if foundOptions.DisplayObjectID {
 						b.DrawTrack(&img.ImgScaled, fmt.Sprintf("v = %.2f km/h", spd), fmt.Sprintf("%v", b.GetID()))
@@ -389,23 +403,13 @@ func performDetection(neuralNet *darknet.YOLONetwork, targetClasses []string) {
 	fmt.Println("Start performDetection thread")
 	for {
 		frame := <-imagesChannel
-		darknetImage, err := darknet.Image2Float32(frame.ImgSTD)
+		dr, err := odam.DetectObjects(neuralNet, frame.ImgSTD)
 		if err != nil {
-			log.Printf("Can't convert image to Darknet's format due the error: %s. Sleep for 100ms", err.Error())
+			log.Printf("Can't detect objects on provided image due the error: %s. Sleep for 100ms", err.Error())
 			frame.Close()
 			time.Sleep(100 * time.Millisecond)
 			continue
 		}
-		dr, err := neuralNet.Detect(darknetImage)
-		if err != nil {
-			frame.Close()
-			darknetImage.Close()
-			log.Printf("Can't make detection: %s. Sleep for 100ms", err.Error())
-			time.Sleep(100 * time.Millisecond)
-			continue
-		}
-		darknetImage.Close() // free the memory
-		darknetImage = nil
 		detectedRects := make([]*odam.DetectedObject, 0, len(dr.Detections))
 		for _, d := range dr.Detections {
 			for i := range d.ClassIDs {
