@@ -23,8 +23,12 @@ func GetPerspectiveTransformer(srcPoints, dstPoints []gocv.Point2f) func(gocv.Po
 		pmat.SetDoubleAt(1, 0, float64(src.Y))
 		pmat.SetDoubleAt(2, 0, 1.0)
 		answ := transformMat.MultiplyMatrix(pmat)
+		pmat.Close() // Free memory
 		scale := answ.GetDoubleAt(2, 0)
-		return gocv.Point2f{X: float32(answ.GetDoubleAt(0, 0) / scale), Y: float32(answ.GetDoubleAt(1, 0) / scale)}
+		xattr := answ.GetDoubleAt(0, 0)
+		yattr := answ.GetDoubleAt(1, 0)
+		answ.Close() // Free memory
+		return gocv.Point2f{X: float32(xattr / scale), Y: float32(yattr / scale)}
 	}
 }
 
