@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"image"
-	"image/jpeg"
 	"log"
 	"math"
 	"time"
@@ -239,38 +238,20 @@ func main() {
 									)
 									// Make sure to be not out of image bounds
 									odam.FixRectForOpenCV(&cropRect, settings.VideoSettings.Width, settings.VideoSettings.Height)
-									buf := new(bytes.Buffer)
+									var buf *bytes.Buffer
 									xtop, ytop := int32(cropRect.Min.X), int32(cropRect.Min.Y)
 
 									// Futher buffer preparation depends on 'crop_mode' in JSON'ed configuration file
 									if vline.VLine.CropObject {
-										cropImage := img.ImgSource.Region(cropRect)
-										copyCrop := cropImage.Clone()
-										cropImageSTD, err := copyCrop.ToImage()
+										buf, err = odam.PrepareCroppedImageBuffer(&img.ImgSource, cropRect)
 										if err != nil {
-											fmt.Println("[WARNING] Can't convert cropped gocv.Mat to image.Image:", err)
-											cropImage.Close()
-											copyCrop.Close()
-											continue
-										}
-										cropImage.Close()
-										copyCrop.Close()
-										err = jpeg.Encode(buf, cropImageSTD, nil)
-										if err != nil {
-											fmt.Println("[WARNING] Can't call jpeg.Encode() on cropped gocv.Mat to image.Image:", err)
+											fmt.Println("[WARNING] Can't prepare image buffer (with crop) due ther error:", err)
 										}
 										xtop, ytop = 0, 0
 									} else {
-										copyImage := img.ImgSource.Clone()
-										copyImageSTD, err := copyImage.ToImage()
+										buf, err = odam.PrepareImageBuffer(&img.ImgSource)
 										if err != nil {
-											fmt.Println("[WARNING] Can't convert source gocv.Mat to image.Image:", err)
-											copyImage.Close()
-											continue
-										}
-										err = jpeg.Encode(buf, copyImageSTD, nil)
-										if err != nil {
-											fmt.Println("[WARNING] Can't call jpeg.Encode() on source gocv.Mat to image.Image:", err)
+											fmt.Println("[WARNING] Can't prepare image buffer due ther error:", err)
 										}
 									}
 									bytesBuffer := buf.Bytes()
