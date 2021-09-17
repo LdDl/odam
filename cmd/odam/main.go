@@ -346,7 +346,7 @@ func main() {
 		}
 
 		/* temporary */
-		time.Sleep(100 * time.Millisecond)
+		// time.Sleep(100 * time.Millisecond)
 	}
 
 	fmt.Println("Shutting down...")
