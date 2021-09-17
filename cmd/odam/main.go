@@ -13,7 +13,6 @@ import (
 
 	"net/http"
 
-	darknet "github.com/LdDl/go-darknet"
 	blob "github.com/LdDl/gocv-blob/v2/blob"
 	"github.com/LdDl/odam"
 	"github.com/hybridgroup/mjpeg"
@@ -63,19 +62,13 @@ func main() {
 		defer grpcConn.Close()
 	}
 
-	/* Initialize neural network */
-	neuralNet := darknet.YOLONetwork{
-		GPUDeviceIndex:           0,
-		NetworkConfigurationFile: settings.NeuralNetworkSettings.DarknetCFG,
-		WeightsFile:              settings.NeuralNetworkSettings.DarknetWeights,
-		Threshold:                float32(settings.NeuralNetworkSettings.ConfThreshold),
-	}
-	err = neuralNet.Init()
+	/* Initialize application */
+	app, err := odam.NewApp(settings)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	defer neuralNet.Close()
+	defer app.Close()
 
 	/* Initialize objects tracker */
 	allblobies := blob.NewBlobiesDefaults()
@@ -137,7 +130,7 @@ func main() {
 	processFrame(img)
 
 	/* Start goroutine for object detection purposes */
-	go performDetection(&neuralNet, settings.NeuralNetworkSettings.TargetClasses)
+	go performDetection(app, settings.NeuralNetworkSettings.TargetClasses)
 
 	/* Initialize variables for evaluation of time difference between frames */
 	lastMS := 0.0
@@ -380,7 +373,7 @@ func main() {
 
 	// Hard release memory
 	img.Close()
-	neuralNet.Close()
+	app.Close()
 
 	// pprof (for debuggin purposes)
 	if settings.MatPPROFSettings.Enable {
@@ -399,11 +392,11 @@ func processFrame(fd *odam.FrameData) {
 	imagesChannel <- frame
 }
 
-func performDetection(neuralNet *darknet.YOLONetwork, targetClasses []string) {
+func performDetection(app *odam.Application, targetClasses []string) {
 	fmt.Println("Start performDetection thread")
 	for {
 		frame := <-imagesChannel
-		detectedRects, err := odam.DetectObjects(neuralNet, frame.ImgSTD, targetClasses...)
+		detectedRects, err := odam.DetectObjects(app, frame.ImgSTD, targetClasses...)
 		if err != nil {
 			log.Printf("Can't detect objects on provided image due the error: %s. Sleep for 100ms", err.Error())
 			frame.Close()
