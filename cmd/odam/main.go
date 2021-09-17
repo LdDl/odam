@@ -403,29 +403,12 @@ func performDetection(neuralNet *darknet.YOLONetwork, targetClasses []string) {
 	fmt.Println("Start performDetection thread")
 	for {
 		frame := <-imagesChannel
-		dr, err := odam.DetectObjects(neuralNet, frame.ImgSTD)
+		detectedRects, err := odam.DetectObjects(neuralNet, frame.ImgSTD, targetClasses...)
 		if err != nil {
 			log.Printf("Can't detect objects on provided image due the error: %s. Sleep for 100ms", err.Error())
 			frame.Close()
 			time.Sleep(100 * time.Millisecond)
 			continue
-		}
-		detectedRects := make([]*odam.DetectedObject, 0, len(dr.Detections))
-		for _, d := range dr.Detections {
-			for i := range d.ClassIDs {
-				if stringInSlice(&d.ClassNames[i], targetClasses) {
-					bBox := d.BoundingBox
-					minX, minY := float64(bBox.StartPoint.X), float64(bBox.StartPoint.Y)
-					maxX, maxY := float64(bBox.EndPoint.X), float64(bBox.EndPoint.Y)
-					rect := odam.DetectedObject{
-						Rect:       image.Rect(odam.Round(minX), odam.Round(minY), odam.Round(maxX), odam.Round(maxY)),
-						ClassName:  d.ClassNames[i],
-						ClassID:    d.ClassIDs[i],
-						Confidence: d.Probabilities[i],
-					}
-					detectedRects = append(detectedRects, &rect)
-				}
-			}
 		}
 		frame.Close() // free the memory
 		detectedChannel <- detectedRects
