@@ -8,6 +8,20 @@ import (
 	"gocv.io/x/gocv"
 )
 
+func maxInt(x, y int) int {
+	if x >= y {
+		return x
+	}
+	return y
+}
+
+func minInt(x, y int) int {
+	if x < y {
+		return x
+	}
+	return y
+}
+
 func stringInSlice(str *string, sl []string) bool {
 	for i := range sl {
 		if sl[i] == *str {

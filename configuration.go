@@ -40,6 +40,10 @@ func NewSettings(fname string) (*AppSettings, error) {
 	for _, lsettings := range appsettings.TrackerSettings.LinesSettings {
 		lsettings.VLine.Scale(appsettings.VideoSettings.ScaleX, appsettings.VideoSettings.ScaleY)
 	}
+	// Scale virtual polygons
+	for _, psettings := range appsettings.TrackerSettings.PolygonsSettings {
+		psettings.VPolygon.Scale(appsettings.VideoSettings.ScaleX, appsettings.VideoSettings.ScaleY)
+	}
 
 	// Prepare drawing options for each class defined in 'neural_network_settings'
 	appsettings.ClassesDrawOptions = make(map[string]*DrawOptions)
@@ -155,6 +159,16 @@ type LinesSetting struct {
 	CropMode      string   `json:"crop_mode"`
 	// Exported, but not from JSON
 	VLine *VirtualLine `json:"-"`
+}
+
+// PolygonsSetting Virtual polygons
+type PolygonsSetting struct {
+	PolygonID     int64    `json:"polygon_id"`
+	Coordinates   [][2]int `json:"coordinates"`
+	DetectClasses []string `json:"detect_classes"`
+	RGBA          [4]uint8 `json:"rgba"`
+	// Exported, but not from JSON
+	VPolygon *VirtualPolygon `json:"-"`
 }
 
 // BBoxSettings Options for detection rectangle

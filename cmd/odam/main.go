@@ -299,6 +299,21 @@ func main() {
 						}
 					}
 				}
+				for _, vpolygon := range settings.TrackerSettings.PolygonsSettings {
+					for _, b := range allblobies.Objects {
+						className := b.GetClassName()
+						if stringInSlice(&className, vpolygon.DetectClasses) { // Detect if object should be detected by virtual polygon (filter by classname)
+							enteredPolygon := vpolygon.VPolygon.BlobEntered(b)
+							if enteredPolygon {
+								fmt.Println("entered blob", b.GetID())
+							}
+							leftPolygon := vpolygon.VPolygon.BlobLeft(b)
+							if leftPolygon {
+								fmt.Println("left blob", b.GetID())
+							}
+						}
+					}
+				}
 			}
 			break
 		default:
@@ -311,6 +326,10 @@ func main() {
 			for i := range settings.TrackerSettings.LinesSettings {
 				settings.TrackerSettings.LinesSettings[i].VLine.Draw(&img.ImgScaled)
 			}
+			for i := range settings.TrackerSettings.PolygonsSettings {
+				settings.TrackerSettings.PolygonsSettings[i].VPolygon.Draw(&img.ImgScaled)
+			}
+
 			for _, b := range allblobies.Objects {
 				spd := float32(0.0)
 				if spdInterface, ok := b.GetProperty("speed"); ok {
@@ -351,6 +370,9 @@ func main() {
 				stream.UpdateJPEG(buf.GetBytes())
 			}
 		}
+
+		/* temporary */
+		time.Sleep(100 * time.Millisecond)
 	}
 
 	fmt.Println("Shutting down...")
