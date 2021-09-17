@@ -33,18 +33,20 @@ func (e EVENT_TYPE) String() string {
 	}
 }
 
-// Event Metainformation about event
+// Event Information about event
 //
 // ID - an event's identifier
 // EventType - corresponding event type
 // Timestamp - corresponding time in UnixTimestamp format (UTC)
 // PreviousEvent - optional information about event chain. Could be used for event type EVENT_LEAVE_POLYGON
+// SpatialObject - Spatial object (see 'SpatialObjectInfo' description)
 //
 type Event struct {
 	ID            uuid.UUID
 	EventType     EVENT_TYPE
 	Timestamp     int64
 	PreviousEvent *Event
+	SpatialObject SpatialObjectInfo
 }
 
 // NewEvent Constructor for events
