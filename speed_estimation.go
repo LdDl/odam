@@ -16,15 +16,14 @@ const (
 func GetPerspectiveTransformer(srcPoints, dstPoints []gocv.Point2f) func(gocv.Point2f) gocv.Point2f {
 	src := gocv.NewPoint2fVectorFromPoints(srcPoints)
 	trgt := gocv.NewPoint2fVectorFromPoints(dstPoints)
-	transformMat := gocv.GetPerspectiveTransform2f(src, trgt)
+	transformMat := gocv.GetPerspectiveTransform2f(src, trgt) // This gocv.Mat should be freed. But I'll think how to do it correctly
 	return func(src gocv.Point2f) gocv.Point2f {
 		pmat := gocv.NewMatWithSize(3, 1, gocv.MatTypeCV64F)
 		pmat.SetDoubleAt(0, 0, float64(src.X))
 		pmat.SetDoubleAt(1, 0, float64(src.Y))
 		pmat.SetDoubleAt(2, 0, 1.0)
 		answ := transformMat.MultiplyMatrix(pmat)
-		pmat.Close()         // Free memory
-		transformMat.Close() // Free memory
+		pmat.Close() // Free memory
 		scale := answ.GetDoubleAt(2, 0)
 		xattr := answ.GetDoubleAt(0, 0)
 		yattr := answ.GetDoubleAt(1, 0)
