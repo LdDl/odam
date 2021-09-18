@@ -32,6 +32,7 @@ func main() {
 		for sig := range interruptChan {
 			fmt.Printf("Shutting down after signal: %v\n", sig)
 			time.Sleep(2 * time.Second)
+			os.Exit(1)
 		}
 	}()
 
