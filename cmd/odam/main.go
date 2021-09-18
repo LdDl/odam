@@ -67,6 +67,7 @@ func main() {
 	/* Initialize GIS converter (for speed estimation) if needed*/
 	// It just helps to figure out what does [Longitude; Latitude] pair correspond to certain pixel
 	var gisConverter func(gocv.Point2f) gocv.Point2f
+	var transformMat gocv.Mat
 	if settings.TrackerSettings.SpeedEstimationSettings.Enabled {
 		if len(settings.TrackerSettings.SpeedEstimationSettings.Mapper) != 4 {
 			fmt.Println("[WARNING] 'mapper' field in 'speed_estimation_settings' should contain exactly 4 elements. Disabling speed estimation feature...")
@@ -80,9 +81,10 @@ func main() {
 				src[i] = gocv.Point2f{X: ptImage[0], Y: ptImage[1]}
 				dst[i] = gocv.Point2f{X: ptGIS[0], Y: ptGIS[1]}
 			}
-			gisConverter = odam.GetPerspectiveTransformer(src, dst)
+			transformMat, gisConverter = odam.GetPerspectiveTransformer(src, dst)
 		}
 	}
+	defer transformMat.Close()
 
 	/* Open video capturer */
 	videoCapturer, err := gocv.OpenVideoCapture(settings.VideoSettings.Source)

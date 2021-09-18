@@ -13,11 +13,11 @@ const (
 )
 
 // GetPerspectiveTransformer Initializates gocv.Point2f for GIS conversion purposes
-func GetPerspectiveTransformer(srcPoints, dstPoints []gocv.Point2f) func(gocv.Point2f) gocv.Point2f {
+func GetPerspectiveTransformer(srcPoints, dstPoints []gocv.Point2f) (gocv.Mat, func(gocv.Point2f) gocv.Point2f) {
 	src := gocv.NewPoint2fVectorFromPoints(srcPoints)
 	trgt := gocv.NewPoint2fVectorFromPoints(dstPoints)
-	transformMat := gocv.GetPerspectiveTransform2f(src, trgt) // This gocv.Mat should be freed. But I'll think how to do it correctly
-	return func(src gocv.Point2f) gocv.Point2f {
+	transformMat := gocv.GetPerspectiveTransform2f(src, trgt)
+	return transformMat, func(src gocv.Point2f) gocv.Point2f {
 		pmat := gocv.NewMatWithSize(3, 1, gocv.MatTypeCV64F)
 		pmat.SetDoubleAt(0, 0, float64(src.X))
 		pmat.SetDoubleAt(1, 0, float64(src.Y))
