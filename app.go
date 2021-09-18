@@ -10,13 +10,18 @@ import (
 	blob "github.com/LdDl/gocv-blob/v2/blob"
 	"github.com/hybridgroup/mjpeg"
 	"github.com/pkg/errors"
+	uuid "github.com/satori/go.uuid"
 	"gocv.io/x/gocv"
 )
+
+// Just an alias to uuid.UUID
+type blobID uuid.UUID
 
 // Application Main engine
 type Application struct {
 	neuralNetwork  *darknet.YOLONetwork
 	blobiesStorage *blob.Blobies
+	blobiesEvents  map[blobID]*Event
 	trackerType    TRACKER_TYPE
 	gisConverter   *SpatialConverter
 
@@ -63,6 +68,7 @@ func NewApp(settings *AppSettings) (*Application, error) {
 	return &Application{
 		neuralNetwork:  &neuralNet,
 		blobiesStorage: blob.NewBlobiesDefaults(),
+		blobiesEvents:  make(map[blobID]*Event),
 		trackerType:    settings.TrackerSettings.GetTrackerType(),
 		gisConverter:   &spatialConverter,
 		settings:       settings,

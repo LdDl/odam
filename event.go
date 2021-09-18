@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 // EVENT_TYPE Alias to int
@@ -62,7 +62,7 @@ func NewEvent(etype EVENT_TYPE, object *DetectedObject, prevEvent ...*Event) (*E
 	switch etype {
 	case EVENT_CROSS_LINE, EVENT_ENTER_POLYGON:
 		return &Event{
-			ID:            uuid.New(),
+			ID:            uuid.NewV4(),
 			EventType:     etype,
 			Timestamp:     time.Now().UTC().Unix(),
 			PreviousEvent: nil,
@@ -72,7 +72,7 @@ func NewEvent(etype EVENT_TYPE, object *DetectedObject, prevEvent ...*Event) (*E
 			return nil, fmt.Errorf("Event is 'EVENT_LEAVE_POLYGON' but previous event hasn't been provided")
 		}
 		return &Event{
-			ID:            uuid.New(),
+			ID:            uuid.NewV4(),
 			EventType:     etype,
 			Timestamp:     time.Now().UTC().Unix(),
 			PreviousEvent: prevEvent[0],
