@@ -10,8 +10,6 @@ import (
 	"math"
 	"time"
 
-	"net/http"
-
 	blob "github.com/LdDl/gocv-blob/v2/blob"
 	"github.com/LdDl/odam"
 	"github.com/hybridgroup/mjpeg"
@@ -35,18 +33,18 @@ func main() {
 		return
 	}
 
+	/* Initialize application */
+	app, err := odam.NewApp(settings)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer app.Close()
+
 	/* Initialize MJPEG server if needed */
 	var stream *mjpeg.Stream
 	if settings.MjpegSettings.Enable {
-		stream = mjpeg.NewStream()
-		go func() {
-			fmt.Printf("Starting MJPEG on http://localhost:%d\n", settings.MjpegSettings.Port)
-			http.Handle("/", stream)
-			err = http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", settings.MjpegSettings.Port), nil)
-			if err != nil {
-				log.Fatalln(err)
-			}
-		}()
+		stream = app.StartMJPEGStream()
 	}
 
 	/* Initialize gRPC data forwarding if needed */
@@ -60,14 +58,6 @@ func main() {
 		}
 		defer grpcConn.Close()
 	}
-
-	/* Initialize application */
-	app, err := odam.NewApp(settings)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	defer app.Close()
 
 	/* Initialize objects tracker */
 	allblobies := blob.NewBlobiesDefaults()
@@ -181,17 +171,13 @@ func main() {
 						TimeDeltaSeconds: secDiff,
 					}
 					if trackerType == odam.TRACKER_SIMPLE {
-						// detected[i].Blobie = blob.NewSimpleBlobie(detected[i].Rect, &commonOptions)
 						detectedObjects[i] = blob.NewSimpleBlobie(detected[i].Rect, &commonOptions)
 					} else if trackerType == odam.TRACKER_KALMAN {
-						// detected[i].Blobie = blob.NewKalmanBlobie(detected[i].Rect, &commonOptions)
 						detectedObjects[i] = blob.NewKalmanBlobie(detected[i].Rect, &commonOptions)
 					}
 					if foundOptions := settings.GetDrawOptions(detected[i].ClassName); foundOptions != nil {
-						// detected[i].Blobie.SetDraw(foundOptions.DrawOptions)
 						detectedObjects[i].SetDraw(foundOptions.DrawOptions)
 					}
-					// detectedObjects[i] = detected[i]
 				}
 				/* Match blobs to existing ones */
 				allblobies.MatchToExisting(detectedObjects)
