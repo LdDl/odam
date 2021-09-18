@@ -152,9 +152,9 @@ func (app *Application) PrepareBlobs(detected DetectedObjects, lastTm time.Time,
 // RegisterEventForBlobID Registers en event for blob
 func (app *Application) RegisterEventForBlobID(id uuid.UUID, event *Event) {
 	app.blobiesEvents[id] = event
-	if app.publisherImpl.eventsChannel != nil {
-		app.publisherImpl.eventsChannel <- event
-	}
+	// if app.publisherImpl.eventsChannel != nil {
+	// 	app.publisherImpl.eventsChannel <- event
+	// }
 }
 
 // GetEventByBlobID Return last registered event for blob

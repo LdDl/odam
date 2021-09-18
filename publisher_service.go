@@ -8,6 +8,7 @@ import (
 type PublisherService struct {
 	ServiceODaMServer
 	eventsChannel chan *Event
+	clientNum     int
 }
 
 func (service *PublisherService) Subscribe(in *EventTypes, stream ServiceODaM_SubscribeServer) error {
