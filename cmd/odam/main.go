@@ -331,6 +331,7 @@ func main() {
 	// Hard release memory
 	img.Close()
 	app.Close()
+	transformMat.Close()
 
 	// pprof (for debuggin purposes)
 	if settings.MatPPROFSettings.Enable {
