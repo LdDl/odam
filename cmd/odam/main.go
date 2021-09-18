@@ -58,6 +58,11 @@ func main() {
 		defer grpcConn.Close()
 	}
 
+	// @todo: test purposes
+	{
+		go app.StartEventsPublisher()
+	}
+
 	/* Initialize objects tracker */
 	allblobies := app.GetBlobsStorage()
 	fmt.Printf("Using tracker: '%s'\n", settings.TrackerSettings.TrackerType)
