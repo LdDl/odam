@@ -140,12 +140,11 @@ type MjpegSettings struct {
 
 // NeuralNetworkSettings Neural network
 type NeuralNetworkSettings struct {
-	DarknetCFG     string `json:"darknet_cfg"`
-	DarknetWeights string `json:"darknet_weights"`
-	// DarknetClasses string   `json:"darknet_classes"`
-	ConfThreshold float64  `json:"conf_threshold"`
-	NmsThreshold  float64  `json:"nms_threshold"`
-	TargetClasses []string `json:"target_classes"`
+	DarknetCFG     string   `json:"darknet_cfg"`
+	DarknetWeights string   `json:"darknet_weights"`
+	ConfThreshold  float64  `json:"conf_threshold"`
+	NmsThreshold   float64  `json:"nms_threshold"`
+	TargetClasses  []string `json:"target_classes"`
 }
 
 // LinesSetting Virtual lines

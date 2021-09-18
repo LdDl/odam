@@ -10,7 +10,6 @@ import (
 	"math"
 	"time"
 
-	blob "github.com/LdDl/gocv-blob/v2/blob"
 	"github.com/LdDl/odam"
 	"github.com/hybridgroup/mjpeg"
 	"gocv.io/x/gocv"
@@ -60,7 +59,7 @@ func main() {
 	}
 
 	/* Initialize objects tracker */
-	allblobies := blob.NewBlobiesDefaults()
+	allblobies := app.GetBlobsStorage()
 	fmt.Printf("Using tracker: '%s'\n", settings.TrackerSettings.TrackerType)
 
 	/* Initialize GIS converter (for speed estimation) if needed*/

@@ -44,6 +44,10 @@ func (app *Application) Close() {
 	app.neuralNetwork.Close()
 }
 
+func (app *Application) GetBlobsStorage() *blob.Blobies {
+	return app.blobiesStorage
+}
+
 func (app *Application) StartMJPEGStream() *mjpeg.Stream {
 	stream := mjpeg.NewStream()
 	go func() {
