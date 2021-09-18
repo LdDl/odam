@@ -84,19 +84,19 @@
         "polygons_settings":[
             {
                 "polygon_id": 1,
-                "coordinates": [ [13, 985] , [453, 1005], [694, 17], [418, 5] ],
+                "coordinates": [ [179, 557] , [565, 585], [670, 157], [340, 158] ],
                 "detect_classes": ["car", "motorbike", "bus", "train", "truck"],
                 "rgba": [0, 128, 255, 0]
             },
             {
                 "polygon_id": 2,
-                "coordinates": [ [514, 1006] , [1185, 1006], [1095, 100], [719, 93] ],
+                "coordinates": [ [637, 579] , [1161, 589], [1093, 117], [739, 121] ],
                 "detect_classes": ["car", "motorbike", "bus", "train", "truck"],
                 "rgba": [255, 0, 255, 0]
             },
             {
                 "polygon_id": 3,
-                "coordinates": [ [1290, 1000] , [1889, 1004], [1568, 9], [1126, 18] ],
+                "coordinates": [ [1219, 589] , [1743, 587], [1561, 131], [1171, 135] ],
                 "detect_classes": ["car", "motorbike", "bus", "train", "truck"],
                 "rgba": [0, 255, 255, 0]
             }
