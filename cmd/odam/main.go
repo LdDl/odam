@@ -70,8 +70,7 @@ func main() {
 		defer grpcConn.Close()
 	}
 
-	// @todo: test purposes
-	{
+	if settings.GrpcSettings.Publisher.Enable {
 		go app.StartEventsPublisher()
 	}
 

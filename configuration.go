@@ -106,10 +106,15 @@ type MatPPROFSettings struct {
 
 // GrpcSettings gRPC-server address
 type GrpcSettings struct {
-	Enable     bool   `json:"enable"`
-	ServerIP   string `json:"server_ip"`
-	ServerPort int    `json:"server_port"`
+	Enable     bool                  `json:"enable"`
+	ServerIP   string                `json:"server_ip"`
+	ServerPort int                   `json:"server_port"`
+	Publisher  GrpcPublisherSettings `json:"publisher"`
+}
 
+// GrpcPublisherSettings grpc-publisher settings
+type GrpcPublisherSettings struct {
+	Enable        bool   `json:"enable"`
 	PublisherIP   string `json:"publisher_ip"`
 	PublisherPort int    `json:"publisher_port"`
 }

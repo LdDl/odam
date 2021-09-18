@@ -116,7 +116,7 @@ func (app *Application) StartMJPEGStream() *mjpeg.Stream {
 
 // StartEventsPublisher Starts event publisher server
 func (app *Application) StartEventsPublisher() error {
-	stdListener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", app.settings.GrpcSettings.PublisherIP, app.settings.GrpcSettings.PublisherPort))
+	stdListener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", app.settings.GrpcSettings.Publisher.PublisherIP, app.settings.GrpcSettings.Publisher.PublisherPort))
 	if err != nil {
 		return err
 	}
