@@ -10,6 +10,7 @@ import (
 	blob "github.com/LdDl/gocv-blob/v2/blob"
 	"github.com/hybridgroup/mjpeg"
 	"github.com/pkg/errors"
+	uuid "github.com/satori/go.uuid"
 	"gocv.io/x/gocv"
 )
 
@@ -17,6 +18,7 @@ import (
 type Application struct {
 	neuralNetwork  *darknet.YOLONetwork
 	blobiesStorage *blob.Blobies
+	blobiesEvents  map[uuid.UUID]*Event
 	trackerType    TRACKER_TYPE
 	gisConverter   *SpatialConverter
 
@@ -63,6 +65,7 @@ func NewApp(settings *AppSettings) (*Application, error) {
 	return &Application{
 		neuralNetwork:  &neuralNet,
 		blobiesStorage: blob.NewBlobiesDefaults(),
+		blobiesEvents:  make(map[uuid.UUID]*Event),
 		trackerType:    settings.TrackerSettings.GetTrackerType(),
 		gisConverter:   &spatialConverter,
 		settings:       settings,
@@ -120,4 +123,17 @@ func (app *Application) PrepareBlobs(detected DetectedObjects, lastTm time.Time,
 		}
 	}
 	return detectedObjects
+}
+
+// RegisterEventForBlobID Registers en event for blob
+func (app *Application) RegisterEventForBlobID(id uuid.UUID, event *Event) {
+	app.blobiesEvents[id] = event
+}
+
+// GetEventByBlobID Return last registered event for blob
+func (app *Application) GetEventByBlobID(id uuid.UUID) *Event {
+	if event, ok := app.blobiesEvents[id]; ok {
+		return event
+	}
+	return nil
 }
