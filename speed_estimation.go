@@ -12,6 +12,17 @@ const (
 	earthRaidusKm = 6371 // radius of the earth in kilometers.
 )
 
+// SpatialConverter Just wrapper for spatial conversion
+type SpatialConverter struct {
+	Function     func(gocv.Point2f) gocv.Point2f
+	transformMat *gocv.Mat
+}
+
+// Close Free memory for underlying *gocv.Mat
+func (sc *SpatialConverter) Close() {
+	sc.transformMat.Close()
+}
+
 // GetPerspectiveTransformer Initializates gocv.Point2f for GIS conversion purposes
 func GetPerspectiveTransformer(srcPoints, dstPoints []gocv.Point2f) (*gocv.Mat, func(gocv.Point2f) gocv.Point2f) {
 	src := gocv.NewPoint2fVectorFromPoints(srcPoints)
