@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/LdDl/gocv-blob/v2/blob"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -55,7 +56,7 @@ type Event struct {
 // object - detected object
 // prevEvent - optional reference to previous event. Could be used for event type EVENT_LEAVE_POLYGON only
 //
-func NewEvent(etype EVENT_TYPE, object *DetectedObject, prevEvent ...*Event) (*Event, error) {
+func NewEvent(etype EVENT_TYPE, object blob.Blobie, prevEvent ...*Event) (*Event, error) {
 	if len(prevEvent) > 1 {
 		return nil, fmt.Errorf("Previous event could be only one")
 	}

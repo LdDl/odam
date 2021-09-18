@@ -227,11 +227,29 @@ func main() {
 						if stringInSlice(&className, vpolygon.DetectClasses) { // Detect if object should be detected by virtual polygon (filter by classname)
 							enteredPolygon := vpolygon.VPolygon.BlobEntered(b)
 							if enteredPolygon {
-								fmt.Println("entered blob", b.GetID())
+								event, err := odam.NewEvent(odam.EVENT_ENTER_POLYGON, b)
+								if err != nil {
+									fmt.Println("[WARNING] Can't register event 'EVENT_ENTER_POLYGON' due the error:", err)
+									continue
+								}
+								fmt.Println("Blob has entered polygon", b.GetID())
+								app.RegisterEventForBlobID(b.GetID(), event)
 							}
 							leftPolygon := vpolygon.VPolygon.BlobLeft(b)
 							if leftPolygon {
-								fmt.Println("left blob", b.GetID())
+								// Check if blob has previous event
+								if lastEvent := app.GetEventByBlobID(b.GetID()); lastEvent != nil {
+									// If blob has been registered earlier (entered into polygon)
+									if lastEvent.EventType == odam.EVENT_ENTER_POLYGON {
+										event, err := odam.NewEvent(odam.EVENT_LEAVE_POLYGON, b, lastEvent)
+										if err != nil {
+											fmt.Println("[WARNING] Can't register event 'EVENT_LEAVE_POLYGON' due the error:", err)
+											continue
+										}
+										fmt.Println("Blob has left polygon", b.GetID())
+										app.RegisterEventForBlobID(b.GetID(), event)
+									}
+								}
 							}
 						}
 					}
