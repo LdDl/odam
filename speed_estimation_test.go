@@ -20,14 +20,14 @@ func TestGetPerspectiveTransformer(t *testing.T) {
 		{X: float32(6.603638), Y: float32(52.036558)},
 		{X: float32(6.603560), Y: float32(52.036730)},
 	}
-	converter := GetPerspectiveTransformer(src, dst)
+	transformMat, converter := GetPerspectiveTransformer(src, dst)
 	for i, p := range src {
 		res := converter(p)
 		if res != dst[i] {
 			t.Errorf("Incorrect perspective transformation. Should be be %v, but got %v", dst[i], res)
 		}
 	}
-
+	transformMat.Close()
 }
 
 func TestHaversine(t *testing.T) {
@@ -53,13 +53,14 @@ func TestEstimateSpeed(t *testing.T) {
 		{X: 6.603638, Y: 52.036558},
 		{X: 6.603560, Y: 52.036730},
 	}
-	converter := GetPerspectiveTransformer(srcMat, dstMat)
+	transformMat, converter := GetPerspectiveTransformer(srcMat, dstMat)
 	src := gocv.Point2f{X: 1200, Y: 278}
 	dst := gocv.Point2f{X: 1205, Y: 698}
 	start := time.Now()
 	finish := start.Add(6000 * time.Millisecond)
 	res := EstimateSpeed(src, dst, start, finish, converter)
 	correctSpeed := float32(63.30266)
+	transformMat.Close()
 	if res != correctSpeed {
 		t.Errorf("Estimated speed should be %f, but got %f", res, correctSpeed)
 	}

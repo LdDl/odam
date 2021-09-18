@@ -12,19 +12,34 @@ const (
 	earthRaidusKm = 6371 // radius of the earth in kilometers.
 )
 
+// SpatialConverter Just wrapper for spatial conversion
+type SpatialConverter struct {
+	Function     func(gocv.Point2f) gocv.Point2f
+	transformMat *gocv.Mat
+}
+
+// Close Free memory for underlying *gocv.Mat
+func (sc *SpatialConverter) Close() {
+	sc.transformMat.Close()
+}
+
 // GetPerspectiveTransformer Initializates gocv.Point2f for GIS conversion purposes
-func GetPerspectiveTransformer(srcPoints, dstPoints []gocv.Point2f) func(gocv.Point2f) gocv.Point2f {
+func GetPerspectiveTransformer(srcPoints, dstPoints []gocv.Point2f) (*gocv.Mat, func(gocv.Point2f) gocv.Point2f) {
 	src := gocv.NewPoint2fVectorFromPoints(srcPoints)
 	trgt := gocv.NewPoint2fVectorFromPoints(dstPoints)
 	transformMat := gocv.GetPerspectiveTransform2f(src, trgt)
-	return func(src gocv.Point2f) gocv.Point2f {
+	return &transformMat, func(src gocv.Point2f) gocv.Point2f {
 		pmat := gocv.NewMatWithSize(3, 1, gocv.MatTypeCV64F)
 		pmat.SetDoubleAt(0, 0, float64(src.X))
 		pmat.SetDoubleAt(1, 0, float64(src.Y))
 		pmat.SetDoubleAt(2, 0, 1.0)
 		answ := transformMat.MultiplyMatrix(pmat)
+		pmat.Close() // Free memory
 		scale := answ.GetDoubleAt(2, 0)
-		return gocv.Point2f{X: float32(answ.GetDoubleAt(0, 0) / scale), Y: float32(answ.GetDoubleAt(1, 0) / scale)}
+		xattr := answ.GetDoubleAt(0, 0)
+		yattr := answ.GetDoubleAt(1, 0)
+		answ.Close() // Free memory
+		return gocv.Point2f{X: float32(xattr / scale), Y: float32(yattr / scale)}
 	}
 }
 

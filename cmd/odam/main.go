@@ -6,15 +6,10 @@ import (
 	"flag"
 	"fmt"
 	"image"
-	"image/jpeg"
 	"log"
 	"math"
 	"time"
 
-	"net/http"
-
-	darknet "github.com/LdDl/go-darknet"
-	blob "github.com/LdDl/gocv-blob/v2/blob"
 	"github.com/LdDl/odam"
 	"github.com/hybridgroup/mjpeg"
 	"gocv.io/x/gocv"
@@ -37,18 +32,18 @@ func main() {
 		return
 	}
 
+	/* Initialize application */
+	app, err := odam.NewApp(settings)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer app.Close()
+
 	/* Initialize MJPEG server if needed */
 	var stream *mjpeg.Stream
 	if settings.MjpegSettings.Enable {
-		stream = mjpeg.NewStream()
-		go func() {
-			fmt.Printf("Starting MJPEG on http://localhost:%d\n", settings.MjpegSettings.Port)
-			http.Handle("/", stream)
-			err = http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", settings.MjpegSettings.Port), nil)
-			if err != nil {
-				log.Fatalln(err)
-			}
-		}()
+		stream = app.StartMJPEGStream()
 	}
 
 	/* Initialize gRPC data forwarding if needed */
@@ -63,43 +58,15 @@ func main() {
 		defer grpcConn.Close()
 	}
 
-	/* Initialize neural network */
-	neuralNet := darknet.YOLONetwork{
-		GPUDeviceIndex:           0,
-		NetworkConfigurationFile: settings.NeuralNetworkSettings.DarknetCFG,
-		WeightsFile:              settings.NeuralNetworkSettings.DarknetWeights,
-		Threshold:                float32(settings.NeuralNetworkSettings.ConfThreshold),
-	}
-	err = neuralNet.Init()
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	defer neuralNet.Close()
-
 	/* Initialize objects tracker */
-	allblobies := blob.NewBlobiesDefaults()
-	trackerType := settings.TrackerSettings.GetTrackerType()
+	allblobies := app.GetBlobsStorage()
 	fmt.Printf("Using tracker: '%s'\n", settings.TrackerSettings.TrackerType)
 
 	/* Initialize GIS converter (for speed estimation) if needed*/
 	// It just helps to figure out what does [Longitude; Latitude] pair correspond to certain pixel
 	var gisConverter func(gocv.Point2f) gocv.Point2f
 	if settings.TrackerSettings.SpeedEstimationSettings.Enabled {
-		if len(settings.TrackerSettings.SpeedEstimationSettings.Mapper) != 4 {
-			fmt.Println("[WARNING] 'mapper' field in 'speed_estimation_settings' should contain exactly 4 elements. Disabling speed estimation feature...")
-			settings.TrackerSettings.SpeedEstimationSettings.Enabled = false
-		} else {
-			src := make([]gocv.Point2f, len(settings.TrackerSettings.SpeedEstimationSettings.Mapper))
-			dst := make([]gocv.Point2f, len(settings.TrackerSettings.SpeedEstimationSettings.Mapper))
-			for i := range settings.TrackerSettings.SpeedEstimationSettings.Mapper {
-				ptImage := settings.TrackerSettings.SpeedEstimationSettings.Mapper[i].ImageCoordinates
-				ptGIS := settings.TrackerSettings.SpeedEstimationSettings.Mapper[i].EPSG4326
-				src[i] = gocv.Point2f{X: ptImage[0], Y: ptImage[1]}
-				dst[i] = gocv.Point2f{X: ptGIS[0], Y: ptGIS[1]}
-			}
-			gisConverter = odam.GetPerspectiveTransformer(src, dst)
-		}
+		gisConverter = app.GetGISConverter()
 	}
 
 	/* Open video capturer */
@@ -137,7 +104,7 @@ func main() {
 	processFrame(img)
 
 	/* Start goroutine for object detection purposes */
-	go performDetection(&neuralNet, settings.NeuralNetworkSettings.TargetClasses)
+	go performDetection(app, settings.NeuralNetworkSettings.TargetClasses)
 
 	/* Initialize variables for evaluation of time difference between frames */
 	lastMS := 0.0
@@ -178,29 +145,8 @@ func main() {
 		case detected := <-detectedChannel:
 			processFrame(img)
 			if len(detected) != 0 {
-				/* Prepare 'blobs' for each detected object */
-				detectedObjects := make([]blob.Blobie, len(detected))
-				for i := range detected {
-					commonOptions := blob.BlobOptions{
-						ClassID:          detected[i].ClassID,
-						ClassName:        detected[i].ClassName,
-						MaxPointsInTrack: settings.TrackerSettings.MaxPointsInTrack,
-						Time:             lastTime,
-						TimeDeltaSeconds: secDiff,
-					}
-					if trackerType == odam.TRACKER_SIMPLE {
-						// detected[i].Blobie = blob.NewSimpleBlobie(detected[i].Rect, &commonOptions)
-						detectedObjects[i] = blob.NewSimpleBlobie(detected[i].Rect, &commonOptions)
-					} else if trackerType == odam.TRACKER_KALMAN {
-						// detected[i].Blobie = blob.NewKalmanBlobie(detected[i].Rect, &commonOptions)
-						detectedObjects[i] = blob.NewKalmanBlobie(detected[i].Rect, &commonOptions)
-					}
-					if foundOptions := settings.GetDrawOptions(detected[i].ClassName); foundOptions != nil {
-						// detected[i].Blobie.SetDraw(foundOptions.DrawOptions)
-						detectedObjects[i].SetDraw(foundOptions.DrawOptions)
-					}
-					// detectedObjects[i] = detected[i]
-				}
+				/* Prepare 'blob' for each detected object */
+				detectedObjects := app.PrepareBlobs(detected, lastTime, secDiff)
 				/* Match blobs to existing ones */
 				allblobies.MatchToExisting(detectedObjects)
 
@@ -215,12 +161,6 @@ func main() {
 							lp := odam.STDPointToGoCVPoint2F(blobTrack[trackLen-1])
 							spd := odam.EstimateSpeed(fp, lp, blobTimestamps[0], blobTimestamps[trackLen-1], gisConverter)
 							b.SetProperty("speed", spd)
-							// do, err := odam.CastBlobToDetectedObject(b)
-							// if err != nil {
-							// 	fmt.Println("[WARNING] Can't cast blob.Blobie to *odam.DetectedObject:", err)
-							// 	continue
-							// }
-							// do.SetSpeed(spd)
 						}
 					}
 				}
@@ -246,38 +186,20 @@ func main() {
 									)
 									// Make sure to be not out of image bounds
 									odam.FixRectForOpenCV(&cropRect, settings.VideoSettings.Width, settings.VideoSettings.Height)
-									buf := new(bytes.Buffer)
+									var buf *bytes.Buffer
 									xtop, ytop := int32(cropRect.Min.X), int32(cropRect.Min.Y)
 
 									// Futher buffer preparation depends on 'crop_mode' in JSON'ed configuration file
 									if vline.VLine.CropObject {
-										cropImage := img.ImgSource.Region(cropRect)
-										copyCrop := cropImage.Clone()
-										cropImageSTD, err := copyCrop.ToImage()
+										buf, err = odam.PrepareCroppedImageBuffer(&img.ImgSource, cropRect)
 										if err != nil {
-											fmt.Println("[WARNING] Can't convert cropped gocv.Mat to image.Image:", err)
-											cropImage.Close()
-											copyCrop.Close()
-											continue
-										}
-										cropImage.Close()
-										copyCrop.Close()
-										err = jpeg.Encode(buf, cropImageSTD, nil)
-										if err != nil {
-											fmt.Println("[WARNING] Can't call jpeg.Encode() on cropped gocv.Mat to image.Image:", err)
+											fmt.Println("[WARNING] Can't prepare image buffer (with crop) due ther error:", err)
 										}
 										xtop, ytop = 0, 0
 									} else {
-										copyImage := img.ImgSource.Clone()
-										copyImageSTD, err := copyImage.ToImage()
+										buf, err = odam.PrepareImageBuffer(&img.ImgSource)
 										if err != nil {
-											fmt.Println("[WARNING] Can't convert source gocv.Mat to image.Image:", err)
-											copyImage.Close()
-											continue
-										}
-										err = jpeg.Encode(buf, copyImageSTD, nil)
-										if err != nil {
-											fmt.Println("[WARNING] Can't call jpeg.Encode() on source gocv.Mat to image.Image:", err)
+											fmt.Println("[WARNING] Can't prepare image buffer due ther error:", err)
 										}
 									}
 									bytesBuffer := buf.Bytes()
@@ -341,12 +263,6 @@ func main() {
 						break
 					}
 				}
-				// do, err := odam.CastBlobToDetectedObject(b)
-				// if err != nil {
-				// 	fmt.Println("[WARNING] Can't cast blob.Blobie to *odam.DetectedObject:", err)
-				// 	continue
-				// }
-				// spd := do.GetSpeed()
 				if foundOptions := settings.GetDrawOptions(b.GetClassName()); foundOptions != nil {
 					if foundOptions.DisplayObjectID {
 						b.DrawTrack(&img.ImgScaled, fmt.Sprintf("v = %.2f km/h", spd), fmt.Sprintf("%v", b.GetID()))
@@ -372,7 +288,7 @@ func main() {
 		}
 
 		/* temporary */
-		time.Sleep(100 * time.Millisecond)
+		// time.Sleep(100 * time.Millisecond)
 	}
 
 	fmt.Println("Shutting down...")
@@ -380,7 +296,7 @@ func main() {
 
 	// Hard release memory
 	img.Close()
-	neuralNet.Close()
+	app.Close()
 
 	// pprof (for debuggin purposes)
 	if settings.MatPPROFSettings.Enable {
@@ -399,11 +315,11 @@ func processFrame(fd *odam.FrameData) {
 	imagesChannel <- frame
 }
 
-func performDetection(neuralNet *darknet.YOLONetwork, targetClasses []string) {
+func performDetection(app *odam.Application, targetClasses []string) {
 	fmt.Println("Start performDetection thread")
 	for {
 		frame := <-imagesChannel
-		detectedRects, err := odam.DetectObjects(neuralNet, frame.ImgSTD, targetClasses...)
+		detectedRects, err := odam.DetectObjects(app, frame.ImgSTD, targetClasses...)
 		if err != nil {
 			log.Printf("Can't detect objects on provided image due the error: %s. Sleep for 100ms", err.Error())
 			frame.Close()

@@ -1,10 +1,13 @@
 package odam
 
 import (
+	"bytes"
 	"image"
+	"image/jpeg"
 	"math"
 
 	blob "github.com/LdDl/gocv-blob/v2/blob"
+	"github.com/pkg/errors"
 	"gocv.io/x/gocv"
 )
 
@@ -54,6 +57,43 @@ func FixRectForOpenCV(r *image.Rectangle, maxCols, maxRows int) {
 	if r.Max.Y >= maxRows {
 		r.Max.Y = maxRows - 1
 	}
+}
+
+// PrepareImageBuffer Prepares image buffer for provided *gocv.Mat
+func PrepareImageBuffer(img *gocv.Mat) (*bytes.Buffer, error) {
+	buf := new(bytes.Buffer)
+	copyImage := img.Clone()
+	copyImageSTD, err := copyImage.ToImage()
+	if err != nil {
+		copyImage.Close()
+		return nil, errors.Wrap(err, "Can't convert source gocv.Mat to image.Image")
+	}
+	copyImage.Close()
+	err = jpeg.Encode(buf, copyImageSTD, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "Can't call jpeg.Encode() on source gocv.Mat to image.Image")
+	}
+	return buf, nil
+}
+
+// PrepareCroppedImageBuffer Prepares image buffer of certain rectangular area for provided *gocv.Mat
+func PrepareCroppedImageBuffer(img *gocv.Mat, rect image.Rectangle) (*bytes.Buffer, error) {
+	buf := new(bytes.Buffer)
+	croppedImg := img.Region(rect)
+	copyCrop := croppedImg.Clone()
+	cropImageSTD, err := copyCrop.ToImage()
+	if err != nil {
+		croppedImg.Close()
+		copyCrop.Close()
+		return nil, errors.Wrap(err, "Can't convert cropped *gocv.Mat to image.Image")
+	}
+	croppedImg.Close()
+	copyCrop.Close()
+	err = jpeg.Encode(buf, cropImageSTD, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "Can't call jpeg.Encode() on cropped gocv.Mat to image.Image")
+	}
+	return buf, nil
 }
 
 // ClassInfoGRPC Prepares gRPC message 'ClassInfo'

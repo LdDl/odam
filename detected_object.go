@@ -54,16 +54,16 @@ func (do *DetectedObject) GetSpeed() float32 {
 
 // DetectObjects Detect objects for provided Go's image via neural network
 //
-// neuralNet - Neural network for object detection
+// app - Application instance containing pointer to neural network for object detection
 // imgSTD - image.Image from Go's standart library
 // filters - List of classes for which you need to filter detected objects
 //
-func DetectObjects(neuralNet *darknet.YOLONetwork, imgSTD image.Image, filters ...string) ([]*DetectedObject, error) {
+func DetectObjects(app *Application, imgSTD image.Image, filters ...string) ([]*DetectedObject, error) {
 	darknetImage, err := darknet.Image2Float32(imgSTD)
 	if err != nil {
 		return nil, errors.Wrap(err, "Can't convert image to Darknet's format")
 	}
-	dr, err := neuralNet.Detect(darknetImage)
+	dr, err := app.neuralNetwork.Detect(darknetImage)
 	if err != nil {
 		darknetImage.Close()
 		return nil, errors.Wrap(err, "Can't make detection on Darknet image")
