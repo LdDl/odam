@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	darknet "github.com/LdDl/go-darknet"
 	blob "github.com/LdDl/gocv-blob/v2/blob"
@@ -14,6 +15,7 @@ import (
 type Application struct {
 	neuralNetwork  *darknet.YOLONetwork
 	blobiesStorage *blob.Blobies
+	trackerType    TRACKER_TYPE
 
 	settings *AppSettings
 }
@@ -33,6 +35,7 @@ func NewApp(settings *AppSettings) (*Application, error) {
 	return &Application{
 		neuralNetwork:  &neuralNet,
 		blobiesStorage: blob.NewBlobiesDefaults(),
+		trackerType:    settings.TrackerSettings.GetTrackerType(),
 		settings:       settings,
 	}, nil
 }
@@ -52,4 +55,26 @@ func (app *Application) StartMJPEGStream() *mjpeg.Stream {
 		}
 	}()
 	return stream
+}
+
+func (app *Application) PrepareBlobs(detected DetectedObjects, lastTm time.Time, secDiff float64) []blob.Blobie {
+	detectedObjects := make([]blob.Blobie, len(detected))
+	for i := range detected {
+		commonOptions := blob.BlobOptions{
+			ClassID:          detected[i].ClassID,
+			ClassName:        detected[i].ClassName,
+			MaxPointsInTrack: app.settings.TrackerSettings.MaxPointsInTrack,
+			Time:             lastTm,
+			TimeDeltaSeconds: secDiff,
+		}
+		if app.trackerType == TRACKER_SIMPLE {
+			detectedObjects[i] = blob.NewSimpleBlobie(detected[i].Rect, &commonOptions)
+		} else if app.trackerType == TRACKER_KALMAN {
+			detectedObjects[i] = blob.NewKalmanBlobie(detected[i].Rect, &commonOptions)
+		}
+		if foundOptions := app.settings.GetDrawOptions(detected[i].ClassName); foundOptions != nil {
+			detectedObjects[i].SetDraw(foundOptions.DrawOptions)
+		}
+	}
+	return detectedObjects
 }

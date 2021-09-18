@@ -61,7 +61,6 @@ func main() {
 
 	/* Initialize objects tracker */
 	allblobies := blob.NewBlobiesDefaults()
-	trackerType := settings.TrackerSettings.GetTrackerType()
 	fmt.Printf("Using tracker: '%s'\n", settings.TrackerSettings.TrackerType)
 
 	/* Initialize GIS converter (for speed estimation) if needed*/
@@ -162,25 +161,8 @@ func main() {
 		case detected := <-detectedChannel:
 			processFrame(img)
 			if len(detected) != 0 {
-				/* Prepare 'blobs' for each detected object */
-				detectedObjects := make([]blob.Blobie, len(detected))
-				for i := range detected {
-					commonOptions := blob.BlobOptions{
-						ClassID:          detected[i].ClassID,
-						ClassName:        detected[i].ClassName,
-						MaxPointsInTrack: settings.TrackerSettings.MaxPointsInTrack,
-						Time:             lastTime,
-						TimeDeltaSeconds: secDiff,
-					}
-					if trackerType == odam.TRACKER_SIMPLE {
-						detectedObjects[i] = blob.NewSimpleBlobie(detected[i].Rect, &commonOptions)
-					} else if trackerType == odam.TRACKER_KALMAN {
-						detectedObjects[i] = blob.NewKalmanBlobie(detected[i].Rect, &commonOptions)
-					}
-					if foundOptions := settings.GetDrawOptions(detected[i].ClassName); foundOptions != nil {
-						detectedObjects[i].SetDraw(foundOptions.DrawOptions)
-					}
-				}
+				/* Prepare 'blob' for each detected object */
+				detectedObjects := app.PrepareBlobs(detected, lastTime, secDiff)
 				/* Match blobs to existing ones */
 				allblobies.MatchToExisting(detectedObjects)
 
