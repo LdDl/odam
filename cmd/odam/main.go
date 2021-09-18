@@ -8,6 +8,8 @@ import (
 	"image"
 	"log"
 	"math"
+	"os"
+	"os/signal"
 	"time"
 
 	"github.com/LdDl/odam"
@@ -23,6 +25,15 @@ var (
 )
 
 func main() {
+	/* Prepare shutdown with lag*/
+	interruptChan := make(chan os.Signal, 1)
+	signal.Notify(interruptChan, os.Interrupt)
+	go func() {
+		for sig := range interruptChan {
+			fmt.Printf("Shutting down after signal: %v\n", sig)
+			time.Sleep(2 * time.Second)
+		}
+	}()
 
 	/* Read settings */
 	flag.Parse()
