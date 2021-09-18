@@ -149,7 +149,7 @@ If you want to make PR for some undone features (algorithms mainly) I'll glad to
 
    If you need to rebuild *.pb.go file, call this is from project root folder:
    ```
-   protoc -I . yolo_grpc.proto --go_out=plugins=grpc:.
+   protoc -I . odam.proto --go_out=plugins=grpc:.
    ```
    In case of my needs I need to detect license plates on vehicles and do OCR on server-side: you can take a look on https://github.com/LdDl/license_plate_recognition for gRPC server example
 
