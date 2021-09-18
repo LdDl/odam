@@ -171,6 +171,13 @@ func main() {
 							crossedLine := vline.VLine.IsBlobCrossedLine(b)
 							// If object crossed the virtual line
 							if crossedLine {
+								event, err := odam.NewEvent(odam.EVENT_CROSS_LINE, b)
+								if err != nil {
+									fmt.Println("[WARNING] Can't register event 'EVENT_CROSS_LINE' due the error:", err)
+									continue
+								}
+								app.RegisterEventForBlobID(b.GetID(), event)
+
 								catchedTimestamp := time.Now().UTC().Unix()
 								b.SetTracking(false)
 								// If gRPC streaming data is disabled why do we need to process all stuff? We add strict condition.
@@ -239,8 +246,8 @@ func main() {
 							if leftPolygon {
 								// Check if blob has previous event
 								if lastEvent := app.GetEventByBlobID(b.GetID()); lastEvent != nil {
-									// If blob has been registered earlier (entered into polygon)
-									if lastEvent.EventType == odam.EVENT_ENTER_POLYGON {
+									// If blob has been registered earlier (entered into polygon or crossed a line)
+									if lastEvent.EventType != odam.EVENT_LEAVE_POLYGON {
 										event, err := odam.NewEvent(odam.EVENT_LEAVE_POLYGON, b, lastEvent)
 										if err != nil {
 											fmt.Println("[WARNING] Can't register event 'EVENT_LEAVE_POLYGON' due the error:", err)
