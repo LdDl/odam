@@ -214,13 +214,13 @@ var file_pub_sub_proto_rawDesc = []byte{
 	0x45, 0x56, 0x45, 0x4e, 0x54, 0x10, 0x01, 0x12, 0x17, 0x0a, 0x13, 0x45, 0x4e, 0x54, 0x45, 0x52,
 	0x5f, 0x50, 0x4f, 0x4c, 0x59, 0x47, 0x4f, 0x4e, 0x5f, 0x45, 0x56, 0x45, 0x4e, 0x54, 0x10, 0x02,
 	0x12, 0x17, 0x0a, 0x13, 0x4c, 0x45, 0x41, 0x56, 0x45, 0x5f, 0x50, 0x4f, 0x4c, 0x59, 0x47, 0x4f,
-	0x4e, 0x5f, 0x45, 0x56, 0x45, 0x4e, 0x54, 0x10, 0x03, 0x32, 0x46, 0x0a, 0x0b, 0x53, 0x65, 0x72,
-	0x76, 0x69, 0x63, 0x65, 0x4f, 0x44, 0x61, 0x4d, 0x12, 0x37, 0x0a, 0x09, 0x53, 0x75, 0x62, 0x73,
+	0x4e, 0x5f, 0x45, 0x56, 0x45, 0x4e, 0x54, 0x10, 0x03, 0x32, 0x48, 0x0a, 0x0b, 0x53, 0x65, 0x72,
+	0x76, 0x69, 0x63, 0x65, 0x4f, 0x44, 0x61, 0x4d, 0x12, 0x39, 0x0a, 0x09, 0x53, 0x75, 0x62, 0x73,
 	0x63, 0x72, 0x69, 0x62, 0x65, 0x12, 0x10, 0x2e, 0x6f, 0x64, 0x61, 0x6d, 0x2e, 0x45, 0x76, 0x65,
 	0x6e, 0x74, 0x54, 0x79, 0x70, 0x65, 0x73, 0x1a, 0x16, 0x2e, 0x6f, 0x64, 0x61, 0x6d, 0x2e, 0x45,
 	0x76, 0x65, 0x6e, 0x74, 0x49, 0x6e, 0x66, 0x6f, 0x72, 0x6d, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x22,
-	0x00, 0x42, 0x09, 0x5a, 0x07, 0x2e, 0x2f, 0x3b, 0x6f, 0x64, 0x61, 0x6d, 0x62, 0x06, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x33,
+	0x00, 0x30, 0x01, 0x42, 0x09, 0x5a, 0x07, 0x2e, 0x2f, 0x3b, 0x6f, 0x64, 0x61, 0x6d, 0x62, 0x06,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -319,7 +319,7 @@ const _ = grpc.SupportPackageIsVersion6
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type ServiceODaMClient interface {
 	// Subscribe to provided events
-	Subscribe(ctx context.Context, in *EventTypes, opts ...grpc.CallOption) (*EventInformation, error)
+	Subscribe(ctx context.Context, in *EventTypes, opts ...grpc.CallOption) (ServiceODaM_SubscribeClient, error)
 }
 
 type serviceODaMClient struct {
@@ -330,60 +330,87 @@ func NewServiceODaMClient(cc grpc.ClientConnInterface) ServiceODaMClient {
 	return &serviceODaMClient{cc}
 }
 
-func (c *serviceODaMClient) Subscribe(ctx context.Context, in *EventTypes, opts ...grpc.CallOption) (*EventInformation, error) {
-	out := new(EventInformation)
-	err := c.cc.Invoke(ctx, "/odam.ServiceODaM/Subscribe", in, out, opts...)
+func (c *serviceODaMClient) Subscribe(ctx context.Context, in *EventTypes, opts ...grpc.CallOption) (ServiceODaM_SubscribeClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_ServiceODaM_serviceDesc.Streams[0], "/odam.ServiceODaM/Subscribe", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &serviceODaMSubscribeClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type ServiceODaM_SubscribeClient interface {
+	Recv() (*EventInformation, error)
+	grpc.ClientStream
+}
+
+type serviceODaMSubscribeClient struct {
+	grpc.ClientStream
+}
+
+func (x *serviceODaMSubscribeClient) Recv() (*EventInformation, error) {
+	m := new(EventInformation)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // ServiceODaMServer is the server API for ServiceODaM service.
 type ServiceODaMServer interface {
 	// Subscribe to provided events
-	Subscribe(context.Context, *EventTypes) (*EventInformation, error)
+	Subscribe(*EventTypes, ServiceODaM_SubscribeServer) error
 }
 
 // UnimplementedServiceODaMServer can be embedded to have forward compatible implementations.
 type UnimplementedServiceODaMServer struct {
 }
 
-func (*UnimplementedServiceODaMServer) Subscribe(context.Context, *EventTypes) (*EventInformation, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Subscribe not implemented")
+func (*UnimplementedServiceODaMServer) Subscribe(*EventTypes, ServiceODaM_SubscribeServer) error {
+	return status.Errorf(codes.Unimplemented, "method Subscribe not implemented")
 }
 
 func RegisterServiceODaMServer(s *grpc.Server, srv ServiceODaMServer) {
 	s.RegisterService(&_ServiceODaM_serviceDesc, srv)
 }
 
-func _ServiceODaM_Subscribe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(EventTypes)
-	if err := dec(in); err != nil {
-		return nil, err
+func _ServiceODaM_Subscribe_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(EventTypes)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(ServiceODaMServer).Subscribe(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/odam.ServiceODaM/Subscribe",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ServiceODaMServer).Subscribe(ctx, req.(*EventTypes))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(ServiceODaMServer).Subscribe(m, &serviceODaMSubscribeServer{stream})
+}
+
+type ServiceODaM_SubscribeServer interface {
+	Send(*EventInformation) error
+	grpc.ServerStream
+}
+
+type serviceODaMSubscribeServer struct {
+	grpc.ServerStream
+}
+
+func (x *serviceODaMSubscribeServer) Send(m *EventInformation) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 var _ServiceODaM_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "odam.ServiceODaM",
 	HandlerType: (*ServiceODaMServer)(nil),
-	Methods: []grpc.MethodDesc{
+	Methods:     []grpc.MethodDesc{},
+	Streams: []grpc.StreamDesc{
 		{
-			MethodName: "Subscribe",
-			Handler:    _ServiceODaM_Subscribe_Handler,
+			StreamName:    "Subscribe",
+			Handler:       _ServiceODaM_Subscribe_Handler,
+			ServerStreams: true,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
 	Metadata: "pub_sub.proto",
 }
