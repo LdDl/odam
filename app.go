@@ -24,8 +24,8 @@ type Application struct {
 	trackerType      TRACKER_TYPE
 	gisConverter     *SpatialConverter
 	publisherService *grpc.Server
-
-	settings *AppSettings
+	publisherImpl    *PublisherService
+	settings         *AppSettings
 }
 
 // NewApp Constructor for Application
@@ -66,9 +66,10 @@ func NewApp(settings *AppSettings) (*Application, error) {
 	}
 
 	/* Itialize gRPC server */
-
 	grpcInstance := grpc.NewServer()
-	gRPCServer := PublisherService{}
+	gRPCServer := PublisherService{
+		eventsChannel: make(chan *Event, 1),
+	}
 	RegisterServiceODaMServer(grpcInstance, &gRPCServer)
 
 	return &Application{
@@ -78,6 +79,7 @@ func NewApp(settings *AppSettings) (*Application, error) {
 		trackerType:      settings.TrackerSettings.GetTrackerType(),
 		gisConverter:     &spatialConverter,
 		publisherService: grpcInstance,
+		publisherImpl:    &gRPCServer,
 		settings:         settings,
 	}, nil
 }
@@ -150,6 +152,9 @@ func (app *Application) PrepareBlobs(detected DetectedObjects, lastTm time.Time,
 // RegisterEventForBlobID Registers en event for blob
 func (app *Application) RegisterEventForBlobID(id uuid.UUID, event *Event) {
 	app.blobiesEvents[id] = event
+	if app.publisherImpl.eventsChannel != nil {
+		app.publisherImpl.eventsChannel <- event
+	}
 }
 
 // GetEventByBlobID Return last registered event for blob

@@ -2,30 +2,28 @@ package odam
 
 import (
 	"fmt"
-	"time"
-
-	uuid "github.com/satori/go.uuid"
 )
 
 // PublisherService Wrapper around interface
 type PublisherService struct {
 	ServiceODaMServer
+	eventsChannel chan *Event
 }
 
 func (service *PublisherService) Subscribe(in *EventTypes, stream ServiceODaM_SubscribeServer) error {
-	// @todo: implement
-	// @todo: until then just test
 	for {
+		event := <-service.eventsChannel
 		err := stream.Send(
 			&EventInformation{
-				EventId: uuid.NewV4().String(),
+				EventId:   event.ID.String(),
+				EventType: EventType(event.EventType),
+				EventTm:   event.Timestamp,
 			},
 		)
 		if err != nil {
 			fmt.Println("Error while sending data via stream:", err)
 			break
 		}
-		time.Sleep(1 * time.Second)
 	}
 	return nil
 }

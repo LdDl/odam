@@ -31,6 +31,7 @@ func main() {
 	defer grpcConn.Close()
 
 	grpcClient := NewClient(grpcConn)
+	fmt.Println("Starting gRPC client")
 	err = grpcClient.RecieveAllEvents(context.Background())
 	if err != nil {
 		fmt.Println("Error:", err)
