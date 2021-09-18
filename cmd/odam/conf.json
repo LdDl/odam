@@ -26,7 +26,9 @@
     "grpc_settings": {
         "enable": false,
         "server_ip": "localhost",
-        "server_port": 50051
+        "server_port": 50051,
+        "publisher_ip": "0.0.0.0",
+        "publisher_port": 50052
     },
     "classes_settings": [
         {

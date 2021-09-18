@@ -109,6 +109,9 @@ type GrpcSettings struct {
 	Enable     bool   `json:"enable"`
 	ServerIP   string `json:"server_ip"`
 	ServerPort int    `json:"server_port"`
+
+	PublisherIP   string `json:"publisher_ip"`
+	PublisherPort int    `json:"publisher_port"`
 }
 
 // ClassesSettings Settings for each possible class

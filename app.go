@@ -3,6 +3,7 @@ package odam
 import (
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"time"
 
@@ -12,15 +13,17 @@ import (
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
 	"gocv.io/x/gocv"
+	grpc "google.golang.org/grpc"
 )
 
 // Application Main engine
 type Application struct {
-	neuralNetwork  *darknet.YOLONetwork
-	blobiesStorage *blob.Blobies
-	blobiesEvents  map[uuid.UUID]*Event
-	trackerType    TRACKER_TYPE
-	gisConverter   *SpatialConverter
+	neuralNetwork    *darknet.YOLONetwork
+	blobiesStorage   *blob.Blobies
+	blobiesEvents    map[uuid.UUID]*Event
+	trackerType      TRACKER_TYPE
+	gisConverter     *SpatialConverter
+	publisherService *grpc.Server
 
 	settings *AppSettings
 }
@@ -62,13 +65,20 @@ func NewApp(settings *AppSettings) (*Application, error) {
 		}
 	}
 
+	/* Itialize gRPC server */
+
+	grpcInstance := grpc.NewServer()
+	gRPCServer := PublisherService{}
+	RegisterServiceODaMServer(grpcInstance, &gRPCServer)
+
 	return &Application{
-		neuralNetwork:  &neuralNet,
-		blobiesStorage: blob.NewBlobiesDefaults(),
-		blobiesEvents:  make(map[uuid.UUID]*Event),
-		trackerType:    settings.TrackerSettings.GetTrackerType(),
-		gisConverter:   &spatialConverter,
-		settings:       settings,
+		neuralNetwork:    &neuralNet,
+		blobiesStorage:   blob.NewBlobiesDefaults(),
+		blobiesEvents:    make(map[uuid.UUID]*Event),
+		trackerType:      settings.TrackerSettings.GetTrackerType(),
+		gisConverter:     &spatialConverter,
+		publisherService: grpcInstance,
+		settings:         settings,
 	}, nil
 }
 
@@ -88,7 +98,7 @@ func (app *Application) GetGISConverter() func(gocv.Point2f) gocv.Point2f {
 	return app.gisConverter.Function
 }
 
-// StartMJPEGStream Start MJPEG video stream in separate goroutine
+// StartMJPEGStream Starts MJPEG video stream in separate goroutine
 func (app *Application) StartMJPEGStream() *mjpeg.Stream {
 	stream := mjpeg.NewStream()
 	go func() {
@@ -100,6 +110,18 @@ func (app *Application) StartMJPEGStream() *mjpeg.Stream {
 		}
 	}()
 	return stream
+}
+
+// StartEventsPublisher Starts event publisher server
+func (app *Application) StartEventsPublisher() error {
+	stdListener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", app.settings.GrpcSettings.PublisherIP, app.settings.GrpcSettings.PublisherPort))
+	if err != nil {
+		return err
+	}
+	if err := app.publisherService.Serve(stdListener); err != nil {
+		return err
+	}
+	return nil
 }
 
 // PrepareBlobs Convert DetectedObjects to slice of blob.Blobie

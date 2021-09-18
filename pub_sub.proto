@@ -29,6 +29,6 @@ message EventInformation {
 // Subscribe service
 service ServiceODaM {
     // Subscribe to provided events
-    rpc Subscribe(EventTypes) returns (EventInformation) { };
+    rpc Subscribe(EventTypes) returns (stream EventInformation) { };
 }
 
