@@ -1,0 +1,34 @@
+syntax = "proto3";
+package odam;
+
+option go_package = "./;odam";
+
+// Enumeration for possible event types
+enum EventType {
+    UNDEFINED_EVENT = 0;
+    CROSS_LINE_EVENT = 1;
+    ENTER_POLYGON_EVENT = 2;
+    LEAVE_POLYGON_EVENT = 3;
+}
+
+// Alias to multiple event types
+message EventTypes {
+    repeated EventType event_types = 1;
+}
+
+// Event itself
+message EventInformation {
+    // Event identifier
+    string event_id = 1;
+    // Event type
+    EventType event_type = 2;
+    // Timestamp (Unix UTC) of event
+    int64 event_tm = 3;
+}
+
+// Subscribe service
+service ServiceODaM {
+    // Subscribe to provided events
+    rpc Subscribe(EventTypes) returns (EventInformation) { };
+}
+
