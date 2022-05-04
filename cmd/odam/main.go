@@ -319,7 +319,7 @@ func performDetection(app *odam.Application, targetClasses []string) {
 	fmt.Println("Start performDetection thread")
 	for {
 		frame := <-imagesChannel
-		detectedRects, err := odam.DetectObjects(app, frame.ImgSTD, targetClasses...)
+		detectedRects, err := odam.DetectObjects(app, frame.ImgScaled, targetClasses...)
 		if err != nil {
 			log.Printf("Can't detect objects on provided image due the error: %s. Sleep for 100ms", err.Error())
 			frame.Close()
