@@ -311,7 +311,7 @@ func processFrame(fd *odam.FrameData) {
 	frame := odam.NewFrameData()
 	fd.ImgSource.CopyTo(&frame.ImgSource)
 	fd.ImgScaled.CopyTo(&frame.ImgScaled)
-	frame.ImgSTD = fd.ImgSTD
+	fd.ImgScaledCopy.CopyTo(&frame.ImgScaledCopy)
 	imagesChannel <- frame
 }
 
@@ -319,7 +319,8 @@ func performDetection(app *odam.Application, targetClasses []string) {
 	fmt.Println("Start performDetection thread")
 	for {
 		frame := <-imagesChannel
-		detectedRects, err := odam.DetectObjects(app, frame.ImgScaled, targetClasses...)
+		fmt.Println("Call detections")
+		detectedRects, err := odam.DetectObjects(app, frame.ImgScaledCopy, targetClasses...)
 		if err != nil {
 			log.Printf("Can't detect objects on provided image due the error: %s. Sleep for 100ms", err.Error())
 			frame.Close()

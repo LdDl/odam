@@ -71,8 +71,12 @@ var (
 //
 func DetectObjects(app *Application, img gocv.Mat, filters ...string) ([]*DetectedObject, error) {
 	blobImg := gocv.BlobFromImage(img, yoloScaleFactor, yoloSize, yoloMean, true, false)
+	defer blobImg.Close()
 	app.neuralNetwork.SetInput(blobImg, yoloBlobName)
 	detections := app.neuralNetwork.ForwardLayers(app.layersNames)
+	for i := range detections {
+		defer detections[i].Close()
+	}
 	return postprocess(detections, 0.5, 0.4, filters)
 }
 
