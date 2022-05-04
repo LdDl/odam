@@ -20,16 +20,22 @@ We are working on this.
 Not too fast, but it is what it is.
 
 ## Table of Contents
-- [About](#about)
-- [QA section](#qa-section)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Screenshots](#screenshots)
-- [Support](#support)
-- [Roadmap](#roadmap)
-- [Dependencies](#dependencies)
-- [License](#license)
-- [Devs](#developers)
+- [ODaM - Object Detection and Monitoring](#odam---object-detection-and-monitoring)
+- [v0.8.3](#v083)
+  - [Work in progress](#work-in-progress)
+  - [Table of Contents](#table-of-contents)
+  - [About](#about)
+  - [QA section](#qa-section)
+  - [Installation](#installation)
+    - [notice: targeted for Linux users (no Windows/OSX instructions currenlty)](#notice-targeted-for-linux-users-no-windowsosx-instructions-currenlty)
+  - [Usage](#usage)
+    - [notice: targeted for Linux users (no Windows/OSX instructions currenlty)](#notice-targeted-for-linux-users-no-windowsosx-instructions-currenlty-1)
+  - [Screenshots](#screenshots)
+  - [Support](#support)
+  - [Roadmap](#roadmap)
+  - [Dependencies](#dependencies)
+  - [License](#license)
+  - [Developers](#developers)
 
 ## About
 ODaM is tool for doing monitoring via Darknet's neural network called Yolo V4 (paper: https://arxiv.org/abs/2004.10934).
@@ -126,7 +132,7 @@ If you want to make PR for some undone features (algorithms mainly) I'll glad to
     git clone https://github.com/AlexeyAB/darknet
     cd ./darknet
     # Checkout to last battle-tested commit
-    git checkout f056fc3b6a11528fa0522a468eca1e909b7004b7
+    git checkout 9d40b619756be9521bc2ccd81808f502daaa3e9a
     # Enable GPU acceleration
     sed 's/GPU=0/GPU=1/' ./Makefile
     # Enable cuDNN
