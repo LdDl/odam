@@ -3,7 +3,6 @@ module github.com/LdDl/odam
 go 1.14
 
 require (
-	github.com/LdDl/go-darknet v1.3.5
 	github.com/LdDl/gocv-blob/v2 v2.3.0
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/hybridgroup/mjpeg v0.0.0-20140228234708-4680f319790e

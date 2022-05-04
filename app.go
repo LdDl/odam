@@ -6,16 +6,14 @@ import (
 	"net/http"
 	"time"
 
-	darknet "github.com/LdDl/go-darknet"
 	blob "github.com/LdDl/gocv-blob/v2/blob"
 	"github.com/hybridgroup/mjpeg"
-	"github.com/pkg/errors"
 	"gocv.io/x/gocv"
 )
 
 // Application Main engine
 type Application struct {
-	neuralNetwork  *darknet.YOLONetwork
+	neuralNetwork  *gocv.Net
 	blobiesStorage *blob.Blobies
 	trackerType    TRACKER_TYPE
 	gisConverter   *SpatialConverter
@@ -29,16 +27,7 @@ type Application struct {
 //
 func NewApp(settings *AppSettings) (*Application, error) {
 	/* Initialize neural network */
-	neuralNet := darknet.YOLONetwork{
-		GPUDeviceIndex:           0,
-		NetworkConfigurationFile: settings.NeuralNetworkSettings.DarknetCFG,
-		WeightsFile:              settings.NeuralNetworkSettings.DarknetWeights,
-		Threshold:                float32(settings.NeuralNetworkSettings.ConfThreshold),
-	}
-	err := neuralNet.Init()
-	if err != nil {
-		return nil, errors.Wrap(err, "Can't initialize neural network")
-	}
+	neuralNet := gocv.ReadNet(settings.NeuralNetworkSettings.DarknetWeights, settings.NeuralNetworkSettings.DarknetCFG)
 
 	/* Initialize GIS converter (for speed estimation) if needed*/
 	// It just helps to figure out what does [Longitude; Latitude] pair correspond to certain pixel

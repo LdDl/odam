@@ -5,9 +5,7 @@ import (
 	"image"
 	reflect "reflect"
 
-	darknet "github.com/LdDl/go-darknet"
 	blob "github.com/LdDl/gocv-blob/v2/blob"
-	"github.com/pkg/errors"
 )
 
 // DetectedObject Store detected object info
@@ -59,33 +57,7 @@ func (do *DetectedObject) GetSpeed() float32 {
 // filters - List of classes for which you need to filter detected objects
 //
 func DetectObjects(app *Application, imgSTD image.Image, filters ...string) ([]*DetectedObject, error) {
-	darknetImage, err := darknet.Image2Float32(imgSTD)
-	if err != nil {
-		return nil, errors.Wrap(err, "Can't convert image to Darknet's format")
-	}
-	dr, err := app.neuralNetwork.Detect(darknetImage)
-	if err != nil {
-		darknetImage.Close()
-		return nil, errors.Wrap(err, "Can't make detection on Darknet image")
-	}
-	darknetImage.Close() // free the memory
-	darknetImage = nil
-	detectedRects := make([]*DetectedObject, 0, len(dr.Detections))
-	for _, d := range dr.Detections {
-		for i := range d.ClassIDs {
-			if stringInSlice(&d.ClassNames[i], filters) {
-				bBox := d.BoundingBox
-				minX, minY := float64(bBox.StartPoint.X), float64(bBox.StartPoint.Y)
-				maxX, maxY := float64(bBox.EndPoint.X), float64(bBox.EndPoint.Y)
-				rect := DetectedObject{
-					Rect:       image.Rect(Round(minX), Round(minY), Round(maxX), Round(maxY)),
-					ClassName:  d.ClassNames[i],
-					ClassID:    d.ClassIDs[i],
-					Confidence: d.Probabilities[i],
-				}
-				detectedRects = append(detectedRects, &rect)
-			}
-		}
-	}
+
+	detectedRects := make([]*DetectedObject, 0)
 	return detectedRects, nil
 }
