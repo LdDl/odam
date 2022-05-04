@@ -60,7 +60,8 @@ for example.
 * Virtual lines
    * Split ID and other additional information for next paragraph
    * Make additional information optional for sending via gRPC. Sometimes reciever-side already knows everything about lines and just need its IDs.
-  
+* Move to full OpenCV (no [go-darknet](https://github.com/LdDl/go-darknet) is needed since OpenCV does stuff)
+
 ### Planned
 * Stable core (need many tests as possible)
 * Extend [conf.json](cmd/odam/conf.json) for such settings as: color of virtual lines, color of boxes and similar stuff.
