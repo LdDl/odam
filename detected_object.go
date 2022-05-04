@@ -72,6 +72,36 @@ var (
 func DetectObjects(app *Application, img gocv.Mat, filters ...string) ([]*DetectedObject, error) {
 	blobImg := gocv.BlobFromImage(img, yoloScaleFactor, yoloSize, yoloMean, true, false)
 	app.neuralNetwork.SetInput(blobImg, yoloBlobName)
-	detectedRects := make([]*DetectedObject, 0)
-	return detectedRects, nil
+	detections := app.neuralNetwork.ForwardLayers(app.layersNames)
+	return postprocess(detections, 0.5, 0.4, filters)
+}
+
+func postprocess(detections []gocv.Mat, confidenceThreshold, nmsThreshold float32, filters []string) ([]*DetectedObject, error) {
+	// @todo
+	return nil, nil
+}
+
+func getClassIDAndConfidence(x []float32) (int, float32) {
+	res := 0
+	max := float32(0.0)
+	for i, y := range x {
+		if y > max {
+			max = y
+			res = i
+		}
+	}
+	return res, max
+}
+
+func calculateBoundingBox(netWidth, netHeight float32, row []float32) image.Rectangle {
+	if len(row) < 4 {
+		return image.Rect(0, 0, 0, 0)
+	}
+	centerX := int(row[0] * netWidth)
+	centerY := int(row[1] * netHeight)
+	width := int(row[2] * netWidth)
+	height := int(row[3] * netHeight)
+	left := (centerX - width/2)
+	top := (centerY - height/2)
+	return image.Rect(left, top, left+width, top+height)
 }
