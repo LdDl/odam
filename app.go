@@ -8,12 +8,14 @@ import (
 
 	blob "github.com/LdDl/gocv-blob/v2/blob"
 	"github.com/hybridgroup/mjpeg"
+	"github.com/pkg/errors"
 	"gocv.io/x/gocv"
 )
 
 // Application Main engine
 type Application struct {
 	neuralNetwork  *gocv.Net
+	layersNames    []string
 	blobiesStorage *blob.Blobies
 	trackerType    TRACKER_TYPE
 	gisConverter   *SpatialConverter
@@ -28,7 +30,20 @@ type Application struct {
 func NewApp(settings *AppSettings) (*Application, error) {
 	/* Initialize neural network */
 	neuralNet := gocv.ReadNet(settings.NeuralNetworkSettings.DarknetWeights, settings.NeuralNetworkSettings.DarknetCFG)
-
+	yoloLayersIdx := neuralNet.GetUnconnectedOutLayers()
+	outLayerNames := make([]string, 0, 3)
+	for _, idx := range yoloLayersIdx {
+		layer := neuralNet.GetLayer(idx)
+		outLayerNames = append(outLayerNames, layer.GetName())
+	}
+	err := neuralNet.SetPreferableBackend(gocv.NetBackendCUDA)
+	if err != nil {
+		return nil, errors.Wrap(err, "Can't set backend CUDA")
+	}
+	err = neuralNet.SetPreferableTarget(gocv.NetTargetCUDA)
+	if err != nil {
+		return nil, errors.Wrap(err, "Can't set target CUDA")
+	}
 	/* Initialize GIS converter (for speed estimation) if needed*/
 	// It just helps to figure out what does [Longitude; Latitude] pair correspond to certain pixel
 	spatialConverter := SpatialConverter{}
@@ -51,6 +66,7 @@ func NewApp(settings *AppSettings) (*Application, error) {
 
 	return &Application{
 		neuralNetwork:  &neuralNet,
+		layersNames:    outLayerNames,
 		blobiesStorage: blob.NewBlobiesDefaults(),
 		trackerType:    settings.TrackerSettings.GetTrackerType(),
 		gisConverter:   &spatialConverter,
