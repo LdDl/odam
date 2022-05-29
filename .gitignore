@@ -3,3 +3,5 @@ cmd/odam/*.weights
 cmd/odam/*.cfg
 cmd/odam/odam
 *.exe
+./vscode
+./vscode/
