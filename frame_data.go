@@ -18,9 +18,8 @@ type FrameData struct {
 // NewFrameData Simplifies creation of FrameData
 func NewFrameData() *FrameData {
 	fd := FrameData{
-		ImgSource:     gocv.NewMat(),
-		ImgScaled:     gocv.NewMat(),
-		ImgScaledCopy: gocv.NewMat(),
+		ImgSource: gocv.NewMat(),
+		ImgScaled: gocv.NewMat(),
 	}
 	return &fd
 }
