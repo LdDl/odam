@@ -10,9 +10,9 @@ import (
 
 // FrameData Wrapper around gocv.Mat
 type FrameData struct {
-	ImgSource gocv.Mat //  Source image
-	ImgScaled gocv.Mat // Scaled image
-	ImgSTD    image.Image
+	ImgSource     gocv.Mat //  Source image
+	ImgScaled     gocv.Mat // Scaled image
+	ImgScaledCopy gocv.Mat // Copy of scaled image
 }
 
 // NewFrameData Simplifies creation of FrameData
@@ -28,16 +28,13 @@ func NewFrameData() *FrameData {
 func (fd *FrameData) Close() {
 	fd.ImgSource.Close()
 	fd.ImgScaled.Close()
+	fd.ImgScaledCopy.Close()
 }
 
 // Preprocess Scales image to given width and height
 func (fd *FrameData) Preprocess(width, height int) error {
 	gocv.Resize(fd.ImgSource, &fd.ImgScaled, image.Point{X: width, Y: height}, 0, 0, gocv.InterpolationDefault)
-	stdImage, err := fd.ImgScaled.ToImage()
-	if err != nil {
-		return err
-	}
-	fd.ImgSTD = stdImage
+	fd.ImgScaledCopy = fd.ImgScaled.Clone()
 	return nil
 }
 

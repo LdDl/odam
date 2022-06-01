@@ -9,7 +9,7 @@ New ideas, thoughts about needed features will be store in this file.
     * Initial integration with [GoCV MJPEG](https://github.com/hybridgroup/mjpeg)
 
 * go-darknet
-    * convert [gocv.Mat](https://github.com/hybridgroup/gocv/blob/master/core.go#L179) to [darknet.DarknetImage](https://github.com/LdDl/go-darknet/blob/master/image.go#L14)
+    * convert [gocv.Mat](https://github.com/hybridgroup/gocv/blob/master/core.go#L179) to [darknet.DarknetImage](https://github.com/LdDl/go-darknet/blob/master/image.go#L14) [NOT NEEDED NOW]
     * init neural network from configuration
     * prepare *.sh scripts to download yolov4.cfg and yolov4.weights files (also yolov3 avaible)
     * detect only targeted classes

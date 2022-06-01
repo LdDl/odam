@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 	"sync"
+
+	"github.com/pkg/errors"
 )
 
 // NewSettings Create new AppSettings from content of configuration file
@@ -24,6 +27,13 @@ func NewSettings(fname string) (*AppSettings, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// Prepare Darknet's classes
+	content, err := ioutil.ReadFile(appsettings.NeuralNetworkSettings.DarknetClasses)
+	if err != nil {
+		return nil, errors.Wrap(err, "Can't read Darknet's classes file")
+	}
+	appsettings.NeuralNetworkSettings.NetClasses = strings.Split(string(content), "\n")
 
 	// Prepare video settings
 	if appsettings.VideoSettings == nil {
@@ -140,11 +150,14 @@ type MjpegSettings struct {
 
 // NeuralNetworkSettings Neural network
 type NeuralNetworkSettings struct {
-	DarknetCFG     string   `json:"darknet_cfg"`
-	DarknetWeights string   `json:"darknet_weights"`
-	ConfThreshold  float64  `json:"conf_threshold"`
-	NmsThreshold   float64  `json:"nms_threshold"`
-	TargetClasses  []string `json:"target_classes"`
+	DarknetCFG     string  `json:"darknet_cfg"`
+	DarknetWeights string  `json:"darknet_weights"`
+	DarknetClasses string  `json:"darknet_classes"`
+	ConfThreshold  float64 `json:"conf_threshold"`
+	NmsThreshold   float64 `json:"nms_threshold"`
+	// Exported, but not from JSON
+	NetClasses    []string `json:"-"`
+	TargetClasses []string `json:"target_classes"`
 }
 
 // LinesSetting Virtual lines

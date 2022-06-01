@@ -3,8 +3,6 @@ dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7
 gioui.org v0.0.0-20210308172011-57750fc8a0a6/go.mod h1:RSH6KIUZ0p2xy5zHDxgAM4zumjgTw83q2ge/PI+yyw8=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/LdDl/go-darknet v1.3.5 h1:oOMpWesW0+8ZLOdZcGS4LfjKKS48cHUceNrBy1MU7aM=
-github.com/LdDl/go-darknet v1.3.5/go.mod h1:vNpwlxHd2mevaqWDYG9r/ABi1+cQrXw0HUuSPaDKuD8=
 github.com/LdDl/gocv-blob/v2 v2.3.0 h1:SM0YYgWTi3PP+q2T4IYu4s13UYwBTfTAD0UciusL/48=
 github.com/LdDl/gocv-blob/v2 v2.3.0/go.mod h1:zgg+b4NHjtVVBGJcaCAcgWOz5grCEJg/ZSASB/09H9o=
 github.com/LdDl/kalman-filter v0.1.1 h1:HAfi2q9PVxvFt/O8hfn78ekTwFBZJDuuKQaUqnph1vc=
@@ -84,7 +82,6 @@ golang.org/x/image v0.0.0-20200119044424-58c23975cae1/go.mod h1:FeLwcggjj3mMvU+o
 golang.org/x/image v0.0.0-20200430140353-33d19683fad8/go.mod h1:FeLwcggjj3mMvU+oOTbSwawSJRM1uh48EjtB4UJZlP0=
 golang.org/x/image v0.0.0-20200618115811-c13761719519/go.mod h1:FeLwcggjj3mMvU+oOTbSwawSJRM1uh48EjtB4UJZlP0=
 golang.org/x/image v0.0.0-20201208152932-35266b937fa6/go.mod h1:FeLwcggjj3mMvU+oOTbSwawSJRM1uh48EjtB4UJZlP0=
-golang.org/x/image v0.0.0-20210216034530-4410531fe030 h1:lP9pYkih3DUSC641giIXa2XqfTIbbbRr0w2EOTA7wHA=
 golang.org/x/image v0.0.0-20210216034530-4410531fe030/go.mod h1:FeLwcggjj3mMvU+oOTbSwawSJRM1uh48EjtB4UJZlP0=
 golang.org/x/lint v0.0.0-20181026193005-c67002cb31c3/go.mod h1:UVdnD1Gm6xHRNCYTkRU2/jEulfH38KcIWyp/GAMgvoE=
 golang.org/x/lint v0.0.0-20190227174305-5b3e6a55c961/go.mod h1:wehouNa3lNwaWXcvxsM5YxQ5yQlVC4a0KAMCusXpPoU=

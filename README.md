@@ -1,6 +1,6 @@
 # ODaM - Object Detection and Monitoring
 [![GoDoc](https://godoc.org/github.com/LdDl/odam?status.svg)](https://godoc.org/github.com/LdDl/odam) [![Sourcegraph](https://sourcegraph.com/github.com/LdDl/odam/-/badge.svg)](https://sourcegraph.com/github.com/LdDl/odam?badge) [![Go Report Card](https://goreportcard.com/badge/github.com/LdDl/odam)](https://goreportcard.com/report/github.com/LdDl/odam) [![GitHub tag](https://img.shields.io/github/tag/LdDl/odam.svg)](https://github.com/LdDl/odam/releases)
-# v0.8.3
+# v0.9.0
 ODaM is project aimed to do monitoring such as: pedestrian detection and counting, vehicle detection and counting, speed estimation of objects, sending detected objects to gRPC server for detailed analysis.
 
 It's written on Go with a lot of [CGO](https://golang.org/cmd/cgo/).
@@ -21,7 +21,7 @@ Not too fast, but it is what it is.
 
 ## Table of Contents
 - [ODaM - Object Detection and Monitoring](#odam---object-detection-and-monitoring)
-- [v0.8.3](#v083)
+- [v0.9.0](#v090)
   - [Work in progress](#work-in-progress)
   - [Table of Contents](#table-of-contents)
   - [About](#about)
@@ -40,7 +40,7 @@ Not too fast, but it is what it is.
 ## About
 ODaM is tool for doing monitoring via Darknet's neural network called Yolo V4 (paper: https://arxiv.org/abs/2004.10934).
 
-It's built on top of [go-darknet](https://github.com/LdDl/go-darknet#go-darknet-go-bindings-for-darknet-yolo-v4-yolo-v3) which uses [AlexeyAB's fork of Darknet](https://github.com/AlexeyAB/darknet/#yolo-v4-and-yolo-v3v2-for-windows-and-linux). For doing computer vision stuff and video reading [GoCV](https://github.com/hybridgroup/gocv#gocv) is used.
+It's built on top of [GoCV](https://github.com/hybridgroup/gocv#gocv).
 
 ## QA section
 > Who are you and what do you do?
@@ -57,7 +57,7 @@ I think about it as software with library capabilities.
 
 Not that much currently:
 
-* Object detection via darknet: both YOLOv3 and YOLOv4 (thanks to [Go bindings](https://github.com/LdDl/go-darknet#go-darknet-go-bindings-for-darknet-yolo-v4-yolo-v3) for it)
+* Object detection via darknet: OpenCV::ddn module is used
 * Object tracking via two possible techniques: Kalman tracking (filtering) or Centroid tracking;
 * Sending data to dedicated gRPC server;
 * MJPEG / imshow optional visual output;
@@ -127,29 +127,9 @@ If you want to make PR for some undone features (algorithms mainly) I'll glad to
     ./mnistCUDNN
     cd -
     ```
-3. Install [AlexeyAb's fork of Darknet](https://github.com/AlexeyAB/darknet)
-    ```bash
-    git clone https://github.com/AlexeyAB/darknet
-    cd ./darknet
-    # Checkout to last battle-tested commit
-    git checkout 9d40b619756be9521bc2ccd81808f502daaa3e9a
-    # Enable GPU acceleration
-    sed 's/GPU=0/GPU=1/' ./Makefile
-    # Enable cuDNN
-    sed 's/CUDNN=0/CUDNN=1/' ./Makefile
-    # Prepare *.so
-    sed 's/LIBSO=0/LIBSO=1/' ./Makefile
-    make
-    # Copy *.so to /usr/lib + /usr/include (or /usr/local/lib + /usr/local/include)
-    sudo cp libdarknet.so /usr/lib/libdarknet.so && sudo cp include/darknet.h /usr/include/darknet.h
-    # sudo cp libdarknet.so /usr/local/lib/libdarknet.so && sudo cp include/darknet.h /usr/local/include/darknet.h
-    ```
-    Alternatively you can use Makefile from go-darknet repository: https://github.com/LdDl/go-darknet/blob/master/Makefile
-    
-4. Go bindings for Darknet - [instructions link](https://github.com/LdDl/go-darknet#installation)
-5. GoCV - [instructions link](https://github.com/hybridgroup/gocv#how-to-install).
-6. Blob tracking library - [instructions link](https://github.com/LdDl/gocv-blob#installation)
-7. If you want to use gRPC client-server model: gRPC - [instructions link](https://github.com/grpc/grpc-go#installation)
+3. GoCV - [instructions link](https://github.com/hybridgroup/gocv#how-to-install).
+4. Blob tracking library - [instructions link](https://github.com/LdDl/gocv-blob#installation)
+5. If you want to use gRPC client-server model: gRPC - [instructions link](https://github.com/grpc/grpc-go#installation)
 
    You need to implement your gRPC server as following proto-file: https://github.com/LdDl/odam/blob/master/yolo_grpc.proto.
 
@@ -324,7 +304,6 @@ Please see [ROADMAP.md](ROADMAP.md)
 * Bindings to [OpenCV](https://github.com/opencv/opencv) - [GoCV](https://github.com/hybridgroup/gocv#gocv). License is Apache-2.0
 * MJPEG streaming via GoCV - [mjpeg](https://github.com/hybridgroup/mjpeg). No license currently
 * Darknet (AlexeyAB's fork) - [darknet](https://github.com/AlexeyAB/darknet#yolo-v4-and-yolo-v3v2-for-windows-and-linux). License is YOLO LICENSE
-* Golang binding to darknet - [go-darknet](https://github.com/LdDl/go-darknet#go-darknet-go-bindings-for-darknet-yolo-v4-yolo-v3). License is Apache-2.0
 * Tracking objects - [gocv-blob](https://github.com/LdDl/gocv-blob#gocv-blob). No license currently
 * gRPC for doing "'client-server'" application - [grpc](https://github.com/grpc/grpc-go). License is Apache-2.0
 
