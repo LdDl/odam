@@ -93,13 +93,6 @@ func main() {
 		log.Printf("Error cannot read video '%s'\n", settings.VideoSettings.Source)
 		return
 	}
-	/* Scale first frame */
-	err = img.Preprocess(settings.VideoSettings.ReducedWidth, settings.VideoSettings.ReducedHeight)
-	if err != nil {
-		log.Println("Error on first preprocessing step", err)
-		return
-	}
-	img.ImgScaledCopy.Close()
 
 	/* Initialize variables for evaluation of time difference between frames */
 	lastMS := 0.0
