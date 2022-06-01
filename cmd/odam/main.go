@@ -5,9 +5,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"image"
 	"log"
-	"math"
 	"time"
 
 	"github.com/LdDl/odam"
@@ -68,7 +66,7 @@ func main() {
 	if settings.TrackerSettings.SpeedEstimationSettings.Enabled {
 		gisConverter = app.GetGISConverter()
 	}
-
+	_ = gisConverter
 	/* Open video capturer */
 	videoCapturer, err := gocv.OpenVideoCapture(settings.VideoSettings.Source)
 	if err != nil {
@@ -100,11 +98,9 @@ func main() {
 		log.Println("Error on first preprocessing step", err)
 		return
 	}
-	/* Process first frame */
-	processFrame(img)
 
 	/* Start goroutine for object detection purposes */
-	go performDetection(app, settings.NeuralNetworkSettings.TargetClasses)
+	// go performDetection(app, settings.NeuralNetworkSettings.TargetClasses)
 
 	/* Initialize variables for evaluation of time difference between frames */
 	lastMS := 0.0
@@ -123,7 +119,7 @@ func main() {
 		secDiff := msDiff / 1000.0
 		lastTime = lastTime.Add(time.Duration(msDiff) * time.Millisecond)
 		lastMS = currentMS
-
+		_ = secDiff
 		/* Skip empty frame */
 		if img.ImgSource.Empty() {
 			fmt.Println("Empty frame has been detected. Sleep for 400 ms")
@@ -139,109 +135,117 @@ func main() {
 			continue
 		}
 
-		/* Read data from object detection goroutine */
-		select {
-		/* Prepare variable for channel reading */
-		case detected := <-detectedChannel:
-			processFrame(img)
-			if len(detected) != 0 {
-				/* Prepare 'blob' for each detected object */
-				detectedObjects := app.PrepareBlobs(detected, lastTime, secDiff)
-				/* Match blobs to existing ones */
-				allblobies.MatchToExisting(detectedObjects)
-
-				/* Estimate speed if needed */
-				if settings.TrackerSettings.SpeedEstimationSettings.Enabled {
-					for _, b := range allblobies.Objects {
-						blobTrack := b.GetTrack()
-						trackLen := len(blobTrack)
-						if trackLen >= 2 {
-							blobTimestamps := b.GetTimestamps()
-							fp := odam.STDPointToGoCVPoint2F(blobTrack[0])
-							lp := odam.STDPointToGoCVPoint2F(blobTrack[trackLen-1])
-							spd := odam.EstimateSpeed(fp, lp, blobTimestamps[0], blobTimestamps[trackLen-1], gisConverter)
-							b.SetProperty("speed", spd)
-						}
-					}
-				}
-				for _, vline := range settings.TrackerSettings.LinesSettings {
-					for _, b := range allblobies.Objects {
-						className := b.GetClassName()
-						if stringInSlice(&className, vline.DetectClasses) { // Detect if object should be detected by virtual line (filter by classname)
-							crossedLine := vline.VLine.IsBlobCrossedLine(b)
-							// If object crossed the virtual line
-							if crossedLine {
-								catchedTimestamp := time.Now().UTC().Unix()
-								b.SetTracking(false)
-								// If gRPC streaming data is disabled why do we need to process all stuff? We add strict condition.
-								if settings.GrpcSettings.Enable {
-									blobRect := b.GetCurrentRect()
-									minx, miny := math.Floor(float64(blobRect.Min.X)*settings.VideoSettings.ScaleX), math.Floor(float64(blobRect.Min.Y)*settings.VideoSettings.ScaleY)
-									maxx, maxy := math.Floor(float64(blobRect.Max.X)*settings.VideoSettings.ScaleX), math.Floor(float64(blobRect.Max.Y)*settings.VideoSettings.ScaleY)
-									cropRect := image.Rect(
-										int(minx)+5,  // add a bit width to crop bigger region
-										int(miny)+10, // add a bit height to crop bigger region
-										int(maxx)+5,
-										int(maxy)+10,
-									)
-									// Make sure to be not out of image bounds
-									odam.FixRectForOpenCV(&cropRect, settings.VideoSettings.Width, settings.VideoSettings.Height)
-									var buf *bytes.Buffer
-									xtop, ytop := int32(cropRect.Min.X), int32(cropRect.Min.Y)
-
-									// Futher buffer preparation depends on 'crop_mode' in JSON'ed configuration file
-									if vline.VLine.CropObject {
-										buf, err = odam.PrepareCroppedImageBuffer(&img.ImgSource, cropRect)
-										if err != nil {
-											fmt.Println("[WARNING] Can't prepare image buffer (with crop) due ther error:", err)
-										}
-										xtop, ytop = 0, 0
-									} else {
-										buf, err = odam.PrepareImageBuffer(&img.ImgSource)
-										if err != nil {
-											fmt.Println("[WARNING] Can't prepare image buffer due ther error:", err)
-										}
-									}
-									bytesBuffer := buf.Bytes()
-									sendData := odam.ObjectInformation{
-										CamId:       settings.VideoSettings.CameraID,
-										Timestamp:   catchedTimestamp,
-										Image:       bytesBuffer,
-										Detection:   odam.DetectionInfoGRPC(xtop, ytop, int32(cropRect.Dx()), int32(cropRect.Dy())),
-										Class:       odam.ClassInfoGRPC(b),
-										VirtualLine: odam.VirtualLineInfoGRPC(vline.LineID, vline.VLine),
-									}
-									// If it is needed to send speed and track information
-									if settings.TrackerSettings.SpeedEstimationSettings.SendGRPC {
-										sendData.TrackInformation = odam.TrackInfoInfoGRPC(b, "speed", float32(settings.VideoSettings.ScaleX), float32(settings.VideoSettings.ScaleY), gisConverter)
-									}
-									go sendDataToServer(grpcConn, &sendData)
-								}
-							}
-						}
-					}
-				}
-				for _, vpolygon := range settings.TrackerSettings.PolygonsSettings {
-					for _, b := range allblobies.Objects {
-						className := b.GetClassName()
-						if stringInSlice(&className, vpolygon.DetectClasses) { // Detect if object should be detected by virtual polygon (filter by classname)
-							enteredPolygon := vpolygon.VPolygon.BlobEntered(b)
-							if enteredPolygon {
-								fmt.Println("entered blob", b.GetID())
-							}
-							leftPolygon := vpolygon.VPolygon.BlobLeft(b)
-							if leftPolygon {
-								fmt.Println("left blob", b.GetID())
-							}
-						}
-					}
-				}
-			}
-			break
-		default:
-			// show current frame without blocking, so do nothing here
-			break
+		frameToDetect := processFrameSequential(img)
+		detected := performDetectionSequential(app, frameToDetect, settings.NeuralNetworkSettings.NetClasses, settings.NeuralNetworkSettings.TargetClasses)
+		if len(detected) != 0 {
+			/* Prepare 'blob' for each detected object */
+			detectedObjects := app.PrepareBlobs(detected, lastTime, secDiff)
+			/* Match blobs to existing ones */
+			allblobies.MatchToExisting(detectedObjects)
 		}
+		/* Read data from object detection goroutine */
+		// select {
+		// /* Prepare variable for channel reading */
+		// case detected := <-detectedChannel:
+		// 	processFrame(img)
+		// 	if len(detected) != 0 {
+		// 		/* Prepare 'blob' for each detected object */
+		// 		detectedObjects := app.PrepareBlobs(detected, lastTime, secDiff)
+		// 		/* Match blobs to existing ones */
+		// 		allblobies.MatchToExisting(detectedObjects)
+
+		// 		/* Estimate speed if needed */
+		// 		if settings.TrackerSettings.SpeedEstimationSettings.Enabled {
+		// 			for _, b := range allblobies.Objects {
+		// 				blobTrack := b.GetTrack()
+		// 				trackLen := len(blobTrack)
+		// 				if trackLen >= 2 {
+		// 					blobTimestamps := b.GetTimestamps()
+		// 					fp := odam.STDPointToGoCVPoint2F(blobTrack[0])
+		// 					lp := odam.STDPointToGoCVPoint2F(blobTrack[trackLen-1])
+		// 					spd := odam.EstimateSpeed(fp, lp, blobTimestamps[0], blobTimestamps[trackLen-1], gisConverter)
+		// 					b.SetProperty("speed", spd)
+		// 				}
+		// 			}
+		// 		}
+		// 		for _, vline := range settings.TrackerSettings.LinesSettings {
+		// 			for _, b := range allblobies.Objects {
+		// 				className := b.GetClassName()
+		// 				if stringInSlice(&className, vline.DetectClasses) { // Detect if object should be detected by virtual line (filter by classname)
+		// 					crossedLine := vline.VLine.IsBlobCrossedLine(b)
+		// 					// If object crossed the virtual line
+		// 					if crossedLine {
+		// 						catchedTimestamp := time.Now().UTC().Unix()
+		// 						b.SetTracking(false)
+		// 						// If gRPC streaming data is disabled why do we need to process all stuff? We add strict condition.
+		// 						if settings.GrpcSettings.Enable {
+		// 							blobRect := b.GetCurrentRect()
+		// 							minx, miny := math.Floor(float64(blobRect.Min.X)*settings.VideoSettings.ScaleX), math.Floor(float64(blobRect.Min.Y)*settings.VideoSettings.ScaleY)
+		// 							maxx, maxy := math.Floor(float64(blobRect.Max.X)*settings.VideoSettings.ScaleX), math.Floor(float64(blobRect.Max.Y)*settings.VideoSettings.ScaleY)
+		// 							cropRect := image.Rect(
+		// 								int(minx)+5,  // add a bit width to crop bigger region
+		// 								int(miny)+10, // add a bit height to crop bigger region
+		// 								int(maxx)+5,
+		// 								int(maxy)+10,
+		// 							)
+		// 							// Make sure to be not out of image bounds
+		// 							odam.FixRectForOpenCV(&cropRect, settings.VideoSettings.Width, settings.VideoSettings.Height)
+		// 							var buf *bytes.Buffer
+		// 							xtop, ytop := int32(cropRect.Min.X), int32(cropRect.Min.Y)
+
+		// 							// Futher buffer preparation depends on 'crop_mode' in JSON'ed configuration file
+		// 							if vline.VLine.CropObject {
+		// 								buf, err = odam.PrepareCroppedImageBuffer(&img.ImgSource, cropRect)
+		// 								if err != nil {
+		// 									fmt.Println("[WARNING] Can't prepare image buffer (with crop) due ther error:", err)
+		// 								}
+		// 								xtop, ytop = 0, 0
+		// 							} else {
+		// 								buf, err = odam.PrepareImageBuffer(&img.ImgSource)
+		// 								if err != nil {
+		// 									fmt.Println("[WARNING] Can't prepare image buffer due ther error:", err)
+		// 								}
+		// 							}
+		// 							bytesBuffer := buf.Bytes()
+		// 							sendData := odam.ObjectInformation{
+		// 								CamId:       settings.VideoSettings.CameraID,
+		// 								Timestamp:   catchedTimestamp,
+		// 								Image:       bytesBuffer,
+		// 								Detection:   odam.DetectionInfoGRPC(xtop, ytop, int32(cropRect.Dx()), int32(cropRect.Dy())),
+		// 								Class:       odam.ClassInfoGRPC(b),
+		// 								VirtualLine: odam.VirtualLineInfoGRPC(vline.LineID, vline.VLine),
+		// 							}
+		// 							// If it is needed to send speed and track information
+		// 							if settings.TrackerSettings.SpeedEstimationSettings.SendGRPC {
+		// 								sendData.TrackInformation = odam.TrackInfoInfoGRPC(b, "speed", float32(settings.VideoSettings.ScaleX), float32(settings.VideoSettings.ScaleY), gisConverter)
+		// 							}
+		// 							go sendDataToServer(grpcConn, &sendData)
+		// 						}
+		// 					}
+		// 				}
+		// 			}
+		// 		}
+		// 		for _, vpolygon := range settings.TrackerSettings.PolygonsSettings {
+		// 			for _, b := range allblobies.Objects {
+		// 				className := b.GetClassName()
+		// 				if stringInSlice(&className, vpolygon.DetectClasses) { // Detect if object should be detected by virtual polygon (filter by classname)
+		// 					enteredPolygon := vpolygon.VPolygon.BlobEntered(b)
+		// 					if enteredPolygon {
+		// 						fmt.Println("entered blob", b.GetID())
+		// 					}
+		// 					leftPolygon := vpolygon.VPolygon.BlobLeft(b)
+		// 					if leftPolygon {
+		// 						fmt.Println("left blob", b.GetID())
+		// 					}
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// 	break
+		// default:
+		// 	// show current frame without blocking, so do nothing here
+		// 	break
+		// }
 
 		/* Draw info about detected objects when either MJPEG or imshow() GUI is enabled */
 		if settings.MjpegSettings.ImshowEnable || settings.MjpegSettings.Enable {
@@ -315,12 +319,12 @@ func processFrame(fd *odam.FrameData) {
 	imagesChannel <- frame
 }
 
-func performDetection(app *odam.Application, targetClasses []string) {
+func performDetection(app *odam.Application, netClasses, targetClasses []string) {
 	fmt.Println("Start performDetection thread")
 	for {
 		frame := <-imagesChannel
 		fmt.Println("Call detections")
-		detectedRects, err := odam.DetectObjects(app, frame.ImgScaledCopy, targetClasses...)
+		detectedRects, err := odam.DetectObjects(app, frame.ImgScaledCopy, netClasses, targetClasses...)
 		if err != nil {
 			log.Printf("Can't detect objects on provided image due the error: %s. Sleep for 100ms", err.Error())
 			frame.Close()
@@ -330,6 +334,26 @@ func performDetection(app *odam.Application, targetClasses []string) {
 		frame.Close() // free the memory
 		detectedChannel <- detectedRects
 	}
+}
+
+func processFrameSequential(fd *odam.FrameData) *odam.FrameData {
+	frame := odam.NewFrameData()
+	fd.ImgSource.CopyTo(&frame.ImgSource)
+	fd.ImgScaled.CopyTo(&frame.ImgScaled)
+	fd.ImgScaledCopy.CopyTo(&frame.ImgScaledCopy)
+	return frame
+}
+
+func performDetectionSequential(app *odam.Application, frame *odam.FrameData, netClasses, targetClasses []string) []*odam.DetectedObject {
+	fmt.Println("Call detections sequential")
+	detectedRects, err := odam.DetectObjects(app, frame.ImgScaledCopy, netClasses, targetClasses...)
+	if err != nil {
+		log.Printf("Can't detect objects on provided image due the error: %s. Sleep for 100ms", err.Error())
+		frame.Close()
+		time.Sleep(100 * time.Millisecond)
+	}
+	frame.Close() // free the memory
+	return detectedRects
 }
 
 func stringInSlice(str *string, sl []string) bool {
