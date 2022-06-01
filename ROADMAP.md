@@ -16,7 +16,7 @@ New ideas, thoughts about needed features will be store in this file.
 
 * GoCV
     * init gocv.VideoCapture
-    * make separate goroutines for grabbing frames and feeding them to neural network
+    * ~~make separate goroutines for grabbing frames and feeding them to neural network~~ !!!NOT NEEDED NOW!!!
     * make MJPEG server avaible as option
 
 * gRPC
