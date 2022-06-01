@@ -68,7 +68,6 @@ func main() {
 	if settings.TrackerSettings.SpeedEstimationSettings.Enabled {
 		gisConverter = app.GetGISConverter()
 	}
-	_ = gisConverter
 	/* Open video capturer */
 	videoCapturer, err := gocv.OpenVideoCapture(settings.VideoSettings.Source)
 	if err != nil {
@@ -216,21 +215,21 @@ func main() {
 					}
 				}
 			}
-			for _, vpolygon := range settings.TrackerSettings.PolygonsSettings {
-				for _, b := range allblobies.Objects {
-					className := b.GetClassName()
-					if stringInSlice(&className, vpolygon.DetectClasses) { // Detect if object should be detected by virtual polygon (filter by classname)
-						enteredPolygon := vpolygon.VPolygon.BlobEntered(b)
-						if enteredPolygon {
-							fmt.Println("entered blob", b.GetID())
-						}
-						leftPolygon := vpolygon.VPolygon.BlobLeft(b)
-						if leftPolygon {
-							fmt.Println("left blob", b.GetID())
-						}
-					}
-				}
-			}
+			// for _, vpolygon := range settings.TrackerSettings.PolygonsSettings {
+			// 	for _, b := range allblobies.Objects {
+			// 		className := b.GetClassName()
+			// 		if stringInSlice(&className, vpolygon.DetectClasses) { // Detect if object should be detected by virtual polygon (filter by classname)
+			// 			enteredPolygon := vpolygon.VPolygon.BlobEntered(b)
+			// 			if enteredPolygon {
+			// 				fmt.Println("entered blob", b.GetID())
+			// 			}
+			// 			leftPolygon := vpolygon.VPolygon.BlobLeft(b)
+			// 			if leftPolygon {
+			// 				fmt.Println("left blob", b.GetID())
+			// 			}
+			// 		}
+			// 	}
+			// }
 		}
 		/* Draw info about detected objects when either MJPEG or imshow() GUI is enabled */
 		if settings.MjpegSettings.ImshowEnable || settings.MjpegSettings.Enable {
@@ -275,7 +274,6 @@ func main() {
 				stream.UpdateJPEG(buf.GetBytes())
 			}
 		}
-
 		/* temporary */
 		// time.Sleep(100 * time.Millisecond)
 	}
