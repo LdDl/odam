@@ -63,7 +63,6 @@ func NewApp(settings *AppSettings) (*Application, error) {
 			spatialConverter.transformMat, spatialConverter.Function = GetPerspectiveTransformer(src, dst)
 		}
 	}
-
 	return &Application{
 		neuralNetwork:  &neuralNet,
 		layersNames:    outLayerNames,
