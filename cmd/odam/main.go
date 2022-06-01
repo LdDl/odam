@@ -16,14 +16,8 @@ import (
 	"google.golang.org/grpc"
 )
 
-var (
-	settingsFile    = flag.String("settings", "conf.json", "Path to application's settings")
-	imagesChannel   chan *odam.FrameData
-	detectedChannel chan odam.DetectedObjects
-)
-
 func main() {
-
+	settingsFile := flag.String("settings", "conf.json", "Path to application's settings")
 	/* Read settings */
 	flag.Parse()
 	settings, err := odam.NewSettings(*settingsFile)
@@ -83,12 +77,8 @@ func main() {
 		defer window.Close()
 	}
 
-	/* Initialize channels */
-	imagesChannel = make(chan *odam.FrameData, 1)
-	detectedChannel = make(chan odam.DetectedObjects)
-	img := odam.NewFrameData()
-
 	/* Read first frame */
+	img := odam.NewFrameData()
 	if ok := videoCapturer.Read(&img.ImgSource); !ok {
 		log.Printf("Error cannot read video '%s'\n", settings.VideoSettings.Source)
 		return
@@ -280,31 +270,6 @@ func main() {
 		// go run -tags matprofile main.go
 		// gocv.MatProfile.WriteTo(&b, 1)
 		fmt.Print(b.String())
-	}
-}
-
-func processFrame(fd *odam.FrameData) {
-	frame := odam.NewFrameData()
-	fd.ImgSource.CopyTo(&frame.ImgSource)
-	fd.ImgScaled.CopyTo(&frame.ImgScaled)
-	fd.ImgScaledCopy.CopyTo(&frame.ImgScaledCopy)
-	imagesChannel <- frame
-}
-
-func performDetection(app *odam.Application, netClasses, targetClasses []string) {
-	fmt.Println("Start performDetection thread")
-	for {
-		frame := <-imagesChannel
-		fmt.Println("Call detections")
-		detectedRects, err := odam.DetectObjects(app, frame.ImgScaledCopy, netClasses, targetClasses...)
-		if err != nil {
-			log.Printf("Can't detect objects on provided image due the error: %s. Sleep for 100ms", err.Error())
-			frame.Close()
-			time.Sleep(100 * time.Millisecond)
-			continue
-		}
-		frame.Close() // free the memory
-		detectedChannel <- detectedRects
 	}
 }
 
