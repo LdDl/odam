@@ -3,16 +3,16 @@ New ideas, thoughts about needed features will be store in this file.
 
 ### Done
 * Initial core
-    * Integration with [go-darknet](https://github.com/LdDl/go-darknet)
+    * ~~Integration with [go-darknet](https://github.com/LdDl/go-darknet)~~ !!!NOT NEEDED NOW!!!
     * Initial integration with [gRPC](https://grpc.io/docs/quickstart/go/)
     * Initial integration with [GoCV](https://github.com/hybridgroup/gocv/)
     * Initial integration with [GoCV MJPEG](https://github.com/hybridgroup/mjpeg)
 
-* go-darknet
-    * convert [gocv.Mat](https://github.com/hybridgroup/gocv/blob/master/core.go#L179) to [darknet.DarknetImage](https://github.com/LdDl/go-darknet/blob/master/image.go#L14) [NOT NEEDED NOW]
-    * init neural network from configuration
-    * prepare *.sh scripts to download yolov4.cfg and yolov4.weights files (also yolov3 avaible)
-    * detect only targeted classes
+* ~~go-darknet~~ !!!NOT NEEDED NOW!!!
+    * ~~convert [gocv.Mat](https://github.com/hybridgroup/gocv/blob/master/core.go#L179) to [darknet.DarknetImage](https://github.com/LdDl/go-darknet/blob/master/image.go#L14)~~ !!!NOT NEEDED NOW!!!
+    * ~~init neural network from configuration~~
+    * ~~prepare *.sh scripts to download yolov4.cfg and yolov4.weights files (also yolov3 avaible)~~
+    * ~~detect only targeted classes~~
 
 * GoCV
     * init gocv.VideoCapture
@@ -39,6 +39,7 @@ New ideas, thoughts about needed features will be store in this file.
 * Extend configuration of conf.json file.
     * Allow to configure draw methods for each type of detected objects
 * Additional field 'targeted objects' (it's called 'detect_classes' actually) in [odam.VirtualLine](virtual_lines.go#11) struct. After it's done odam.VirtualLine will be able to detect e.g. only pedestrians or only motorbikes 
+* Move to full OpenCV (no [go-darknet](https://github.com/LdDl/go-darknet) is needed since OpenCV does stuff). See https://github.com/LdDl/odam/pull/21
 
 ### W.I.P
 * design: current BBoxes and text info on imshow()/mjpeg-server are...ugly
@@ -60,7 +61,6 @@ for example.
 * Virtual lines
    * Split ID and other additional information for next paragraph
    * Make additional information optional for sending via gRPC. Sometimes reciever-side already knows everything about lines and just need its IDs.
-* Move to full OpenCV (no [go-darknet](https://github.com/LdDl/go-darknet) is needed since OpenCV does stuff)
 
 ### Planned
 * Stable core (need many tests as possible)
