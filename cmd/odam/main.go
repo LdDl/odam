@@ -99,9 +99,7 @@ func main() {
 		log.Println("Error on first preprocessing step", err)
 		return
 	}
-
-	/* Start goroutine for object detection purposes */
-	// go performDetection(app, settings.NeuralNetworkSettings.TargetClasses)
+	img.ImgScaledCopy.Close()
 
 	/* Initialize variables for evaluation of time difference between frames */
 	lastMS := 0.0
@@ -120,7 +118,6 @@ func main() {
 		secDiff := msDiff / 1000.0
 		lastTime = lastTime.Add(time.Duration(msDiff) * time.Millisecond)
 		lastMS = currentMS
-		_ = secDiff
 		/* Skip empty frame */
 		if img.ImgSource.Empty() {
 			fmt.Println("Empty frame has been detected. Sleep for 400 ms")
@@ -136,8 +133,7 @@ func main() {
 			continue
 		}
 
-		frameToDetect := processFrameSequential(img)
-		detected := performDetectionSequential(app, frameToDetect, settings.NeuralNetworkSettings.NetClasses, settings.NeuralNetworkSettings.TargetClasses)
+		detected := performDetectionSequential(app, img, settings.NeuralNetworkSettings.NetClasses, settings.NeuralNetworkSettings.TargetClasses)
 		if len(detected) != 0 {
 			/* Prepare 'blob' for each detected object */
 			detectedObjects := app.PrepareBlobs(detected, lastTime, secDiff)
@@ -289,7 +285,7 @@ func main() {
 	if settings.MatPPROFSettings.Enable {
 		var b bytes.Buffer
 		// go run -tags matprofile main.go
-		// gocv.MatProfile.WriteTo(&b, 1)
+		gocv.MatProfile.WriteTo(&b, 1)
 		fmt.Print(b.String())
 	}
 }
@@ -331,10 +327,10 @@ func performDetectionSequential(app *odam.Application, frame *odam.FrameData, ne
 	detectedRects, err := odam.DetectObjects(app, frame.ImgScaledCopy, netClasses, targetClasses...)
 	if err != nil {
 		log.Printf("Can't detect objects on provided image due the error: %s. Sleep for 100ms", err.Error())
-		frame.Close()
+		frame.ImgScaledCopy.Close()
 		time.Sleep(100 * time.Millisecond)
 	}
-	frame.Close() // free the memory
+	frame.ImgScaledCopy.Close() // free the memory
 	return detectedRects
 }
 
