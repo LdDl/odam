@@ -3,7 +3,7 @@
 # v0.9.0
 ODaM is project aimed to do monitoring such as: pedestrian detection and counting, vehicle detection and counting, speed estimation of objects, sending detected objects to gRPC server for detailed analysis.
 
-It's written on Go with a lot of [CGO](https://golang.org/cmd/cgo/).
+
 
 YOLOv4 + Kalman filter for tracking             |  YOLOv4 + simple centroid tracking
 :-------------------------:|:-------------------------:
@@ -18,6 +18,8 @@ YOLOv4 Tiny + Kalman filter for tracking             |  YOLOv4 Tiny + simple cen
 We are working on this.
 
 Not too fast, but it is what it is.
+
+Former version (until [#21](https://github.com/LdDl/odam/pull/21)) of this repository were containing a lot of business logic via [go-darknet](https://github.com/LdDl/go-darknet#go-darknet-go-bindings-for-darknet-yolo-v4-yolo-v3). Current version depends on OpenCV's DNN module.
 
 ## Table of Contents
 - [ODaM - Object Detection and Monitoring](#odam---object-detection-and-monitoring)
