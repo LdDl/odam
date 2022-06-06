@@ -126,7 +126,7 @@ func (app *Application) PrepareBlobs(detected DetectedObjects, lastTm time.Time,
 	return detectedObjects
 }
 
-func (app *Application) Run() {
+func (app *Application) Run() error {
 	settings := app.settings
 
 	/* Open imshow() GUI in needed */
@@ -141,8 +141,7 @@ func (app *Application) Run() {
 	/* Open video capturer */
 	videoCapturer, err := gocv.OpenVideoCapture(settings.VideoSettings.Source)
 	if err != nil {
-		log.Println(err)
-		return
+		return errors.Wrap(err, "Can't open video capture")
 	}
 
 	/* Prepare frame */
@@ -157,4 +156,6 @@ func (app *Application) Run() {
 	}
 	// Hard release memory
 	img.Close()
+
+	return nil
 }
