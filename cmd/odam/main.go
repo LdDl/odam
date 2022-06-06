@@ -77,12 +77,8 @@ func main() {
 		defer window.Close()
 	}
 
-	/* Read first frame */
+	/* Prepare frame */
 	img := odam.NewFrameData()
-	if ok := videoCapturer.Read(&img.ImgSource); !ok {
-		log.Printf("Error cannot read video '%s'\n", settings.VideoSettings.Source)
-		return
-	}
 
 	/* Initialize variables for evaluation of time difference between frames */
 	lastMS := 0.0
