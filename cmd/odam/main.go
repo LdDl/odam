@@ -194,24 +194,24 @@ func main() {
 					}
 				}
 			}
-			for _, vpolygon := range settings.TrackerSettings.PolygonsSettings {
-				for _, b := range allblobies.Objects {
-					className := b.GetClassName()
-					if stringInSlice(&className, vpolygon.DetectClasses) { // Detect if object should be detected by virtual polygon (filter by classname)
-						// if vpolygon.VPolygon.ContainsBlob(b) {
-						// 	fmt.Printf("Polygon %d contains blob %s\n", vpolygon.PolygonID, b.GetID())
-						// }
-						// enteredPolygon := vpolygon.VPolygon.BlobEntered(b)
-						// if enteredPolygon {
-						// 	fmt.Println("entered blob", b.GetID())
-						// }
-						// leftPolygon := vpolygon.VPolygon.BlobLeft(b)
-						// if leftPolygon {
-						// 	fmt.Println("left blob", b.GetID())
-						// }
-					}
-				}
-			}
+			// for _, vpolygon := range settings.TrackerSettings.PolygonsSettings {
+			// 	for _, b := range allblobies.Objects {
+			// 		className := b.GetClassName()
+			// 		if stringInSlice(&className, vpolygon.DetectClasses) { // Detect if object should be detected by virtual polygon (filter by classname)
+			// 			// if vpolygon.VPolygon.ContainsBlob(b) {
+			// 			// 	fmt.Printf("Polygon %d contains blob %s\n", vpolygon.PolygonID, b.GetID())
+			// 			// }
+			// 			// enteredPolygon := vpolygon.VPolygon.BlobEntered(b)
+			// 			// if enteredPolygon {
+			// 			// 	fmt.Println("entered blob", b.GetID())
+			// 			// }
+			// 			// leftPolygon := vpolygon.VPolygon.BlobLeft(b)
+			// 			// if leftPolygon {
+			// 			// 	fmt.Println("left blob", b.GetID())
+			// 			// }
+			// 		}
+			// 	}
+			// }
 		}
 		/* Draw info about detected objects when either MJPEG or imshow() GUI is enabled */
 		if settings.MjpegSettings.ImshowEnable || settings.MjpegSettings.Enable {
