@@ -125,3 +125,15 @@ func (app *Application) PrepareBlobs(detected DetectedObjects, lastTm time.Time,
 	}
 	return detectedObjects
 }
+
+func (app *Application) Run() {
+	settings := app.settings
+	/* Open imshow() GUI in needed */
+	var window *gocv.Window
+	if settings.MjpegSettings.ImshowEnable {
+		fmt.Println("Press 'ESC' to stop imshow()")
+		window = gocv.NewWindow("ODAM v0.9.0")
+		window.ResizeWindow(settings.VideoSettings.ReducedWidth, settings.VideoSettings.ReducedHeight)
+		defer window.Close()
+	}
+}

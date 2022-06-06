@@ -68,7 +68,7 @@ func main() {
 		log.Println(err)
 		return
 	}
-	/* Open imshow() GUI in needed */
+
 	var window *gocv.Window
 	if settings.MjpegSettings.ImshowEnable {
 		fmt.Println("Press 'ESC' to stop imshow()")
