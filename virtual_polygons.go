@@ -10,9 +10,11 @@ import (
 )
 
 // VIRTUAL_POLYGON_TYPE Alias to int
+// @Warning: Should be deprecated
 type VIRTUAL_POLYGON_TYPE int
 
 const (
+	// @Warning: Should be deprecated
 	// CONVEX_POLYGON See ref. https://en.wikipedia.org/wiki/Convex_polygon
 	CONVEX_POLYGON = VIRTUAL_POLYGON_TYPE(iota + 1)
 	// CONCAVE_POLYGON See ref. https://en.wikipedia.org/wiki/Concave_polygon
@@ -30,9 +32,11 @@ type VirtualPolygon struct {
 	// Information about coordinates [non-scaled]
 	SourceCoordinates []image.Point `json:"-"`
 	// Type of virtual polygon: could be convex or concave
+	// @Warning: Should be deprecated
 	PolygonType VIRTUAL_POLYGON_TYPE `json:"-"`
 
-	gocvPoly gocv.PointsVector
+	gocvPoly     gocv.PointVector
+	gocvPolyDraw gocv.PointsVector
 }
 
 // Constructor for VirtualPolygon
@@ -53,16 +57,18 @@ func NewVirtualPolygon(polygonID int64, pairs ...image.Point) *VirtualPolygon {
 	} else {
 		vpolygon.PolygonType = CONCAVE_POLYGON
 	}
-	vpolygon.gocvPoly = gocv.NewPointsVectorFromPoints([][]image.Point{vpolygon.Coordinates})
+	vpolygon.gocvPolyDraw = gocv.NewPointsVectorFromPoints([][]image.Point{vpolygon.Coordinates})
+	vpolygon.gocvPoly = gocv.NewPointVectorFromPoints(vpolygon.Coordinates)
 	return &vpolygon
 }
 
 // Draw Draw virtual polygon on image
 func (vpolygon *VirtualPolygon) Draw(img *gocv.Mat) {
-	gocv.Polylines(img, vpolygon.gocvPoly, true, vpolygon.Color, 2)
+	gocv.Polylines(img, vpolygon.gocvPolyDraw, true, vpolygon.Color, 2)
 }
 
 // isConvex check if polygon either convex or concave
+// @Warning: Should be deprecated
 func (vpolygon *VirtualPolygon) isConvex() bool {
 	// time complexity: O(n)
 	n := len(vpolygon.Coordinates)
@@ -86,6 +92,7 @@ func (vpolygon *VirtualPolygon) isConvex() bool {
 }
 
 // crossProduct Cross product of two vectors
+// @Warning: Should be deprecated
 func crossProduct(a image.Point, b image.Point, c image.Point) int {
 	// direction of vector b.x -> a.x
 	x1 := b.X - a.X
@@ -108,7 +115,8 @@ func (vpolygon *VirtualPolygon) Scale(scaleX, scaleY float64) {
 		vpolygon.Coordinates[i].X = int(math.Round(float64(vpolygon.Coordinates[i].X) / scaleX))
 		vpolygon.Coordinates[i].Y = int(math.Round(float64(vpolygon.Coordinates[i].Y) / scaleY))
 	}
-	vpolygon.gocvPoly = gocv.NewPointsVectorFromPoints([][]image.Point{vpolygon.Coordinates})
+	vpolygon.gocvPolyDraw = gocv.NewPointsVectorFromPoints([][]image.Point{vpolygon.Coordinates})
+	vpolygon.gocvPoly = gocv.NewPointVectorFromPoints(vpolygon.Coordinates)
 }
 
 // BlobEntered Checks if an object has entered the polygon
@@ -160,25 +168,12 @@ func (vpolygon *VirtualPolygon) ContainsBlob(b blob.Blobie) bool {
 
 // ContainsPoint Checks if polygon contains the given point
 func (vpolygon *VirtualPolygon) ContainsPoint(p image.Point) bool {
-	if len(vpolygon.Coordinates) < 3 {
-		// Well, this is not that strange if polygon have been prepared wrongly
-		return false
-	}
-	switch vpolygon.PolygonType {
-	case CONVEX_POLYGON:
-		return vpolygon.convexContainsPoint(p)
-	case CONCAVE_POLYGON:
-		return vpolygon.concaveContainsPoint(p)
-	default:
-		// This actually should not happen
-		// Is this really needed to have error returning in this function?
-		break
-	}
-	return false
+	return gocv.PointPolygonTest(vpolygon.gocvPoly, p, true) >= 0
 }
 
 // convexContainsPoint Checks if CONVEX polygon contains the given point
 // Heavily inspired by this: https://github.com/LdDl/gocv-blob/blob/master/v2/blob/line_cross.go#L5
+// @Warning: Should be deprecated
 func (vpolygon *VirtualPolygon) convexContainsPoint(p image.Point) bool {
 	n := len(vpolygon.Coordinates)
 	extremePoint := image.Point{
@@ -225,11 +220,13 @@ func (vpolygon *VirtualPolygon) convexContainsPoint(p image.Point) bool {
 // concaveContainsPoint Checks if CONCAVE polygon contains the given point
 func (vpolygon *VirtualPolygon) concaveContainsPoint(p image.Point) bool {
 	// @todo
+	// @Warning: Should be deprecated, so no todo :P
 	return false
 }
 
 // isOnSegment Checks if point Q lies on segment PR
 // Input: three colinear points Q, Q and R
+// @Warning: Should be deprecated
 func isOnSegment(Px, Py, Qx, Qy, Rx, Ry int) bool {
 	if Qx <= maxInt(Px, Rx) && Qx >= minInt(Px, Rx) && Qy <= maxInt(Py, Ry) && Qy >= minInt(Py, Ry) {
 		return true
@@ -237,9 +234,11 @@ func isOnSegment(Px, Py, Qx, Qy, Rx, Ry int) bool {
 	return false
 }
 
+// @Warning: Should be deprecated
 type PointsOrientation int
 
 const (
+	// @Warning: Should be deprecated
 	Collinear = iota
 	Clockwise
 	CounterClockwise
@@ -248,6 +247,7 @@ const (
 // getOrientation Gets orientations of points P -> Q -> R.
 // Possible output values: Collinear / Clockwise or CounterClockwise
 // Input: points P, Q and R in provided order
+// @Warning: Should be deprecated
 func getOrientation(Px, Py, Qx, Qy, Rx, Ry int) PointsOrientation {
 	val := (Qy-Py)*(Rx-Qx) - (Qx-Px)*(Ry-Qy)
 	if val == 0 {
@@ -270,6 +270,7 @@ Notation
 	P2 = (secondPx, secondPy)
 	Q2 = (secondQx, secondQy)
 */
+// @Warning: Should be deprecated
 func isIntersects(firstPx, firstPy, firstQx, firstQy, secondPx, secondPy, secondQx, secondQy int) bool {
 	// Find the four orientations needed for general case and special ones
 	o1 := getOrientation(firstPx, firstPy, firstQx, firstQy, secondPx, secondPy)
