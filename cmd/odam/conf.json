@@ -113,6 +113,6 @@
         }
     },
     "matpprof_settings": {
-        "enable": true
+        "enable": false
     }
 }
