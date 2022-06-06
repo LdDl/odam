@@ -146,13 +146,24 @@ func (app *Application) Run() error {
 
 	/* Prepare frame */
 	img := NewFrameData()
+	/* Initialize variables for evaluation of time difference between frames */
+	lastMS := 0.0
+	lastTime := time.Now()
 
 	/* Read frames in a */
 	for {
+		// Grab a frame
 		if ok := videoCapturer.Read(&img.ImgSource); !ok {
 			fmt.Println("Can't read next frame, stop grabbing...")
 			break
 		}
+		/* Evaluate time difference */
+		currentMS := videoCapturer.Get(gocv.VideoCapturePosMsec)
+		msDiff := currentMS - lastMS
+		lastTime = lastTime.Add(time.Duration(msDiff) * time.Millisecond)
+		lastMS = currentMS
+
+		// @todo: long copy-paste stuff from cmd/odam/main.go
 	}
 	// Hard release memory
 	img.Close()
