@@ -128,6 +128,7 @@ func (app *Application) PrepareBlobs(detected DetectedObjects, lastTm time.Time,
 
 func (app *Application) Run() {
 	settings := app.settings
+
 	/* Open imshow() GUI in needed */
 	var window *gocv.Window
 	if settings.MjpegSettings.ImshowEnable {
@@ -136,4 +137,24 @@ func (app *Application) Run() {
 		window.ResizeWindow(settings.VideoSettings.ReducedWidth, settings.VideoSettings.ReducedHeight)
 		defer window.Close()
 	}
+
+	/* Open video capturer */
+	videoCapturer, err := gocv.OpenVideoCapture(settings.VideoSettings.Source)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	/* Prepare frame */
+	img := NewFrameData()
+
+	/* Read frames in a */
+	for {
+		if ok := videoCapturer.Read(&img.ImgSource); !ok {
+			fmt.Println("Can't read next frame, stop grabbing...")
+			break
+		}
+	}
+	// Hard release memory
+	img.Close()
 }
