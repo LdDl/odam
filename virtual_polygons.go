@@ -123,6 +123,17 @@ func (vpolygon *VirtualPolygon) Scale(scaleX, scaleY float64) {
 // Let's clarify for future questions: we are assuming the object is represented by a center, not a bounding box
 // So object has entered polygon when its center had entered polygon too
 func (vpolygon *VirtualPolygon) BlobEntered(b blob.Blobie) bool {
+	// Early exit if blob already have same property
+	if prop, ok := b.GetProperty("polygon_id"); ok {
+		switch propStr := prop.(type) {
+		case int64:
+			if propStr == vpolygon.ID {
+				return false
+			}
+		default:
+			return false
+		}
+	}
 	track := b.GetTrack()
 	n := len(track)
 	if n < 2 {

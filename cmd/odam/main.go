@@ -131,7 +131,6 @@ func main() {
 						b.SetProperty("speed", spd)
 					}
 				}
-
 			}
 			for _, vline := range settings.TrackerSettings.LinesSettings {
 				for _, b := range allblobies.Objects {
