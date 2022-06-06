@@ -72,7 +72,7 @@ func main() {
 	var window *gocv.Window
 	if settings.MjpegSettings.ImshowEnable {
 		fmt.Println("Press 'ESC' to stop imshow()")
-		window = gocv.NewWindow("ODAM v0.8.0")
+		window = gocv.NewWindow("ODAM v0.9.0")
 		window.ResizeWindow(settings.VideoSettings.ReducedWidth, settings.VideoSettings.ReducedHeight)
 		defer window.Close()
 	}
