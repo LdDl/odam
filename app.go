@@ -223,7 +223,7 @@ func (app *Application) Run() error {
 				}
 			}
 		}
-
+		/* Draw info about detected objects when either MJPEG or imshow() GUI is enabled */
 		if settings.MjpegSettings.ImshowEnable || settings.MjpegSettings.Enable {
 			for i := range settings.TrackerSettings.LinesSettings {
 				settings.TrackerSettings.LinesSettings[i].VLine.Draw(&img.ImgScaled)
@@ -249,6 +249,12 @@ func (app *Application) Run() error {
 						b.DrawTrack(&img.ImgScaled, fmt.Sprintf("v = %.2f km/h", spd))
 					}
 				}
+			}
+		}
+		if settings.MjpegSettings.ImshowEnable {
+			window.IMShow(img.ImgScaled)
+			if window.WaitKey(1) == 27 {
+				break
 			}
 		}
 	}
