@@ -223,7 +223,34 @@ func (app *Application) Run() error {
 				}
 			}
 		}
-		// @todo: long copy-paste stuff from cmd/odam/main.go
+
+		if settings.MjpegSettings.ImshowEnable || settings.MjpegSettings.Enable {
+			for i := range settings.TrackerSettings.LinesSettings {
+				settings.TrackerSettings.LinesSettings[i].VLine.Draw(&img.ImgScaled)
+			}
+			for i := range settings.TrackerSettings.PolygonsSettings {
+				settings.TrackerSettings.PolygonsSettings[i].VPolygon.Draw(&img.ImgScaled)
+			}
+			for _, b := range allblobies.Objects {
+				spd := float32(0.0)
+				if spdInterface, ok := b.GetProperty("speed"); ok {
+					switch spdInterface.(type) { // Want to be sure that interface is float32
+					case float32:
+						spd = spdInterface.(float32)
+						break
+					default:
+						break
+					}
+				}
+				if foundOptions := settings.GetDrawOptions(b.GetClassName()); foundOptions != nil {
+					if foundOptions.DisplayObjectID {
+						b.DrawTrack(&img.ImgScaled, fmt.Sprintf("v = %.2f km/h", spd), fmt.Sprintf("%v", b.GetID()))
+					} else {
+						b.DrawTrack(&img.ImgScaled, fmt.Sprintf("v = %.2f km/h", spd))
+					}
+				}
+			}
+		}
 	}
 	// Hard release memory
 	img.Close()
