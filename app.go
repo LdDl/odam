@@ -274,6 +274,7 @@ func (app *Application) Run() error {
 	}
 	// Hard release memory
 	img.Close()
+	app.Close()
 
 	return nil
 }
