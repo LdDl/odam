@@ -163,10 +163,39 @@ func (app *Application) Run() error {
 		lastTime = lastTime.Add(time.Duration(msDiff) * time.Millisecond)
 		lastMS = currentMS
 
+		/* Skip empty frame */
+		if img.ImgSource.Empty() {
+			fmt.Println("Empty frame has been detected. Sleep for 400 ms")
+			time.Sleep(400 * time.Millisecond)
+			continue
+		}
+
+		/* Scale frame */
+		err := img.Preprocess(settings.VideoSettings.ReducedWidth, settings.VideoSettings.ReducedHeight)
+		if err != nil {
+			fmt.Printf("Can't preprocess. Error: %s. Sleep for 400ms\n", err.Error())
+			time.Sleep(400 * time.Millisecond)
+			continue
+		}
+
+		detected := app.performDetectionSequential(img, settings.NeuralNetworkSettings.NetClasses, settings.NeuralNetworkSettings.TargetClasses)
+		_ = detected
 		// @todo: long copy-paste stuff from cmd/odam/main.go
+
 	}
 	// Hard release memory
 	img.Close()
 
 	return nil
+}
+
+func (app *Application) performDetectionSequential(frame *FrameData, netClasses, targetClasses []string) []*DetectedObject {
+	detectedRects, err := DetectObjects(app, frame.ImgScaledCopy, netClasses, targetClasses...)
+	if err != nil {
+		log.Printf("Can't detect objects on provided image due the error: %s. Sleep for 100ms", err.Error())
+		frame.ImgScaledCopy.Close()
+		time.Sleep(100 * time.Millisecond)
+	}
+	frame.ImgScaledCopy.Close() // free the memory
+	return detectedRects
 }
