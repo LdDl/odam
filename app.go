@@ -150,6 +150,11 @@ func (app *Application) Run() error {
 	lastMS := 0.0
 	lastTime := time.Now()
 
+	/* Initialize objects tracker */
+	allblobies := app.GetBlobsStorage()
+	_ = allblobies
+	fmt.Printf("Using tracker: '%s'\n", settings.TrackerSettings.TrackerType)
+
 	/* Read frames in a */
 	for {
 		// Grab a frame
