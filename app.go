@@ -152,8 +152,14 @@ func (app *Application) Run() error {
 
 	/* Initialize objects tracker */
 	allblobies := app.GetBlobsStorage()
-	_ = allblobies
 	fmt.Printf("Using tracker: '%s'\n", settings.TrackerSettings.TrackerType)
+
+	/* Initialize GIS converter (for speed estimation) if needed*/
+	// It just helps to figure out what does [Longitude; Latitude] pair correspond to certain pixel
+	var gisConverter func(gocv.Point2f) gocv.Point2f
+	if settings.TrackerSettings.SpeedEstimationSettings.Enabled {
+		gisConverter = app.GetGISConverter()
+	}
 
 	/* Read frames in a */
 	for {
@@ -165,6 +171,7 @@ func (app *Application) Run() error {
 		/* Evaluate time difference */
 		currentMS := videoCapturer.Get(gocv.VideoCapturePosMsec)
 		msDiff := currentMS - lastMS
+		secDiff := msDiff / 1000.0
 		lastTime = lastTime.Add(time.Duration(msDiff) * time.Millisecond)
 		lastMS = currentMS
 
@@ -184,9 +191,27 @@ func (app *Application) Run() error {
 		}
 
 		detected := app.performDetectionSequential(img, settings.NeuralNetworkSettings.NetClasses, settings.NeuralNetworkSettings.TargetClasses)
-		_ = detected
+		if len(detected) != 0 {
+			/* Prepare 'blob' for each detected object */
+			detectedObjects := app.PrepareBlobs(detected, lastTime, secDiff)
+			/* Match blobs to existing ones */
+			allblobies.MatchToExisting(detectedObjects)
+			/* Estimate speed if needed */
+			if settings.TrackerSettings.SpeedEstimationSettings.Enabled {
+				for _, b := range allblobies.Objects {
+					blobTrack := b.GetTrack()
+					trackLen := len(blobTrack)
+					if trackLen >= 2 {
+						blobTimestamps := b.GetTimestamps()
+						fp := STDPointToGoCVPoint2F(blobTrack[0])
+						lp := STDPointToGoCVPoint2F(blobTrack[trackLen-1])
+						spd := EstimateSpeed(fp, lp, blobTimestamps[0], blobTimestamps[trackLen-1], gisConverter)
+						b.SetProperty("speed", spd)
+					}
+				}
+			}
+		}
 		// @todo: long copy-paste stuff from cmd/odam/main.go
-
 	}
 	// Hard release memory
 	img.Close()
