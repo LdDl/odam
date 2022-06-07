@@ -1,8 +1,11 @@
 package odam
 
 import (
+	"bytes"
 	"fmt"
+	"image"
 	"log"
+	"math"
 	"net/http"
 	"time"
 
@@ -224,6 +227,50 @@ func (app *Application) Run() error {
 						// If object crossed the virtual line
 						if crossedLine {
 							b.SetTracking(false)
+							// If gRPC streaming data is disabled why do we need to process all stuff? We add strict condition.
+							if settings.GrpcSettings.Enable {
+								catchedTimestamp := time.Now().UTC().Unix()
+								blobRect := b.GetCurrentRect()
+								minx, miny := math.Floor(float64(blobRect.Min.X)*settings.VideoSettings.ScaleX), math.Floor(float64(blobRect.Min.Y)*settings.VideoSettings.ScaleY)
+								maxx, maxy := math.Floor(float64(blobRect.Max.X)*settings.VideoSettings.ScaleX), math.Floor(float64(blobRect.Max.Y)*settings.VideoSettings.ScaleY)
+								cropRect := image.Rect(
+									int(minx)+5,  // add a bit width to crop bigger region
+									int(miny)+10, // add a bit height to crop bigger region
+									int(maxx)+5,
+									int(maxy)+10,
+								)
+								// Make sure to be not out of image bounds
+								FixRectForOpenCV(&cropRect, settings.VideoSettings.Width, settings.VideoSettings.Height)
+								var buf *bytes.Buffer
+								xtop, ytop := int32(cropRect.Min.X), int32(cropRect.Min.Y)
+
+								// Futher buffer preparation depends on 'crop_mode' in JSON'ed configuration file
+								if vline.VLine.CropObject {
+									buf, err = PrepareCroppedImageBuffer(&img.ImgSource, cropRect)
+									if err != nil {
+										fmt.Println("[WARNING] Can't prepare image buffer (with crop) due ther error:", err)
+									}
+									xtop, ytop = 0, 0
+								} else {
+									buf, err = PrepareImageBuffer(&img.ImgSource)
+									if err != nil {
+										fmt.Println("[WARNING] Can't prepare image buffer due ther error:", err)
+									}
+								}
+								bytesBuffer := buf.Bytes()
+								sendData := ObjectInformation{
+									CamId:       settings.VideoSettings.CameraID,
+									Timestamp:   catchedTimestamp,
+									Image:       bytesBuffer,
+									Detection:   DetectionInfoGRPC(xtop, ytop, int32(cropRect.Dx()), int32(cropRect.Dy())),
+									Class:       ClassInfoGRPC(b),
+									VirtualLine: VirtualLineInfoGRPC(vline.LineID, vline.VLine),
+								}
+								// If it is needed to send speed and track information
+								if settings.TrackerSettings.SpeedEstimationSettings.SendGRPC {
+									sendData.TrackInformation = TrackInfoInfoGRPC(b, "speed", float32(settings.VideoSettings.ScaleX), float32(settings.VideoSettings.ScaleY), gisConverter)
+								}
+							}
 						}
 					}
 				}
