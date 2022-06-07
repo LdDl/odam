@@ -271,14 +271,6 @@ func main() {
 	}
 }
 
-func processFrameSequential(fd *odam.FrameData) *odam.FrameData {
-	frame := odam.NewFrameData()
-	fd.ImgSource.CopyTo(&frame.ImgSource)
-	fd.ImgScaled.CopyTo(&frame.ImgScaled)
-	fd.ImgScaledCopy.CopyTo(&frame.ImgScaledCopy)
-	return frame
-}
-
 func performDetectionSequential(app *odam.Application, frame *odam.FrameData, netClasses, targetClasses []string) []*odam.DetectedObject {
 	detectedRects, err := odam.DetectObjects(app, frame.ImgScaledCopy, netClasses, targetClasses...)
 	if err != nil {
