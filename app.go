@@ -84,6 +84,7 @@ func NewApp(settings *AppSettings) (*Application, error) {
 func (app *Application) Close() {
 	app.neuralNetwork.Close()
 	app.gisConverter.Close()
+	app.grpcConn.Close()
 }
 
 // GetBlobsStorage Returns pointer to blob.Blobies
