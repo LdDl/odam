@@ -2,6 +2,7 @@ package odam
 
 import (
 	"bytes"
+	context "context"
 	"fmt"
 	"image"
 	"log"
@@ -13,6 +14,7 @@ import (
 	"github.com/hybridgroup/mjpeg"
 	"github.com/pkg/errors"
 	"gocv.io/x/gocv"
+	grpc "google.golang.org/grpc"
 )
 
 // Application Main engine
@@ -23,7 +25,9 @@ type Application struct {
 	trackerType    TRACKER_TYPE
 	gisConverter   *SpatialConverter
 
-	settings *AppSettings
+	settings   *AppSettings
+	grpcConn   *grpc.ClientConn
+	grpcClient ServiceYOLOClient
 }
 
 // NewApp Constructor for Application
@@ -170,6 +174,17 @@ func (app *Application) Run() error {
 		stream = app.StartMJPEGStream()
 	}
 
+	/* Initialize gRPC data forwarding if needed */
+	if settings.GrpcSettings.Enable {
+		url := fmt.Sprintf("%s:%d", settings.GrpcSettings.ServerIP, settings.GrpcSettings.ServerPort)
+		app.grpcConn, err = grpc.Dial(url, grpc.WithInsecure(), grpc.WithBlock())
+		if err != nil {
+			return errors.Wrap(err, "Can't init grpc connection")
+		}
+		defer app.grpcConn.Close()
+		app.grpcClient = NewServiceYOLOClient(app.grpcConn)
+	}
+
 	/* Read frames in a */
 	for {
 		// Grab a frame
@@ -270,6 +285,7 @@ func (app *Application) Run() error {
 								if settings.TrackerSettings.SpeedEstimationSettings.SendGRPC {
 									sendData.TrackInformation = TrackInfoInfoGRPC(b, "speed", float32(settings.VideoSettings.ScaleX), float32(settings.VideoSettings.ScaleY), gisConverter)
 								}
+								go sendDataToServer(app.grpcClient, &sendData)
 							}
 						}
 					}
@@ -353,4 +369,30 @@ func (app *Application) performDetectionSequential(frame *FrameData, netClasses,
 	}
 	frame.ImgScaledCopy.Close() // free the memory
 	return detectedRects
+}
+
+func sendDataToServer(grpcClient ServiceYOLOClient, data *ObjectInformation) {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	r, err := grpcClient.SendDetection(
+		ctx,
+		data,
+	)
+	if err != nil {
+		log.Println("grpc send error:", err)
+		return
+	}
+
+	if len(r.GetError()) != 0 {
+		log.Println("grpc accepts error:", r.GetError())
+		return
+	}
+
+	if len(r.GetWarning()) != 0 {
+		log.Println("grpc accepts warning:", r.GetWarning())
+		return
+	}
+
+	log.Println("grpc answer:", r.GetMessage())
+	return
 }
