@@ -210,6 +210,18 @@ func (app *Application) Run() error {
 					}
 				}
 			}
+			for _, vline := range settings.TrackerSettings.LinesSettings {
+				for _, b := range allblobies.Objects {
+					className := b.GetClassName()
+					if stringInSlice(&className, vline.DetectClasses) { // Detect if object should be detected by virtual line (filter by classname)
+						crossedLine := vline.VLine.IsBlobCrossedLine(b)
+						// If object crossed the virtual line
+						if crossedLine {
+							b.SetTracking(false)
+						}
+					}
+				}
+			}
 		}
 		// @todo: long copy-paste stuff from cmd/odam/main.go
 	}
