@@ -161,6 +161,12 @@ func (app *Application) Run() error {
 		gisConverter = app.GetGISConverter()
 	}
 
+	/* Initialize MJPEG server if needed */
+	var stream *mjpeg.Stream
+	if settings.MjpegSettings.Enable {
+		stream = app.StartMJPEGStream()
+	}
+
 	/* Read frames in a */
 	for {
 		// Grab a frame
@@ -255,6 +261,14 @@ func (app *Application) Run() error {
 			window.IMShow(img.ImgScaled)
 			if window.WaitKey(1) == 27 {
 				break
+			}
+		}
+		if settings.MjpegSettings.Enable {
+			buf, err := gocv.IMEncode(".jpg", img.ImgScaled)
+			if err != nil {
+				log.Printf("Error while decoding to JPG (mjpeg): %s", err.Error())
+			} else {
+				stream.UpdateJPEG(buf.GetBytes())
 			}
 		}
 	}
