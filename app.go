@@ -364,7 +364,7 @@ func (app *Application) Run() error {
 	if settings.MatPPROFSettings.Enable {
 		var b bytes.Buffer
 		// go run -tags matprofile main.go
-		gocv.MatProfile.WriteTo(&b, 1)
+		// gocv.MatProfile.WriteTo(&b, 1)
 		fmt.Print(b.String())
 	}
 	return nil
