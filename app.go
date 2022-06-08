@@ -360,6 +360,13 @@ func (app *Application) Run() error {
 	img.Close()
 	app.Close()
 
+	// pprof (for debuggin purposes)
+	if settings.MatPPROFSettings.Enable {
+		var b bytes.Buffer
+		// go run -tags matprofile main.go
+		gocv.MatProfile.WriteTo(&b, 1)
+		fmt.Print(b.String())
+	}
 	return nil
 }
 
