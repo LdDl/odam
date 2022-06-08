@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/LdDl/odam"
+	"gocv.io/x/gocv"
 )
 
 func main() {
@@ -37,7 +38,7 @@ func main() {
 	if settings.MatPPROFSettings.Enable {
 		var b bytes.Buffer
 		// go run -tags matprofile main.go
-		// gocv.MatProfile.WriteTo(&b, 1)
+		gocv.MatProfile.WriteTo(&b, 1)
 		fmt.Print(b.String())
 	}
 }
