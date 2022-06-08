@@ -78,6 +78,8 @@ for example.
 * github tags: travis
 * gRPC server-side for mutation and querying reference info
 * REST server-side for mutation and querying reference info (may be by code wrapping gRPC-based code?)
+* Analytics by each polygon / line
+* Drop analytics to REDIS / REST / gRPC?
 
 ### Continuous activity
 * README
